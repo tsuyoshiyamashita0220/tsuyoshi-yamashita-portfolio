@@ -13,6 +13,8 @@ export interface EgovLawMeta {
   lawNum: string;
   /** 法令名（e-Gov の表記のまま） */
   lawTitle: string;
+  /** 法令の分類（e-Gov の category。例: 刑事） */
+  category?: string;
   /** 法令名読み（e-Gov が提供する場合のみ） */
   lawTitleKana?: string;
   /** 取り込んだ改正版の識別子（e-Gov の revision ID） */
@@ -31,28 +33,47 @@ export interface EgovSnapshotInfo {
   sha256: string;
 }
 
+/**
+ * 本文テキストの扱い（変換スクリプトの規則）:
+ * - 複数の Sentence（本文・ただし書）はそのまま連結する。
+ * - Column（段）は全角スペースで連結する（e-Gov の表示と同じ）。
+ * - ふりがな（Ruby の Rt）は省き、本文の文字だけを残す。
+ */
+
+/** 表（TableStruct）。行 → セルの文字列 */
+export type LawTable = string[][];
+
 /** 項 */
 export interface LawParagraph {
-  /** 項番号（第1項は "1"） */
+  /** 項番号（e-Gov の Num 属性。第1項は "1"） */
   num: string;
+  /** 項番号の表記（第1項は空文字。第2項以降は "２" など e-Gov 原文のまま） */
+  numLabel: string;
+  /** 項の見出し（ある場合のみ） */
+  caption?: string;
   /** 本文（e-Gov 原文のまま） */
   sentence: string;
   /** 号 */
   items?: LawItem[];
+  /** 表 */
+  tables?: LawTable[];
 }
 
-/** 号 */
+/** 号・号の細分（イ、ロ… / (1)、(2)…） */
 export interface LawItem {
-  /** 号の番号表記（e-Gov 原文のまま。例: 一、二…） */
+  /** 番号表記（e-Gov 原文のまま。例: 一、イ） */
   title: string;
   sentence: string;
+  /** 細分 */
+  children?: LawItem[];
 }
 
 /** 条 */
 export interface LawArticle {
   /**
-   * 条番号のキー。e-Gov の Num 属性に合わせる（第百九十九条 → "199"、
-   * 枝番号は "_" 区切り）。URL でも使う。
+   * 条番号のキー。e-Gov の Num 属性をもとにする（第百九十九条 → "199"、
+   * 枝番号は "_" 区切り）。削除条の範囲（e-Gov では "73:76"）は URL で使えるよう
+   * "73-76" に置き換える。
    */
   num: string;
   /** 条名表記（e-Gov 原文のまま。例: 第○条） */
@@ -60,7 +81,7 @@ export interface LawArticle {
   /** 見出し（括弧書きの条文見出し。ない条もある） */
   caption?: string;
   paragraphs: LawParagraph[];
-  /** 削除された条など */
+  /** 本文が「削除」だけの条 */
   deleted?: boolean;
 }
 
@@ -73,10 +94,14 @@ export interface LawTocNode {
   children?: LawTocNode[];
 }
 
-/** data/egov/laws/<lawId>.json の形 */
+/** data/egov/laws/<lawId>.json の形。本則（MainProvision）のみを収録し、附則は含めない */
 export interface EgovLawSnapshot {
   meta: EgovLawMeta;
   snapshot: EgovSnapshotInfo;
+  /** e-Gov の現行状態（例: CurrentEnforced） */
+  currentRevisionStatus?: string;
+  /** 変換スクリプトのバージョン（変換規則を変えたら上げる） */
+  converterVersion: number;
   toc: LawTocNode[];
   articles: LawArticle[];
 }

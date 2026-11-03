@@ -19,11 +19,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         <header className="border-b border-line">
           <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
-            <Link href="/" className="font-bold tracking-wide">
+            <Link href="/" className="font-bold tracking-wide whitespace-nowrap">
               CRIME ATLAS JAPAN
             </Link>
-            <nav className="flex gap-4 text-sm">
-              <Link href="/about">このサイトについて</Link>
+            <nav className="flex shrink-0 gap-4 text-sm whitespace-nowrap">
+              <Link href="/laws">法令</Link>
+              <Link href="/about">サイトについて</Link>
             </nav>
           </div>
         </header>

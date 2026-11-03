@@ -15,6 +15,7 @@
 
 - `npm run dev` / `npm run build` / `npm run lint`
 - `npm run egov:search -- <法令名>` / `npm run egov:fetch -- <lawId>`（laws.e-gov.go.jp への接続が必要）
+- `npm run egov:build`（原本 → `data/egov/laws/` への変換。原本との文字一致を条ごとに検証）
 
 ## 分業（`.claude/agents/`）
 

@@ -14,7 +14,7 @@
 ## コマンド
 
 - `npm run dev` / `npm run build` / `npm run lint`
-- `node scripts/fetch-egov-law.mjs search <法令名>` / `fetch <lawId>`（laws.e-gov.go.jp への接続が必要）
+- `npm run egov:search -- <法令名>` / `npm run egov:fetch -- <lawId>`（laws.e-gov.go.jp への接続が必要）
 
 ## 分業（`.claude/agents/`）
 

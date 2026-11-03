@@ -1,9 +1,10 @@
 /**
  * e-Gov 法令API 関連の定数。
  *
- * エンドポイントは e-Gov 法令API（Version 2）の公式仕様書で確認してから使う。
- * この開発環境からは laws.e-gov.go.jp に接続できなかったため、
- * 2026-11-03 時点では実際の応答による確認をしていない。
+ * e-Gov 法令API Version 2。2026-11-03 に実際の応答で次の 2 つを確認済み:
+ *   GET /laws?law_title=<法令名>                → { total_count, count, laws[] }
+ *   GET /law_data/<lawId>?response_format=json  → { law_info, revision_info, law_full_text, attached_files_info }
+ * law_full_text は XML を { tag, attr, children } の木にした形。
  */
 export const EGOV_API_BASE = "https://laws.e-gov.go.jp/api/2";
 

@@ -8,11 +8,12 @@
  *
  * 方針:
  * - 取得した応答は加工せずに保存し、SHA-256 と取得日時を記録する。
- * - 画面用の形（src/types/law.ts の EgovLawSnapshot）への変換は別スクリプトで行う。
- *   応答の形を公式仕様書と実際の応答で確認してから実装する（未実装）。
+ * - 画面用の形（src/types/law.ts の EgovLawSnapshot）への変換は別スクリプトで行う（未実装）。
  * - 法令ID などをこのファイルに直書きしない。必ず search の結果から選ぶ。
  *
- * 注意: エンドポイントのパスは e-Gov 法令API Version 2 の公式仕様書で要確認。
+ * エンドポイントは 2026-11-03 に実際の応答で確認済み（src/lib/egov.ts 参照）。
+ * クラウド環境では Node の fetch がプロキシを使うよう NODE_USE_ENV_PROXY=1 を付けて実行する
+ * （npm run egov:search / egov:fetch は付与済み）。
  */
 import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -33,8 +34,14 @@ async function getJson(url) {
 async function search(title) {
   const url = `${API_BASE}/laws?law_title=${encodeURIComponent(title)}`;
   const { json } = await getJson(url);
-  // 応答の形は未確認のため、そのまま表示して人が確認する
-  console.log(JSON.stringify(json, null, 2));
+  for (const law of json.laws ?? []) {
+    const info = law.law_info ?? {};
+    const rev = law.current_revision_info ?? law.revision_info ?? {};
+    console.log(
+      [info.law_id, info.law_num, rev.law_title, rev.current_revision_status, rev.amendment_enforcement_date].join("\t"),
+    );
+  }
+  console.log(`\n${json.count ?? 0} 件 / 全 ${json.total_count ?? 0} 件`);
 }
 
 async function fetchLaw(lawId) {

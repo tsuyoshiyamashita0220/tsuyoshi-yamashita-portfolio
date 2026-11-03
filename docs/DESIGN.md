@@ -21,15 +21,27 @@
 | リポジトリ | `tsuyoshiyamashita0220/tsuyoshi-yamashita-portfolio`（初期状態は空、コミットなし） |
 | 作業ブランチ | `claude/crime-atlas-japan-setup-wxbyu2` |
 
-**未解決の問題**: このクラウド環境のネットワーク設定で `laws.e-gov.go.jp` への接続が拒否される。
-環境設定の「Network access」で `laws.e-gov.go.jp` を許可ドメインに追加するまで、法令データを取得できない。
+**e-Gov 接続**: 環境のネットワーク設定で `laws.e-gov.go.jp` を許可済み（2026-11-03）。
+Node の fetch はプロキシを自動で使わないため、`NODE_USE_ENV_PROXY=1` を付けて実行する（npm スクリプトは付与済み）。
+
+### e-Gov 法令API v2（2026-11-03 に実応答で確認）
+
+| 用途 | リクエスト | 応答の主なキー |
+| --- | --- | --- |
+| 法令検索 | `GET /api/2/laws?law_title=<法令名>` | `total_count`, `count`, `laws[]`（各要素に `law_info`, `revision_info`, `current_revision_info`） |
+| 本文取得 | `GET /api/2/law_data/<lawId>?response_format=json` | `law_info`, `revision_info`, `law_full_text`, `attached_files_info` |
+
+- `law_full_text` は XML を `{ tag, attr, children }` の木にしたもの（`Law` → `LawNum` / `LawBody` → …）。変換スクリプトはこの木をたどって `EgovLawSnapshot` を作る。
+- `revision_info.law_revision_id` を `EgovLawMeta.revisionId`、`amendment_enforcement_date` を `enforcementDate` に対応させる。
+- `current_revision_status`（例: `CurrentEnforced`, `Repeal`）で現行法かどうかを判別できる。検索結果には廃止法令も混ざるので、取り込む法令は人が選ぶ。
+- 確認例: 法令名「刑法」の検索結果のうち現行の「刑法」は法令ID `140AC0000000045`（明治四十年法律第四十五号）、取得時点の改正版の施行日は 2026-05-21。
 
 ## 3. 開発計画
 
 | フェーズ | 内容 | 完了条件 |
 | --- | --- | --- |
 | 0. 初期設定（今回） | Next.js 雛形、型定義、取得スクリプト、エージェント定義、設計書 | `npm run build` が通る |
-| 1. データ基盤 | e-Gov 接続許可 → 公式仕様書と実応答で API 形式を確認 → 原本取得 → `EgovLawSnapshot` への変換スクリプト | 刑法・刑事訴訟法のスナップショットが `data/egov/laws/` にあり、sha256 が原本と一致 |
+| 1. データ基盤 | 原本取得 → `EgovLawSnapshot` への変換スクリプト | 刑法・刑事訴訟法のスナップショットが `data/egov/laws/` にあり、sha256 が原本と一致 |
 | 2. 条文ビューア | `/laws`、`/laws/[lawId]`、`/laws/[lawId]/articles/[num]` | 全条が e-Gov 原文どおり表示され、出典・施行日が出る |
 | 3. 罪名解説 | `CrimeEntry` を作成し、legal-reviewer の審査を通ったものだけ公開 | `verified` のエントリのみ表示 |
 | 4. 刑事手続・用語集 | `/procedure`、`/glossary` | 同上 |

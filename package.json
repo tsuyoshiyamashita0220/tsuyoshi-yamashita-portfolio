@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "egov:search": "NODE_USE_ENV_PROXY=1 node scripts/fetch-egov-law.mjs search",
+    "egov:fetch": "NODE_USE_ENV_PROXY=1 node scripts/fetch-egov-law.mjs fetch"
   },
   "dependencies": {
     "next": "16.4.4",

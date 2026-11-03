@@ -1,0 +1,25 @@
+{
+  "slug": "karyou",
+  "term": "科料",
+  "reading": "かりょう",
+  "definition": {
+    "text": "刑の種類（主刑）の一つで、1000円以上1万円未満です。",
+    "lawRefs": [
+      {
+        "lawId": "140AC0000000045",
+        "article": "9"
+      },
+      {
+        "lawId": "140AC0000000045",
+        "article": "17"
+      }
+    ]
+  },
+  "relatedTerms": [
+    "bakkin"
+  ],
+  "review": {
+    "status": "draft"
+  },
+  "updatedAt": "2026-11-03"
+}

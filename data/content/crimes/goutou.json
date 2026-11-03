@@ -100,12 +100,16 @@
     "settou"
   ],
   "review": {
-    "status": "reviewed",
+    "status": "verified",
     "checkedRevisions": {
       "140AC0000000045": "140AC0000000045_20260521_507AC0000000039"
     },
     "checkedAt": "2026-11-03",
-    "notes": "legal-reviewer の審査で指摘された点を修正済み。人の承認待ち。"
+    "notes": "legal-reviewer の審査指摘を修正済み。2026-11-03 にユーザーから承認を一任され、承認。"
   },
-  "updatedAt": "2026-11-03"
+  "updatedAt": "2026-11-03",
+  "glossaryTerms": [
+    "misui",
+    "kinkei"
+  ]
 }

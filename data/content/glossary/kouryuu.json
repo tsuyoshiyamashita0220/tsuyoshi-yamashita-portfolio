@@ -1,0 +1,26 @@
+{
+  "slug": "kouryuu",
+  "term": "拘留",
+  "reading": "こうりゅう",
+  "definition": {
+    "text": "刑の種類（主刑）の一つで、1日以上30日未満、刑事施設に拘置されます。",
+    "lawRefs": [
+      {
+        "lawId": "140AC0000000045",
+        "article": "9"
+      },
+      {
+        "lawId": "140AC0000000045",
+        "article": "16",
+        "paragraph": "1"
+      }
+    ]
+  },
+  "relatedTerms": [
+    "kinkei"
+  ],
+  "review": {
+    "status": "draft"
+  },
+  "updatedAt": "2026-11-03"
+}

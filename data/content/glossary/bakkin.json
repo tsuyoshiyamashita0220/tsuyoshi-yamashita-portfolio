@@ -1,0 +1,25 @@
+{
+  "slug": "bakkin",
+  "term": "罰金",
+  "reading": "ばっきん",
+  "definition": {
+    "text": "刑の種類（主刑）の一つで、1万円以上です。ただし、刑を減軽する場合は1万円未満に下げることができます。",
+    "lawRefs": [
+      {
+        "lawId": "140AC0000000045",
+        "article": "9"
+      },
+      {
+        "lawId": "140AC0000000045",
+        "article": "15"
+      }
+    ]
+  },
+  "relatedTerms": [
+    "karyou"
+  ],
+  "review": {
+    "status": "draft"
+  },
+  "updatedAt": "2026-11-03"
+}

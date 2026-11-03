@@ -5,7 +5,14 @@ import { ArticleView } from "@/components/ArticleView";
 import { CitedTextView } from "@/components/CitedTextView";
 import { PreviewBanner } from "@/components/PreviewBanner";
 import { SourceNote } from "@/components/SourceNote";
-import { crimeChapter, getVisibleCrime, lawRefHref, lawRefLabel, listAllCrimes } from "@/lib/content";
+import {
+  crimeChapter,
+  getVisibleCrime,
+  getVisibleGlossary,
+  lawRefHref,
+  lawRefLabel,
+  listAllCrimes,
+} from "@/lib/content";
 import { getArticle, getLaw } from "@/lib/laws";
 import type { LawRef } from "@/types/content";
 
@@ -48,6 +55,7 @@ export default async function CrimePage(props: PageProps<"/crimes/[slug]">) {
   const relatedCrimes = (entry.relatedCrimes ?? [])
     .map((s) => getVisibleCrime(s))
     .filter((c) => c !== undefined);
+  const terms = (entry.glossaryTerms ?? []).map(getVisibleGlossary).filter((t) => t !== undefined);
   const law = getLaw(entry.basis[0].lawId);
 
   return (
@@ -128,6 +136,21 @@ export default async function CrimePage(props: PageProps<"/crimes/[slug]">) {
               <li key={c.slug}>
                 <Link href={`/crimes/${c.slug}`} className="rounded-full border border-line px-3 py-1 text-sm">
                   {c.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {terms.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-lg font-bold">関連する用語</h2>
+          <ul className="flex flex-wrap gap-2">
+            {terms.map((t) => (
+              <li key={t.slug}>
+                <Link href={`/glossary/${t.slug}`} className="rounded-full border border-line px-3 py-1 text-sm">
+                  {t.term}
                 </Link>
               </li>
             ))}

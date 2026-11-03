@@ -24,6 +24,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Link>
             <nav className="flex shrink-0 gap-3 text-sm whitespace-nowrap">
               <Link href="/crimes">罪名</Link>
+              <Link href="/procedure">手続</Link>
+              <Link href="/glossary">用語</Link>
               <Link href="/laws">法令</Link>
               <Link href="/about">サイトについて</Link>
             </nav>

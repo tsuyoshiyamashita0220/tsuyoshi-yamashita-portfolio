@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { CrimeEntry, LawRef, ReviewInfo } from "@/types/content";
+import type { CitedText, CrimeEntry, GlossaryTerm, LawRef, ProcedureStep, ReviewInfo } from "@/types/content";
 import { getLaw, tocPath } from "@/lib/laws";
 
 const CONTENT_DIR = path.join(process.cwd(), "data", "content");
@@ -40,8 +40,17 @@ export function isVisible(entry: { review: ReviewInfo }): boolean {
 }
 
 let crimes: CrimeEntry[] | undefined;
+/** 根拠条文が法令の中で何番目か（並べ替え用） */
+function articleOrder(ref: LawRef | undefined): number {
+  const law = ref && getLaw(ref.lawId);
+  return law ? law.articles.findIndex((a) => a.num === ref.article) : Number.MAX_SAFE_INTEGER;
+}
+
+/** 条文の並び順（= 刑法の章の順）で返す */
 export function listAllCrimes(): CrimeEntry[] {
-  crimes ??= readDir<CrimeEntry>("crimes");
+  crimes ??= readDir<CrimeEntry>("crimes").sort(
+    (a, b) => articleOrder(a.basis[0]) - articleOrder(b.basis[0]),
+  );
   return crimes;
 }
 
@@ -52,6 +61,54 @@ export function listVisibleCrimes(): CrimeEntry[] {
 export function getVisibleCrime(slug: string): CrimeEntry | undefined {
   const entry = listAllCrimes().find((c) => c.slug === slug);
   return entry && isVisible(entry) ? entry : undefined;
+}
+
+let glossary: GlossaryTerm[] | undefined;
+export function listAllGlossary(): GlossaryTerm[] {
+  glossary ??= readDir<GlossaryTerm>("glossary").sort((a, b) =>
+    (a.reading ?? a.term).localeCompare(b.reading ?? b.term, "ja"),
+  );
+  return glossary;
+}
+
+export function listVisibleGlossary(): GlossaryTerm[] {
+  return listAllGlossary().filter(isVisible);
+}
+
+export function getVisibleGlossary(slug: string): GlossaryTerm | undefined {
+  const entry = listAllGlossary().find((g) => g.slug === slug);
+  return entry && isVisible(entry) ? entry : undefined;
+}
+
+let procedure: ProcedureStep[] | undefined;
+export function listAllProcedure(): ProcedureStep[] {
+  procedure ??= readDir<ProcedureStep>("procedure").sort((a, b) => a.order - b.order);
+  return procedure;
+}
+
+export function listVisibleProcedure(): ProcedureStep[] {
+  return listAllProcedure().filter(isVisible);
+}
+
+export function getVisibleProcedure(slug: string): ProcedureStep | undefined {
+  const entry = listAllProcedure().find((p) => p.slug === slug);
+  return entry && isVisible(entry) ? entry : undefined;
+}
+
+/** 解説文の根拠になっている条を、重複なしで集める */
+export function citedArticles(texts: CitedText[]): LawRef[] {
+  const seen = new Set<string>();
+  const refs: LawRef[] = [];
+  for (const t of texts) {
+    for (const r of t.lawRefs ?? []) {
+      const key = `${r.lawId}/${r.article}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        refs.push({ lawId: r.lawId, article: r.article });
+      }
+    }
+  }
+  return refs;
 }
 
 /** 罪名の分類 = 根拠条文が属する章（e-Gov の目次） */

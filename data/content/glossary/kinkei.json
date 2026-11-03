@@ -1,0 +1,31 @@
+{
+  "slug": "kinkei",
+  "term": "拘禁刑",
+  "reading": "こうきんけい",
+  "definition": {
+    "text": "刑の種類（主刑）の一つです。無期と有期があり、有期拘禁刑は1か月以上20年以下です。刑事施設に拘置されます。",
+    "lawRefs": [
+      {
+        "lawId": "140AC0000000045",
+        "article": "9"
+      },
+      {
+        "lawId": "140AC0000000045",
+        "article": "12",
+        "paragraph": "1"
+      },
+      {
+        "lawId": "140AC0000000045",
+        "article": "12",
+        "paragraph": "2"
+      }
+    ]
+  },
+  "relatedTerms": [
+    "kouryuu"
+  ],
+  "review": {
+    "status": "draft"
+  },
+  "updatedAt": "2026-11-03"
+}

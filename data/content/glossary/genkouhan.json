@@ -1,0 +1,23 @@
+{
+  "slug": "genkouhan",
+  "term": "現行犯人",
+  "reading": "げんこうはんにん",
+  "definition": {
+    "text": "現に罪を行っている者、または現に罪を行い終わった者のことです。現行犯人は、誰でも逮捕状なしで逮捕することができます。",
+    "lawRefs": [
+      {
+        "lawId": "323AC0000000131",
+        "article": "212",
+        "paragraph": "1"
+      },
+      {
+        "lawId": "323AC0000000131",
+        "article": "213"
+      }
+    ]
+  },
+  "review": {
+    "status": "draft"
+  },
+  "updatedAt": "2026-11-03"
+}

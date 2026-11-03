@@ -1,0 +1,53 @@
+{
+  "slug": "sousa",
+  "order": 1,
+  "title": "捜査",
+  "summary": {
+    "text": "犯罪があると考えられるときに、犯人と証拠を調べる段階です。",
+    "lawRefs": [
+      {
+        "lawId": "323AC0000000131",
+        "article": "189",
+        "paragraph": "2"
+      }
+    ]
+  },
+  "details": [
+    {
+      "text": "警察官は、司法警察職員として職務を行います。司法警察職員は、犯罪があると考えるときは、犯人と証拠を捜査します。",
+      "lawRefs": [
+        {
+          "lawId": "323AC0000000131",
+          "article": "189",
+          "paragraph": "1"
+        },
+        {
+          "lawId": "323AC0000000131",
+          "article": "189",
+          "paragraph": "2"
+        }
+      ]
+    },
+    {
+      "text": "検察官も、必要と認めるときは、自ら犯罪を捜査することができます。",
+      "lawRefs": [
+        {
+          "lawId": "323AC0000000131",
+          "article": "191",
+          "paragraph": "1"
+        }
+      ]
+    }
+  ],
+  "actors": [
+    "司法警察職員（警察官など）",
+    "検察官"
+  ],
+  "nextSteps": [
+    "taiho"
+  ],
+  "review": {
+    "status": "draft"
+  },
+  "updatedAt": "2026-11-03"
+}

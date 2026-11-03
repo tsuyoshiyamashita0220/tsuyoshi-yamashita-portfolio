@@ -2,9 +2,9 @@ import Link from "next/link";
 import { listLaws } from "@/lib/laws";
 
 const sections = [
-  { title: "罪名から調べる", body: "罪名ごとに、成立の要件と法定刑を条文つきで解説します。" },
-  { title: "刑事手続の流れ", body: "捜査から判決までの流れを、根拠条文とあわせて説明します。" },
-  { title: "用語集", body: "法律用語をやさしい言葉で言い換えます。" },
+  { href: "/crimes", title: "罪名から調べる", body: "罪名ごとに、成立のポイントを条文つきで解説します。" },
+  { href: "/procedure", title: "刑事手続の流れ", body: "捜査から判決までの流れを、根拠条文とあわせて説明します。" },
+  { href: "/glossary", title: "用語集", body: "条文に定めのある言葉を、やさしく説明します。" },
 ];
 
 export default function Home() {
@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <div className="space-y-10">
       <section className="space-y-3">
-        <p className="text-sm font-semibold text-accent">準備中</p>
+        <p className="text-sm font-semibold text-accent">開発中</p>
         <h1 className="text-3xl font-bold leading-tight">CRIME ATLAS JAPAN 2026</h1>
         <p className="text-muted">
           日本の犯罪と刑事法を、e-Gov の公式法令データにもとづいてわかりやすく学べる百科事典です。
@@ -42,16 +42,15 @@ export default function Home() {
 
       <section className="grid gap-4 sm:grid-cols-2">
         {sections.map((s) => (
-          <div key={s.title} className="rounded-lg border border-line p-4">
+          <Link key={s.title} href={s.href} className="block rounded-lg border border-line p-4 hover:border-foreground">
             <h2 className="font-semibold">{s.title}</h2>
             <p className="mt-1 text-sm text-muted">{s.body}</p>
-            <p className="mt-2 text-xs text-muted">公開準備中</p>
-          </div>
+          </Link>
         ))}
       </section>
 
       <p className="rounded-lg border border-line p-4 text-sm text-muted">
-        罪名解説・刑事手続・用語集は、条文との突き合わせが済んだものから順に公開します。
+        解説は、条文との突き合わせと承認が済んだものから順に追加しています。
       </p>
     </div>
   );

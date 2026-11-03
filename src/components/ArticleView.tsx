@@ -10,7 +10,16 @@ export function ArticleView({ article }: { article: LawArticle }) {
         <div key={p.num} className="space-y-2">
           {p.caption && <p className="text-sm text-muted">{p.caption}</p>}
           <p>
-            {p.numLabel && <span className="mr-2 font-semibold">{p.numLabel}</span>}
+            {p.numLabel ? (
+              <span className="mr-2 font-semibold">{p.numLabel}</span>
+            ) : (
+              // 原文に項番号がない法令でも項の区切りが分かるよう、編集上の番号を薄く添える
+              p.num !== "1" && (
+                <span className="mr-2 text-sm text-muted" title="項番号は原文にはありません（編集上の表示）">
+                  〔{p.num}〕
+                </span>
+              )
+            )}
             {p.sentence}
           </p>
           {p.items && <ItemList items={p.items} />}

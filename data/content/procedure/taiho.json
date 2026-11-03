@@ -88,7 +88,12 @@
     "soutchi-kouryuu"
   ],
   "review": {
-    "status": "draft"
+    "status": "verified",
+    "checkedRevisions": {
+      "323AC0000000131": "323AC0000000131_20261020_508AC0000000067"
+    },
+    "checkedAt": "2026-11-03",
+    "notes": "legal-reviewer の審査（最大 2 回）の指摘をすべて反映し、追加の根拠条文は原文で確認済み。2026-11-03 にユーザーから承認を一任され、承認。"
   },
   "updatedAt": "2026-11-03"
 }

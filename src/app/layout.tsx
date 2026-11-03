@@ -18,11 +18,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="ja" className="h-full antialiased">
       <body className="flex min-h-full flex-col">
         <header className="border-b border-line">
-          <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
+          <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3">
             <Link href="/" className="font-bold tracking-wide whitespace-nowrap">
               CRIME ATLAS JAPAN
             </Link>
-            <nav className="flex shrink-0 gap-4 text-sm whitespace-nowrap">
+            <nav className="flex shrink-0 gap-3 text-sm whitespace-nowrap">
+              <Link href="/crimes">罪名</Link>
               <Link href="/laws">法令</Link>
               <Link href="/about">サイトについて</Link>
             </nav>

@@ -43,7 +43,7 @@ Node の fetch はプロキシを自動で使わないため、`NODE_USE_ENV_PRO
 | 0. 初期設定（済） | Next.js 雛形、型定義、取得スクリプト、エージェント定義、設計書 | `npm run build` が通る |
 | 1. データ基盤（済） | 原本取得 → `EgovLawSnapshot` への変換スクリプト | 刑法・刑事訴訟法のスナップショットが `data/egov/laws/` にあり、sha256 が原本と一致 |
 | 2. 条文ビューア（済） | `/laws`、`/laws/[lawId]`、`/laws/[lawId]/articles/[num]` | 全条が e-Gov 原文どおり表示され、出典・施行日が出る |
-| 3. 罪名解説 | `CrimeEntry` を作成し、legal-reviewer の審査を通ったものだけ公開 | `verified` のエントリのみ表示 |
+| 3. 罪名解説（5 件承認待ち） | `CrimeEntry` を作成し、legal-reviewer の審査を通ったものだけ公開 | `verified` のエントリのみ表示 |
 | 4. 刑事手続・用語集 | `/procedure`、`/glossary` | 同上 |
 | 5. 検索・仕上げ | 静的検索インデックス、アクセシビリティ、OGP | Lighthouse でアクセシビリティ 90 以上 |
 | 6. 公開 | ホスティング先の決定 | **ユーザーの承認後のみ**（今回は対象外） |
@@ -113,6 +113,15 @@ CrimeEntry ─ basis: LawRef[]        ← 本条
 
 LawRef = { lawId, article, paragraph?, item? }  → EgovLawSnapshot を指す
 ```
+
+### 公開までの流れ（実装済み）
+
+1. 下書き（`draft`）を作る。`npm run content:check` で参照切れ・根拠なしを検出（`npm run build` でも自動実行）。
+2. `legal-reviewer`（Opus）が条文と突き合わせる。指摘を直したら `reviewed` にし、`checkedRevisions` に確認した版を入れる。
+3. **人（サイトの責任者）が承認**したら `verified` にする。公開ビルドに出るのは `verified` かつ `checkedRevisions` が現行版と一致するものだけ。
+4. 確認用には `CONTENT_PREVIEW=1 npm run build` で未承認のものも表示できる（注意書きつき。公開ビルドでは使わない）。
+
+2026-11-03 時点: 刑法の殺人・傷害・窃盗・強盗・詐欺の 5 件が `reviewed`（承認待ち）。
 
 ### 根拠の担保
 

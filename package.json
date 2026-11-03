@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/validate-content.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "egov:search": "NODE_USE_ENV_PROXY=1 node scripts/fetch-egov-law.mjs search",
     "egov:fetch": "NODE_USE_ENV_PROXY=1 node scripts/fetch-egov-law.mjs fetch",
-    "egov:build": "node scripts/build-egov-snapshots.mjs"
+    "egov:build": "node scripts/build-egov-snapshots.mjs",
+    "content:check": "node scripts/validate-content.mjs"
   },
   "dependencies": {
     "next": "16.4.4",

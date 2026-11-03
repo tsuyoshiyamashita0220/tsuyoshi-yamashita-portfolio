@@ -1,0 +1,87 @@
+{
+  "slug": "settou",
+  "name": "窃盗",
+  "reading": "せっとう",
+  "basis": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "235"
+    }
+  ],
+  "summary": {
+    "text": "他人の財物を窃取したときに成立する罪です。",
+    "lawRefs": [
+      {
+        "lawId": "140AC0000000045",
+        "article": "235"
+      }
+    ]
+  },
+  "elements": [
+    {
+      "text": "対象は「他人の財物」です。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "235"
+        }
+      ]
+    },
+    {
+      "text": "条文が定める行為は、それを「窃取」することです。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "235"
+        }
+      ]
+    },
+    {
+      "text": "未遂も罰せられます。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "243"
+        }
+      ]
+    },
+    {
+      "text": "窃盗をした者が、手に入れた財物を取り返されるのを防ぐため、逮捕を免れるため、または罪跡を隠滅するために暴行や脅迫をしたときは、強盗として扱われます（事後強盗）。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "238"
+        }
+      ]
+    }
+  ],
+  "penaltyRef": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "235"
+    }
+  ],
+  "relatedProvisions": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "238"
+    },
+    {
+      "lawId": "140AC0000000045",
+      "article": "243"
+    }
+  ],
+  "relatedCrimes": [
+    "goutou",
+    "sagi"
+  ],
+  "review": {
+    "status": "reviewed",
+    "checkedRevisions": {
+      "140AC0000000045": "140AC0000000045_20260521_507AC0000000039"
+    },
+    "checkedAt": "2026-11-03",
+    "notes": "legal-reviewer の審査で指摘された点を修正済み。人の承認待ち。"
+  },
+  "updatedAt": "2026-11-03"
+}

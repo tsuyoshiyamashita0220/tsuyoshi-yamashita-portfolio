@@ -1,0 +1,86 @@
+{
+  "slug": "sagi",
+  "name": "詐欺",
+  "reading": "さぎ",
+  "basis": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "246"
+    }
+  ],
+  "summary": {
+    "text": "人を欺いて財物を交付させたときに成立する罪です。",
+    "lawRefs": [
+      {
+        "lawId": "140AC0000000045",
+        "article": "246",
+        "paragraph": "1"
+      }
+    ]
+  },
+  "elements": [
+    {
+      "text": "手段は「人を欺いて」です。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "246",
+          "paragraph": "1"
+        }
+      ]
+    },
+    {
+      "text": "人を欺いて、財物を「交付させた」ことが必要です。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "246",
+          "paragraph": "1"
+        }
+      ]
+    },
+    {
+      "text": "同じ方法で、財物ではなく財産上不法の利益を得たり、他人に得させたりした場合も、同じように処罰されます。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "246",
+          "paragraph": "2"
+        }
+      ]
+    },
+    {
+      "text": "未遂も罰せられます。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "250"
+        }
+      ]
+    }
+  ],
+  "penaltyRef": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "246"
+    }
+  ],
+  "relatedProvisions": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "250"
+    }
+  ],
+  "relatedCrimes": [
+    "settou"
+  ],
+  "review": {
+    "status": "reviewed",
+    "checkedRevisions": {
+      "140AC0000000045": "140AC0000000045_20260521_507AC0000000039"
+    },
+    "checkedAt": "2026-11-03",
+    "notes": "legal-reviewer の審査で指摘された点を修正済み。人の承認待ち。"
+  },
+  "updatedAt": "2026-11-03"
+}

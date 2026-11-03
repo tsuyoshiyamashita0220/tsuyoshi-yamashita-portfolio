@@ -41,8 +41,8 @@ export interface CitedText {
 /**
  * 公開状態。
  * draft: 下書き（公開しない）
- * reviewed: 編集レビュー済み（根拠の突き合わせ待ち）
- * verified: すべての LawRef が現行スナップショットに存在し、内容の一致を確認済み
+ * reviewed: legal-reviewer の審査を通過（人の承認待ち）
+ * verified: 人が承認済み。checkedRevisions が現行スナップショットと一致する間だけ公開する
  */
 export type ReviewStatus = "draft" | "reviewed" | "verified";
 
@@ -54,14 +54,6 @@ export interface ReviewInfo {
   notes?: string;
 }
 
-/** 罪名カテゴリ（表示用の分類。法令の編・章名とは別に編集側で定義） */
-export interface CrimeCategory {
-  slug: string;
-  name: string;
-  description: string;
-  order: number;
-}
-
 /** 罪名エントリ: data/content/crimes/<slug>.json */
 export interface CrimeEntry {
   /** URL 用の英数字スラッグ */
@@ -69,8 +61,10 @@ export interface CrimeEntry {
   /** 罪名（条文見出し・法令上の表記を根拠にする） */
   name: string;
   reading?: string;
-  categorySlug: string;
-  /** 根拠条文（本条） */
+  /**
+   * 根拠条文（本条）。先頭の条が属する章（e-Gov の目次）を分類として表示するので、
+   * 分類を独自に作らない。
+   */
   basis: LawRef[];
   /** ひとことで言うと（中学生にも分かる言葉で） */
   summary: CitedText;

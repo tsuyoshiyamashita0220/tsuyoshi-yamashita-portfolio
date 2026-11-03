@@ -1,0 +1,111 @@
+{
+  "slug": "goutou",
+  "name": "強盗",
+  "reading": "ごうとう",
+  "basis": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "236"
+    }
+  ],
+  "summary": {
+    "text": "暴行または脅迫を用いて、他人の財物を強取したときに成立する罪です。",
+    "lawRefs": [
+      {
+        "lawId": "140AC0000000045",
+        "article": "236",
+        "paragraph": "1"
+      }
+    ]
+  },
+  "elements": [
+    {
+      "text": "手段は「暴行又は脅迫」です。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "236",
+          "paragraph": "1"
+        }
+      ]
+    },
+    {
+      "text": "対象は「他人の財物」で、条文が定める行為はそれを「強取」することです。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "236",
+          "paragraph": "1"
+        }
+      ]
+    },
+    {
+      "text": "同じ方法で、財物ではなく財産上不法の利益を得たり、他人に得させたりした場合も、同じように処罰されます。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "236",
+          "paragraph": "2"
+        }
+      ]
+    },
+    {
+      "text": "未遂も罰せられます。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "243"
+        }
+      ]
+    },
+    {
+      "text": "強盗が人を負傷させたり死亡させたりしたときは、「強盗致死傷」としてさらに重く処罰されます。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "240"
+        },
+        {
+          "lawId": "140AC0000000045",
+          "article": "236"
+        }
+      ]
+    }
+  ],
+  "penaltyRef": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "236"
+    }
+  ],
+  "relatedProvisions": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "237"
+    },
+    {
+      "lawId": "140AC0000000045",
+      "article": "238"
+    },
+    {
+      "lawId": "140AC0000000045",
+      "article": "240"
+    },
+    {
+      "lawId": "140AC0000000045",
+      "article": "243"
+    }
+  ],
+  "relatedCrimes": [
+    "settou"
+  ],
+  "review": {
+    "status": "reviewed",
+    "checkedRevisions": {
+      "140AC0000000045": "140AC0000000045_20260521_507AC0000000039"
+    },
+    "checkedAt": "2026-11-03",
+    "notes": "legal-reviewer の審査で指摘された点を修正済み。人の承認待ち。"
+  },
+  "updatedAt": "2026-11-03"
+}

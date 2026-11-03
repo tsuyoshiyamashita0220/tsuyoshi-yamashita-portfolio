@@ -1,0 +1,77 @@
+{
+  "slug": "shougai",
+  "name": "傷害",
+  "reading": "しょうがい",
+  "basis": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "204"
+    }
+  ],
+  "summary": {
+    "text": "人の身体を傷害したときに成立する罪です。",
+    "lawRefs": [
+      {
+        "lawId": "140AC0000000045",
+        "article": "204"
+      }
+    ]
+  },
+  "elements": [
+    {
+      "text": "条文が定める行為は「人の身体を傷害した」ことです。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "204"
+        }
+      ]
+    },
+    {
+      "text": "身体を傷害し、それによって人を死亡させた場合は、「傷害致死」の罪になります。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "205"
+        }
+      ]
+    },
+    {
+      "text": "暴行を加えたものの、人を傷害するまでに至らなかった場合は「暴行」の罪の対象になります。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "208"
+        }
+      ]
+    }
+  ],
+  "penaltyRef": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "204"
+    }
+  ],
+  "relatedProvisions": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "205"
+    },
+    {
+      "lawId": "140AC0000000045",
+      "article": "208"
+    }
+  ],
+  "relatedCrimes": [
+    "satsujin"
+  ],
+  "review": {
+    "status": "reviewed",
+    "checkedRevisions": {
+      "140AC0000000045": "140AC0000000045_20260521_507AC0000000039"
+    },
+    "checkedAt": "2026-11-03",
+    "notes": "legal-reviewer の審査で指摘された点を修正済み。人の承認待ち。"
+  },
+  "updatedAt": "2026-11-03"
+}

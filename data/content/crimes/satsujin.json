@@ -1,0 +1,85 @@
+{
+  "slug": "satsujin",
+  "name": "殺人",
+  "reading": "さつじん",
+  "basis": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "199"
+    }
+  ],
+  "summary": {
+    "text": "人を殺したときに成立する罪です。",
+    "lawRefs": [
+      {
+        "lawId": "140AC0000000045",
+        "article": "199"
+      }
+    ]
+  },
+  "elements": [
+    {
+      "text": "条文が定める行為は「人を殺した」ことです。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "199"
+        }
+      ]
+    },
+    {
+      "text": "殺人の罪を犯す目的で、その「予備」をしただけでも罰せられます。ただし、情状（事情）によっては刑が免除されることがあります。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "201"
+        }
+      ]
+    },
+    {
+      "text": "殺人の実行に取りかかった（着手した）が、遂げなかった場合（未遂）も罰せられます。",
+      "lawRefs": [
+        {
+          "lawId": "140AC0000000045",
+          "article": "203"
+        },
+        {
+          "lawId": "140AC0000000045",
+          "article": "43"
+        }
+      ]
+    }
+  ],
+  "penaltyRef": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "199"
+    }
+  ],
+  "relatedProvisions": [
+    {
+      "lawId": "140AC0000000045",
+      "article": "201"
+    },
+    {
+      "lawId": "140AC0000000045",
+      "article": "203"
+    },
+    {
+      "lawId": "140AC0000000045",
+      "article": "43"
+    }
+  ],
+  "relatedCrimes": [
+    "shougai"
+  ],
+  "review": {
+    "status": "reviewed",
+    "checkedRevisions": {
+      "140AC0000000045": "140AC0000000045_20260521_507AC0000000039"
+    },
+    "checkedAt": "2026-11-03",
+    "notes": "legal-reviewer の審査で指摘された点を修正済み。人の承認待ち。"
+  },
+  "updatedAt": "2026-11-03"
+}

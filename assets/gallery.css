@@ -851,9 +851,9 @@ html.lite .rs-ruler::before { animation: none !important; transform: none; }
 
 /* ---------- 言語の切り替えと、言語ごとの書体 ---------- */
 .lang-sw { display: flex; gap: 2px; align-items: center; font-size: .75rem; flex-shrink: 0; }
-.lang-sw a, .lang-sw span { padding: 4px 7px; border-radius: 999px; text-decoration: none; color: var(--ink-3); white-space: nowrap; }
+.lang-sw a, .lang-sw span { padding: 4px 7px; border-radius: 999px; text-decoration: none; color: inherit; opacity: .72; white-space: nowrap; }
 .lang-sw a:hover { color: var(--yellow); }
-.lang-sw [aria-current] { color: var(--navy); background: var(--ink-2); }
+.lang-sw [aria-current] { opacity: 1; font-weight: 700; box-shadow: inset 0 0 0 1px currentColor; }
 .ja-note { display: block; color: var(--ink-3); font-size: .8125rem; }
 html[lang="zh-Hans"] { --body: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "Noto Sans CJK SC", system-ui, sans-serif; --heavy: var(--body); --display: "Songti SC", "STSong", "Noto Serif SC", "Noto Serif CJK SC", serif; }
 html[lang="ko"] { --body: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Noto Sans CJK KR", system-ui, sans-serif; --heavy: var(--body); --display: "AppleMyungjo", "Nanum Myeongjo", "Noto Serif KR", "Noto Serif CJK KR", serif; }
@@ -861,3 +861,5 @@ html[lang="en"] { --display: "Shippori Mincho", Georgia, "Times New Roman", seri
 html[lang="en"] .prose, html[lang="en"] .lede-sm { word-break: normal; overflow-wrap: anywhere; }
 @media (max-width: 640px) { .site-head .brand { order: 1; } .lang-sw { order: 2; margin-left: auto; } .site-nav { order: 3; } .lang-sw a, .lang-sw span { padding: 4px 5px; } }
 @media (min-width: 641px) and (max-width: 1180px) { .lang-sw { width: 100%; justify-content: flex-end; margin-top: -4px; } }
+.lang-sw { color: var(--ink-2); }
+html:has(#threshold) .lang-sw { color: var(--th-ink); }

@@ -1,0 +1,70 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>人間語辞典</title>
+<meta name="description" content="人間って、めんどくさい。だから、おもしろい。表現科学研究所 HYOGEN LAB 408 の『人間語辞典』。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&family=Cormorant+Garamond:wght@500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+
+<div class="app" id="app">
+  <header class="topbar">
+    <p class="brand"><span class="brand-ja">人間語辞典</span><span class="brand-en">HYOGEN LAB 408</span></p>
+    <nav class="tools" aria-label="辞典の操作">
+      <button type="button" class="tool" data-panel="toc" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h9"/></svg><span>目次</span></button>
+      <button type="button" class="tool" data-panel="search" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M15 15l4.5 4.5"/></svg><span>検索</span></button>
+      <button type="button" class="tool" id="btn-random">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h4l8 10h4M4 17h4l2.5-3.1M13.5 10.1L16 7h4M18 5l2 2-2 2M18 15l2 2-2 2"/></svg><span>ランダム</span></button>
+      <button type="button" class="tool" data-panel="fav" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v16l-5-4-5 4z"/></svg><span>しおり</span></button>
+      <button type="button" class="tool" data-panel="settings" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 10v4h3l4 4V6l-4 4z"/><path class="wave" d="M15.5 9a4 4 0 010 6M18 7a7 7 0 010 10"/></svg><span>音・設定</span></button>
+    </nav>
+  </header>
+
+  <main class="stage-wrap">
+    <div class="stage" id="stage">
+      <div class="book" id="book" role="region" aria-roledescription="本" aria-label="人間語辞典"></div>
+    </div>
+    <p class="loading" id="loading">本を用意しています…</p>
+  </main>
+
+  <footer class="pager">
+    <button type="button" class="pg-btn" id="btn-prev" aria-label="前のページ">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="pg-mid">
+      <label class="sr" for="pg-range">ページ移動</label>
+      <input type="range" id="pg-range" min="0" max="1" value="0" step="1">
+      <output id="pg-out" class="pg-out" for="pg-range">表紙</output>
+    </div>
+    <button type="button" class="pg-btn" id="btn-next" aria-label="次のページ">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </footer>
+
+  <div class="sr" id="sr-live" aria-live="polite" aria-atomic="true"></div>
+
+  <div class="hint" id="hint" role="status" hidden>
+    <p>ページの角をつまんでめくれます。<br>タップ、スワイプ、← → キーでも。</p>
+    <button type="button" id="hint-close">わかった</button>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- パネル（目次・検索・しおり・設定・共有） -->
+  <div class="scrim" id="scrim" hidden></div>
+  <section class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" hidden>
+    <header class="panel-head">
+      <h2 id="panel-title">目次</h2>
+      <button type="button" class="panel-close" id="panel-close" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </header>
+    <div class="panel-body" id="panel-body"></div>
+  </section>
+</div>
+
+<script src="vendor/page-flip.browser.js"></script>
+<script src="vendor/budoux-ja.min.js"></script>
+<script src="app.js"></script>
+
+</body></html>

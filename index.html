@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HYOGEN LAB408Gallery｜表現科学研究所 HYOGEN LAB 408</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="表現科学研究所 HYOGEN LAB 408 の公式サイト。表現が生まれ、伝わり、自分に返る仕組みを研究する研究所です。作品を見て、聴いて、触れて巡れます。">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="表現科学研究所 HYOGEN LAB 408">
+<meta property="og:title" content="HYOGEN LAB408Gallery｜表現科学研究所 HYOGEN LAB 408">
+<meta property="og:description" content="表現科学研究所 HYOGEN LAB 408 の公式サイト。表現が生まれ、伝わり、自分に返る仕組みを研究する研究所です。作品を見て、聴いて、触れて巡れます。">
+<meta property="og:image" content="https://hyogen-lab.jp/assets/ogp.jpg">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Montserrat:wght@200;300;400;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="assets/gallery.css">
+<script>try{if(localStorage.getItem('hl408:lite')==='1')document.documentElement.classList.add('lite')}catch(e){}</script>
+<script>(function(){var d=document.documentElement;var back=false;try{var n=performance.getEntriesByType('navigation')[0];var r=document.referrer?new URL(document.referrer):null;back=(n&&n.type==='back_forward')||(!!r&&r.origin===location.origin&&r.pathname!==location.pathname&&!(n&&n.type==='reload'))}catch(e){}try{d.dataset.entry=(back&&sessionStorage.getItem('hl408:entered')==='1')||window.__TH_LOBBY||location.hash==='#floor'?'lobby':'preparing'}catch(e){d.dataset.entry='preparing'}})();window.__LOBBY_SIDE__=["works/music-dna-flower/cover.webp","works/the-testimony/cover.webp","works/the-trick/cover.webp","works/ningengo-jiten/cover.webp"];</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module" src="assets/threshold.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">本文へ</a>
+<header class="site-head"><div class="wrap">
+  <a class="brand" href="index.html"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="#f8c844"/><text x="18.6" y="24.6" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="700" font-size="12.5" fill="#0b2349">408</text><path d="M31 18.2h4.4M33.2 16v4.4" stroke="#0b2349" stroke-width="1.8"/></svg><span class="bn"><b>HYOGEN LAB408Gallery</b><span>表現科学研究所</span></span></a>
+  <nav class="site-nav" aria-label="館内の案内"><a href="index.html#floor">館内案内</a><a href="research/index.html">研究の考え方</a><a href="works/index.html">作品から巡る</a><a href="experiences/index.html">体験から巡る</a><a href="timeline/index.html">歩みから巡る</a><a href="about/index.html">研究所・作者</a><a href="consult/index.html">相談する</a></nav>
+  
+</div></header>
+<main id="main">
+
+<section id="threshold" class="threshold" aria-labelledby="hl">
+  <div class="th-stage" id="threshold-stage" aria-hidden="true">
+    <picture class="th-still closed"><source media="(max-aspect-ratio: 9/10)" srcset="assets/threshold/closed-tall.webp"><img src="assets/threshold/closed-wide.webp" alt="" decoding="async" loading="eager" fetchpriority="high"></picture>
+    <picture class="th-still open"><source media="(max-aspect-ratio: 9/10)" srcset="assets/threshold/open-tall.webp"><img src="assets/threshold/open-wide.webp" alt="" decoding="async" loading="lazy"></picture>
+    <div class="cd-leaves"><i class="l"></i><i class="r"></i><b></b></div>
+    <canvas id="threshold-canvas"></canvas>
+  </div>
+  <div class="th-ui">
+    <div class="th-copy">
+      <p class="th-name">HYOGEN LAB408Gallery</p>
+      <h1 id="hl"><span class="ln">表現から、</span><span class="ln">世界がひらく。</span></h1>
+      <p class="th-lab">表現科学研究所 HYOGEN LAB 408</p>
+    </div>
+    <div class="th-actions">
+      <a id="enter" class="th-enter" href="#lobby"><span class="th-ico" aria-hidden="true"><i></i><i></i><b></b></span><span class="th-lbl">扉をひらく</span></a>
+      <a class="th-link" href="works/index.html">作品一覧へ<svg viewBox="0 0 24 12" aria-hidden="true"><path d="M0 6h22M17 1l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
+    </div>
+    <p class="th-hint" aria-hidden="true">扉に触れても、ひらきます</p>
+    <button id="skip" class="th-skip" type="button">演出をスキップ</button>
+    <p class="sr" id="th-status" aria-live="polite"></p>
+  </div>
+</section>
+
+<section id="lobby" class="lobby" aria-labelledby="lobby-h">
+  <div class="lobby-in">
+    <figure class="lobby-work">
+      <a href="works/voice-bloom/experience/index.html" data-exp aria-label="VOICE BLOOM を体験する"><img id="lobby-poster" src="works/voice-bloom/key.webp" alt="VOICE BLOOM のコンセプトビジュアル。濃紺の地に白い「VOICE」と黄色の「BLOOM」。口元から流れる声のリボンが、青と黄色の大きな花に変わっていく" width="1054" height="1492" decoding="async"></a>
+      <figcaption>コンセプトビジュアル（作品の画面ではありません）</figcaption>
+    </figure>
+    <div class="lobby-text">
+      <p class="lb-room">いまの展示　<span>02　声・放送・演技</span></p>
+      <h2 id="lobby-h" tabindex="-1" class="lb-title"><span>VOICE</span> <span class="y">BLOOM</span></h2>
+      <p class="lb-sum">声の音の特徴から、一輪ずつ違う花が育つ体験作品。</p>
+      <p class="lb-how">声を出すと、その声の高さや響きから、世界にひとつの花が咲いていきます。マイクがなくても、録音ファイルやデモ音で体験できます。</p>
+      <div class="lb-actions">
+        <a class="lb-btn primary" href="works/voice-bloom/experience/index.html" data-exp><span class="seam" aria-hidden="true"></span>体験する</a>
+        <a class="lb-btn" href="works/index.html">作品一覧へ</a>
+      </div>
+      <p class="lb-note">マイクの許可は、作品の中で「マイクではじめる」を押したときだけ求めます。　<a href="works/voice-bloom/index.html" data-work>作品について読む</a></p>
+      <button id="replay" class="lb-replay" type="button">入口の演出をもう一度</button>
+    </div>
+  </div>
+</section>
+
+<section class="sp-banner" aria-labelledby="sp-h"><div class="wrap">
+  <a class="sp-link rs-link" href="research/index.html">
+    <span class="sp-tag"><span class="dot"></span>研究の考え方</span>
+    <span class="sp-en">DISTANCE × BARRIER × EXPRESSION</span>
+    <span class="sp-title" id="sp-h">距離を測り、壁を見つけ、表現で越える。</span>
+    <span class="sp-day">HYOGEN LAB 408</span>
+    <span class="sp-go">考え方を読む　→</span>
+  </a>
+</div></section>
+
+<section class="section" aria-labelledby="ways">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="ways"><span class="eyebrow">Three ways in</span>巡り方を選ぶ</h2></div>
+    <div class="paths">
+      <div class="path">
+        <h3>作品から巡る</h3>
+        <p>名前や言葉で探す。展示室や媒体から選ぶ。</p>
+        <form class="search" action="works/index.html" method="get" role="search">
+          <label class="sr" for="top-q">作品をさがす</label>
+          <input id="top-q" name="q" type="search" placeholder="例：花、推理、辞典">
+          <button class="btn small" type="submit">探す</button>
+        </form>
+        <div class="chips"><a class="chip" href="works/index.html?media=Web%E4%BD%93%E9%A8%93">Web体験</a><a class="chip" href="works/index.html?media=3D">3D</a><a class="chip" href="works/index.html?media=%E3%82%B2%E3%83%BC%E3%83%A0">ゲーム</a><a class="chip" href="works/index.html?media=%E8%BE%9E%E5%85%B8">辞典</a><a class="chip" href="works/index.html?media=%E3%82%AB%E3%83%BC%E3%83%89">カード</a><a class="chip" href="works/index.html?media=%E6%98%A0%E5%83%8F">映像</a><a class="chip" href="works/index.html?media=Web%E8%A8%BA%E6%96%AD">Web診断</a><a class="chip" href="works/index.html?media=Web%E3%83%84%E3%83%BC%E3%83%AB">Webツール</a><a class="chip" href="works/index.html?media=3%E8%A8%80%E8%AA%9E">3言語</a></div>
+      </div>
+      <div class="path">
+        <h3>体験から巡る</h3>
+        <p>声や音、手の動きで、作品に参加する。</p>
+        <ul><li><a href="works/voice-bloom/experience/index.html" data-exp><span class="dot"></span>VOICE BLOOM</a></li><li><a href="works/music-dna-flower/experience/index.html" data-exp><span class="dot"></span>MUSIC DNA FLOWER</a></li><li><a href="works/the-testimony/experience/index.html" data-exp><span class="dot"></span>この証言、嘘です。</a></li></ul>
+        <a class="more-link" href="experiences/index.html">体験できる作品の案内</a>
+      </div>
+      <div class="path">
+        <h3>歩みから巡る</h3>
+        <p>これまでの活動を、時間の順に並べる。</p>
+        <ul><li><a href="works/ai-ceo-project/index.html" data-work><span style="font-family:var(--mono);font-size:.8125rem">2026年10月1日</span>AIは社長になれるのか？ ― 人間とAIの判断の境界を探る実験</a></li><li><a href="works/hibikino-base/index.html" data-work><span style="font-family:var(--mono);font-size:.8125rem">2026年10月1日</span>研究拠点の始動（北九州学術研究都市ひびきの）</a></li><li><a href="works/ningengo-jiten/index.html" data-work><span style="font-family:var(--mono);font-size:.8125rem">2026年10月</span>人間語辞典</a></li></ul>
+        <a class="more-link" href="timeline/index.html">年表を見る</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="floor" aria-labelledby="rooms-h">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="rooms-h"><span class="eyebrow">Floor guide</span>館内マップ</h2><a class="more-link" href="works/index.html">すべての作品</a></div>
+    <p class="lede-sm">七つの展示室の平面図です。部屋を押すと、その展示室の作品だけが並びます。小さな額は、その部屋に掛かっている作品です。</p>
+    <div class="floor">
+      <a class="room-tile" href="works/index.html?room=music#room-music" aria-label="01 音楽（3件）"><span class="rno">01</span><span class="rjp">音楽</span><span class="ren">MUSIC</span>
+          <span class="minis" aria-hidden="true"><img src="works/music-dna-flower/cover.webp" alt="" loading="lazy" decoding="async"><i></i><i></i></span>
+          <span class="rct">1作品・記録2</span></a><a class="room-tile" href="works/index.html?room=voice#room-voice" aria-label="02 声・放送・演技（4件）"><span class="rno">02</span><span class="rjp">声・放送・演技</span><span class="ren">VOICE / BROADCAST / ACTING</span>
+          <span class="minis" aria-hidden="true"><img src="works/voice-bloom/cover.webp" alt="" loading="lazy" decoding="async"><img src="works/rec-sweettimes/cover.webp" alt="" loading="lazy" decoding="async"><img src="works/rec-ryomagumi/cover.webp" alt="" loading="lazy" decoding="async"></span>
+          <span class="rct">1作品・記録3</span></a><a class="room-tile" href="works/index.html?room=visual#room-visual" aria-label="03 映像・視覚・空間（2件）"><span class="rno">03</span><span class="rjp">映像・視覚・空間</span><span class="ren">IMAGE / VISION / SPACE</span>
+          <span class="minis" aria-hidden="true"><img src="works/sun-and-moon/cover.webp" alt="" loading="lazy" decoding="async"><i></i></span>
+          <span class="rct">1作品・記録1</span></a><a class="room-tile" href="works/index.html?room=story#room-story" aria-label="04 物語・出版・ゲーム（3件）"><span class="rno">04</span><span class="rjp">物語・出版・ゲーム</span><span class="ren">STORY / PUBLISHING / GAMES</span>
+          <span class="minis" aria-hidden="true"><img src="works/the-testimony/cover.webp" alt="" loading="lazy" decoding="async"><img src="works/ningengo-jiten/cover.webp" alt="" loading="lazy" decoding="async"><i></i></span>
+          <span class="rct">2作品・記録1</span></a><a class="room-tile" href="works/index.html?room=dialogue#room-dialogue" aria-label="05 教育・対話（6件）"><span class="rno">05</span><span class="rjp">教育・対話</span><span class="ren">EDUCATION / DIALOGUE</span>
+          <span class="minis" aria-hidden="true"><img src="works/namonaki-kaji/cover.webp" alt="" loading="lazy" decoding="async"><img src="works/yatteru-mieteru/cover.webp" alt="" loading="lazy" decoding="async"><img src="works/rec-nhk-class/cover.webp" alt="" loading="lazy" decoding="async"></span>
+          <span class="rct">2作品・記録4</span></a><a class="room-tile" href="works/index.html?room=research#room-research" aria-label="06 研究・実験（9件）"><span class="rno">06</span><span class="rjp">研究・実験</span><span class="ren">RESEARCH / EXPERIMENTS</span>
+          <span class="minis" aria-hidden="true"><img src="works/the-trick/cover.webp" alt="" loading="lazy" decoding="async"><img src="works/anata-ugokidasu/cover.webp" alt="" loading="lazy" decoding="async"><img src="works/shukuyo-engine/cover.webp" alt="" loading="lazy" decoding="async"></span>
+          <span class="rct">3作品・記録6</span></a><a class="room-tile" href="works/index.html?room=practice#room-practice" aria-label="07 事業・社会での実践（4件）"><span class="rno">07</span><span class="rjp">事業・社会での実践</span><span class="ren">PRACTICE IN BUSINESS AND SOCIETY</span>
+          <span class="minis" aria-hidden="true"><img src="works/hbl-cm/cover.webp" alt="" loading="lazy" decoding="async"><img src="works/rec-nodojiman/cover.webp" alt="" loading="lazy" decoding="async"><img src="works/rec-the-fes-2024/cover.webp" alt="" loading="lazy" decoding="async"></span>
+          <span class="rct">1作品・記録3</span></a>
+      <div class="room-tile hall" aria-hidden="true"><span class="ren">ENTRANCE</span><span class="rjp">入口</span><span class="here"><span class="dot"></span>現在地</span></div>
+    </div>
+  </div>
+</section><section class="cs-nudge" aria-label="相談の入口"><div class="wrap"><p>表現科学研究所は、表現がどう生まれ、どう受け取られ、表現した本人に何を返すのかを研究しています。ここに並んでいるのは、私たちの実験です。</p><a class="more-link" href="consult/index.html">まだ、うまく言えなくても大丈夫です。　相談する</a></div></section>
+</main>
+<footer class="site-foot"><div class="wrap">
+  <div class="ft-org">
+    <div class="lab-name"><b>HYOGEN LAB 408</b>表現科学研究所</div>
+    <address>〒808-0135<br>福岡県北九州市若松区ひびきの1番8号 408号室<br>TEL <a href="tel:0932874979">093-287-4979</a><br>MAIL <a href="mailto:info@hyogen-lab.jp">info@hyogen-lab.jp</a></address>
+  </div>
+  <nav class="ft-nav" aria-label="フッター"><a href="index.html#floor">館内案内</a><a href="research/index.html">研究の考え方</a><a href="works/index.html">作品から巡る</a><a href="experiences/index.html">体験から巡る</a><a href="timeline/index.html">歩みから巡る</a><a href="about/index.html">研究所・作者</a><a href="consult/index.html">相談する</a></nav>
+  <ul class="ft-links" aria-label="関連リンク"><li><span>実践・観察の現場</span><a href="https://www.koejuku.com" rel="noopener" target="_blank">声塾 - Koejuku ↗</a></li><li><span>メディア・発信の実験場</span><a href="https://www.bcs-japan.jp" rel="noopener" target="_blank">BCS 408media ↗</a></li><li><span>運営法人</span><a href="https://www.gin-e.co.jp" rel="noopener" target="_blank">G.I.N. Entertainment LLC ↗</a></li><li><span>過去の活動アーカイブ</span><a href="https://www.gin-e.co.jp/tsuyoshiyamashita/" rel="noopener" target="_blank">Tsuyoshi Yamashita Portfolio ↗</a></li></ul>
+  <div class="ft-end"><a href="https://hyogen-lab.jp/privacy/" rel="noopener">プライバシーポリシー</a><button class="btn small quiet" type="button" data-lite-toggle aria-pressed="false">動きを減らす：オフ</button><small>© 2026 表現科学研究所 / HYOGEN LAB 408. All Rights Reserved.</small></div>
+</div></footer>
+<script src="assets/record.js"></script>
+<script src="assets/gallery.js"></script>
+</body>
+</html>

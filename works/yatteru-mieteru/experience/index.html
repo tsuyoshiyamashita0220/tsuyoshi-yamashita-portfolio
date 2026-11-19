@@ -1,0 +1,3266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>名もなき家事診断 ふたり版｜表現科学研究所</title>
+<meta name="description" content="名もなき家事診断 ふたり版。ふたりで、おなじ60個の質問に答えるだけ。どっちが正しいかは決めません。答えが食い違ったところだけを、そっと並べます。開発：表現科学研究所">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   新聞広告の体裁：白地・朱一色・縦書き・細い罫の枠
+   ================================================================ */
+:root{
+  --haku:#FCFAF8; --kami:#F7F3F1; --awa:#FBEFEF;
+  --waku:#EFD9D9; --kei:#EDE7E2; --kei-2:#F5F1ED;
+  --sumi:#35302C; --sumi-2:#726B63; --sumi-3:#A49D94;
+  --shu:#D4484C; --shu-fuka:#B2383C; --shu-usu:#FBEFEF;
+  --ai:#5F87A0; --midori:#7FA477; --cha:#B6926A; --hai:#ADA8A0;
+  --min:"Noto Serif JP","Noto Serif CJK JP","Hiragino Mincho ProN","ヒラギノ明朝 ProN","Yu Mincho","YuMincho","Source Han Serif JP",serif;
+  --go:"Noto Sans JP","Noto Sans CJK JP","Hiragino Sans","ヒラギノ角ゴシック","Yu Gothic","YuGothic","Meiryo",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --haku:#1D1A19; --kami:#262322; --awa:#2E2122;
+  --waku:#4E3A3B; --kei:#3B3633; --kei-2:#2F2B29;
+  --sumi:#F2EEE9; --sumi-2:#C0BAB2; --sumi-3:#8E8880;
+  --shu:#E8767A; --shu-fuka:#E8767A; --shu-usu:#332325;
+  --ai:#8FB0C4; --midori:#9CBA93; --cha:#CBA87E; --hai:#918C85;
+}}
+:root[data-theme="dark"]{
+  --haku:#1D1A19; --kami:#262322; --awa:#2E2122;
+  --waku:#4E3A3B; --kei:#3B3633; --kei-2:#2F2B29;
+  --sumi:#F2EEE9; --sumi-2:#C0BAB2; --sumi-3:#8E8880;
+  --shu:#E8767A; --shu-fuka:#E8767A; --shu-usu:#332325;
+  --ai:#8FB0C4; --midori:#9CBA93; --cha:#CBA87E; --hai:#918C85;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--haku);color:var(--sumi);font-family:var(--go);
+  font-size:15.5px;line-height:1.95;letter-spacing:.03em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:0 20px calc(72px + env(safe-area-inset-bottom))}
+.num,.big,.vl,.pcnum{font-variant-numeric:tabular-nums}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--shu);outline-offset:3px}
+[hidden]{display:none!important}
+p{margin:0 0 1.05em}p:last-child{margin-bottom:0}
+
+/* 天のブランド */
+.brand{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 0 12px}
+.brand .mark{font-family:var(--min);font-size:13px;font-weight:600;letter-spacing:.14em;text-decoration:none;color:var(--sumi);display:flex;align-items:center;gap:7px}
+.brand .mark i{width:9px;height:9px;background:var(--shu);border-radius:50%;display:inline-block}
+.brand .ver{font-size:10.5px;color:var(--sumi-3);letter-spacing:.08em}
+
+section.step{display:none;padding:12px 0 0}
+section.step.on{display:block}
+
+/* ───── 紙面（広告面） ───── */
+.sheet{border:1px solid var(--waku);border-radius:12px;padding:22px 18px 26px;margin:4px 0 0;background:var(--haku)}
+@media(max-width:360px){.wrap{padding-left:14px;padding-right:14px}.sheet{padding:18px 13px 22px}}
+.ad-head{margin:0 0 18px}
+.ad-tag{font-family:var(--min);font-size:12.5px;letter-spacing:.1em;color:var(--shu);margin:0 0 5px;font-weight:600}
+.ad-lab{font-family:var(--min);font-size:15px;font-weight:600;letter-spacing:.16em;margin:0;display:flex;align-items:center;gap:8px}
+.ad-lab i{width:11px;height:11px;background:var(--shu);border-radius:50%;display:inline-block;flex-shrink:0}
+.illust{margin:0;line-height:0;border-radius:8px;overflow:hidden}
+.illust svg{width:100%;height:auto;display:block}
+.strip{margin:5px 0 0;line-height:0;border-radius:8px;overflow:hidden}
+.strip svg{width:100%;height:auto;display:block}
+
+/* 縦書き */
+.tate-wrap{margin:26px 0 0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.tate-wrap::-webkit-scrollbar{display:none}
+.tate{writing-mode:vertical-rl;height:clamp(306px,40vh,344px);margin-left:auto;font-family:var(--min);font-feature-settings:"vert" 1;text-orientation:mixed}
+.tate h1{font-size:clamp(25px,7.2vw,38px);line-height:1.62;letter-spacing:.1em;color:var(--shu);
+  font-weight:600;margin:0;margin-block-end:.85em}
+.tate .lead{font-size:clamp(12px,3.3vw,14.5px);line-height:2.0;letter-spacing:.09em;color:var(--sumi);margin:0;margin-block-end:.9em}
+.tate .sign{font-size:clamp(10.5px,2.9vw,12.5px);line-height:2.0;letter-spacing:.12em;color:var(--sumi-3);margin:0}
+.tate .lead b{font-weight:600;color:var(--shu-fuka)}
+
+/* ロゴロックアップ */
+.lockup{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;margin:26px 0 0;padding-top:20px;border-top:1px solid var(--kei)}
+.lockup .lk-g{display:flex;flex-direction:column;gap:3px}
+.lockup .lk-sub{font-family:var(--go);font-size:11.5px;color:var(--sumi-2);letter-spacing:.03em;line-height:1.5}
+.lockup .mk{width:52px;flex-shrink:0;line-height:0}
+.lockup .mk svg{width:100%;height:auto;display:block}
+.lockup .lk-t{font-family:var(--min);font-size:clamp(19px,5.4vw,26px);font-weight:600;letter-spacing:.07em;line-height:1.4;color:var(--sumi)}
+.lockup .lk-s{font-size:9.5px;letter-spacing:.22em;color:var(--shu);line-height:1.7;margin-left:auto;text-align:right;flex-shrink:0}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 0}
+.facts{list-style:none;padding:0;margin:22px 0 0;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--kei)}
+.facts li{padding:13px 10px 2px;font-size:11px;line-height:1.75;color:var(--sumi-2);border-right:1px solid var(--kei-2)}
+.facts li:last-child{border-right:0}
+.facts li b{display:block;font-family:var(--min);font-size:13px;font-weight:600;color:var(--sumi);letter-spacing:.04em;margin-bottom:3px}
+@media(max-width:400px){.facts li{font-size:10.5px;padding:11px 7px 2px}.facts li b{font-size:12px}}
+
+/* 見出し */
+h2.sec{font-family:var(--min);font-weight:600;font-size:25px;letter-spacing:.06em;line-height:1.5;margin:0 0 12px}
+h2.sec .n{display:block;font-family:var(--go);font-size:10.5px;color:var(--shu);letter-spacing:.2em;font-weight:500;margin-bottom:8px}
+.note{color:var(--sumi-2);font-size:14.5px;line-height:2.05;margin:0 0 26px}
+.note b{color:var(--sumi);font-weight:700}
+h2.h2{font-family:var(--min);font-weight:600;font-size:20px;letter-spacing:.08em;margin:48px 0 16px;padding-top:14px;border-top:1.5px solid var(--shu)}
+h3.grp{font-family:var(--min);font-weight:600;font-size:18px;letter-spacing:.06em;margin:46px 0 12px;
+  padding-bottom:10px;border-bottom:1px solid var(--kei);display:flex;align-items:baseline;gap:10px}
+h3.grp .a{font-family:var(--go);font-size:10px;color:var(--shu);letter-spacing:.18em;flex-shrink:0}
+h3.grp .a:only-child{font-family:var(--min);font-size:18px;font-weight:600;letter-spacing:.08em;color:var(--sumi)}
+
+.who{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--kei);padding:3px 10px;background:var(--haku)}
+.who i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.who.a i{background:var(--shu)} .who.b i{background:var(--ai)}
+
+.cards3{display:grid;gap:10px}
+.cards3 .c{background:#FFF;border:1px solid var(--kei);border-radius:12px;padding:20px 20px 22px}
+.cards3 h3{font-family:var(--min);font-weight:600;font-size:17px;letter-spacing:.04em;margin:0 0 9px;line-height:1.6}
+.cards3 p{margin:0;font-size:13.5px;line-height:1.95;color:var(--sumi-2)}
+ol.flow{list-style:none;padding:0;margin:0;counter-reset:f;display:grid;gap:8px}
+ol.flow li{background:var(--kami);border-radius:10px;padding:14px 18px;font-size:13.5px;line-height:1.85;color:var(--sumi-2);
+  display:grid;grid-template-columns:20px 1fr;gap:2px 13px}
+ol.flow li::before{counter-increment:f;content:counter(f);color:var(--shu);font-family:var(--min);font-size:14px;
+  font-weight:600;grid-row:1;line-height:1.6}
+ol.flow li b{color:var(--sumi);font-family:var(--min);font-weight:600;font-size:15px;letter-spacing:.04em;grid-column:2;display:block}
+ol.flow li>b+span{grid-column:2}
+
+details.doc{border-bottom:1px solid var(--kei)}
+details.doc>summary{cursor:pointer;list-style:none;padding:15px 2px;font-family:var(--min);font-weight:600;font-size:15px;
+  letter-spacing:.04em;display:flex;justify-content:space-between;align-items:center;gap:10px}
+details.doc>summary::-webkit-details-marker{display:none}
+details.doc>summary::after{content:"＋";color:var(--shu);font-family:var(--go);font-weight:400;flex-shrink:0;font-size:13px}
+details.doc[open]>summary::after{content:"−"}
+details.doc>.db{padding:0 2px 20px;font-size:13.5px;line-height:2.05;color:var(--sumi-2)}
+details.doc>.db p{margin:0 0 1em}
+details.doc>.db ul{padding-left:1.3em;margin:10px 0 0}
+details.doc>.db li{margin:6px 0}
+
+.field{margin:0 0 30px}
+.field>label{display:block;font-family:var(--min);font-size:16px;font-weight:600;letter-spacing:.04em;margin-bottom:6px}
+.hint{font-size:13px;color:var(--sumi-3);line-height:1.9;margin:0 0 13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--kei);background:#FFF;color:var(--sumi-2);font-size:14.5px;padding:10px 18px;cursor:pointer;min-height:46px;border-radius:99px}
+.chip[aria-pressed="true"]{background:var(--shu);border-color:var(--shu);color:#fff;font-weight:700}
+
+.btn{font-family:var(--go);font-size:15.5px;font-weight:700;letter-spacing:.08em;background:var(--kami);color:var(--sumi);
+  border:1px solid var(--kei);padding:14px 28px;cursor:pointer;border-radius:99px;min-height:50px}
+.btn.primary{background:var(--shu);border-color:var(--shu);color:#fff}
+.btn.b2{background:var(--ai);border-color:var(--ai);color:#fff}
+.btn.big{font-size:17px;padding:16px 38px;min-height:56px}
+.btn.ghost{background:transparent;color:var(--sumi-2);border-color:var(--kei);font-weight:400}
+.btn.sm{font-size:13px;padding:9px 16px;min-height:38px;font-weight:400}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btnrow{display:flex;gap:12px;flex-wrap:wrap;margin:42px 0 0;padding-top:22px;border-top:1px solid var(--kei);align-items:center}
+.btnrow .msg{font-size:12.5px;color:var(--sumi-3);flex-basis:100%;line-height:1.8}
+
+.toolbar{position:sticky;top:0;z-index:20;background:var(--haku);padding:11px 0 9px;margin:0 0 8px;border-bottom:1px solid var(--kei)}
+.bar{height:5px;background:var(--kei-2);margin-bottom:9px;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;transition:width .3s}
+.bar i.a{background:var(--shu)} .bar i.b{background:var(--ai)}
+.tline{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--sumi-2)}
+.tline b{font-family:var(--min);font-size:18px;color:var(--sumi)}
+
+.qitem{padding:18px 0;border-bottom:1px solid var(--kei-2);scroll-margin-top:100px}
+.qitem .qn{font-size:15.5px;line-height:1.7;margin-bottom:11px;display:flex;gap:10px;align-items:baseline}
+.qitem .qn .ix{font-family:var(--min);font-size:11px;color:var(--shu);flex-shrink:0}
+.tag{font-style:normal;font-size:10px;color:var(--sumi-3);background:var(--kami);border-radius:99px;padding:2px 8px;margin-left:6px;white-space:nowrap}
+.seg{display:flex;width:100%}
+.seg{gap:5px}
+.seg button{flex:1;border:1px solid var(--kei);background:#FFF;color:var(--sumi-3);font-size:12.5px;
+  min-height:44px;cursor:pointer;line-height:1.2;padding:0 2px;border-radius:8px}
+
+.seg button[aria-pressed="true"]{color:#fff;border-color:transparent;font-weight:700}
+.seg button.me[aria-pressed="true"]{background:var(--shu)}
+.seg.bview button.me[aria-pressed="true"]{background:var(--ai)}
+.seg button.half[aria-pressed="true"]{background:var(--cha)}
+.seg button.pt[aria-pressed="true"]{background:var(--ai)}
+.seg.bview button.pt[aria-pressed="true"]{background:var(--shu)}
+.seg button.ext[aria-pressed="true"]{background:var(--midori)}
+.seg button.na[aria-pressed="true"]{background:var(--hai)}
+.qitem.hl{background:var(--awa);border-radius:10px;padding-left:12px;padding-right:12px}
+
+.panel{background:var(--kami);padding:20px 22px;margin:18px 0;border-radius:10px}
+.panel.mark{background:var(--awa)}
+.panel h5{margin:0 0 9px;font-family:var(--min);font-size:17px;font-weight:600;letter-spacing:.04em;line-height:1.65}
+.panel p{margin:0;font-size:14.5px;line-height:2.05;color:var(--sumi-2)}
+.panel p+p{margin-top:1em}
+.panel b{color:var(--sumi)}
+.warn{background:var(--kami);padding:15px 18px;font-size:13px;color:var(--sumi-2);margin:18px 0;line-height:1.9;border-radius:10px}
+
+.handoff{border:1px solid var(--waku);border-radius:12px;padding:22px;margin:18px 0;background:#FFF}
+.handoff h4{font-family:var(--min);font-size:18px;font-weight:600;letter-spacing:.06em;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+.handoff h4 em{font-style:normal;font-family:var(--go);font-size:11px;color:#fff;background:var(--shu);width:21px;height:21px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700}
+.handoff p{font-size:13.5px;color:var(--sumi-2);margin:0 0 15px;line-height:1.95}
+#qrbox,#qrbox2{display:flex;justify-content:center;padding:16px;background:#fff;border:1px solid var(--kei);border-radius:10px;margin:0 0 12px}
+#qrbox img,#qrbox2 img{width:178px!important;height:178px!important;image-rendering:pixelated}
+.codebox{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input[type=text]{flex:1 1 200px;font-family:var(--go);font-size:14px;padding:11px 13px;border:1px solid var(--kei);
+  background:#FFF;color:var(--sumi);border-radius:8px;min-width:0}
+
+.kpi{display:flex;flex-wrap:wrap;margin:18px 0}
+.kpi{gap:9px}
+.kpi>div{flex:1 1 150px;background:var(--kami);padding:17px 19px;border-radius:10px}
+.lb{display:block;font-size:12px;color:var(--sumi-3);margin-bottom:2px}
+.kpi .vl{font-family:var(--min);font-size:31px;font-weight:600;line-height:1.2;margin-top:6px;letter-spacing:.01em;color:var(--sumi)}
+.kpi .vl small{font-family:var(--go);font-size:12.5px;font-weight:400;color:var(--sumi-2);margin-left:3px}
+.kpi .sb{font-size:12px;color:var(--sumi-3);line-height:1.75;margin-top:6px}
+
+.summary{border:1px solid var(--waku);border-radius:14px;overflow:hidden;margin:18px 0;background:#FFF}
+.summary .top{padding:24px 22px}
+.summary .big{font-family:var(--min);font-size:clamp(54px,16vw,80px);font-weight:600;line-height:1;margin:8px 0 0;color:var(--shu)}
+.summary .big small{font-family:var(--go);font-size:15px;font-weight:400;color:var(--sumi-2);margin-left:6px}
+.summary .band{font-family:var(--min);font-size:17px;margin-top:12px;font-weight:600;letter-spacing:.04em}
+.summary .desc{font-size:13.5px;color:var(--sumi-2);line-height:2;margin:12px 0 0}
+.summary .three{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--kei)}
+.summary .three>div{padding:15px 14px;border-right:1px solid var(--kei)}
+.summary .three>div:last-child{border-right:0}
+.summary .three b{font-family:var(--min);font-size:25px;font-weight:600;line-height:1.2}
+.summary .three b small{font-family:var(--go);font-size:11.5px;font-weight:400;color:var(--sumi-2);margin-left:2px}
+.summary .acts{display:flex;gap:8px;flex-wrap:wrap;padding:16px 22px 20px;border-top:1px solid var(--kei)}
+
+.bars{margin:16px 0}
+.brow{display:grid;grid-template-columns:86px 1fr 48px;gap:12px;align-items:center;padding:7px 0}
+.brow .bl{font-size:12.5px;color:var(--sumi-2);line-height:1.5}
+.brow .bl small{color:var(--sumi-3);font-size:11px}
+.brow .tr{height:16px;background:var(--kei-2);position:relative;border-radius:99px;overflow:hidden}
+.brow .tr i{position:absolute;left:0;top:0;bottom:0;width:0;transition:width .6s}
+.brow.a .tr i{background:var(--shu)} .brow.b .tr i{background:var(--ai)}
+.brow .pcnum{font-family:var(--min);font-size:16px;font-weight:600;text-align:right}
+.gapbar{margin-top:10px;padding-top:10px;border-top:1px dashed var(--kei);font-size:13.5px;color:var(--sumi-2)}
+.gapbar b{font-family:var(--min);font-size:21px;color:var(--shu)}
+
+.map{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;max-width:370px;margin:14px 0 10px}
+.map i{padding-bottom:100%;display:block;background:var(--kei-2);border-radius:3px}
+.map i.ok{background:var(--midori)} .map i.grab{background:var(--shu)} .map i.drop{background:var(--cha)} .map i.exist{background:var(--hai)}
+.legend{display:flex;flex-wrap:wrap;gap:7px 16px;font-size:12px;color:var(--sumi-2);margin-top:8px}
+.legend span{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.legend em{width:10px;height:10px;display:inline-block;font-style:normal;border-radius:2px}
+.legend .ok{background:var(--midori)}.legend .grab{background:var(--shu)}.legend .drop{background:var(--cha)}.legend .exist{background:var(--hai)}
+
+table.tb{width:100%;border-collapse:collapse;font-size:13px;margin:16px 0}
+table.tb th,table.tb td{border-bottom:1px solid var(--kei);padding:11px 8px;text-align:center}
+table.tb th{font-weight:400;font-size:11.5px;color:var(--sumi-3);border-bottom:1px solid var(--shu)}
+table.tb td.h{text-align:left;font-family:var(--min);font-weight:600}
+table.tb td b{font-family:var(--min);font-size:16px;font-weight:600}
+
+ol.list{list-style:none;counter-reset:r;padding:0;margin:16px 0}
+ol.list li{counter-increment:r;display:flex;gap:14px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--kei-2)}
+ol.list li::before{content:counter(r,decimal-leading-zero);font-family:var(--min);font-size:11.5px;color:var(--shu);padding-top:6px;min-width:20px;letter-spacing:.06em}
+ol.list .bd{flex:1;min-width:0}
+ol.list .t{font-size:14.5px;line-height:1.7}
+ol.list .d{font-size:12px;color:var(--sumi-3);margin-top:3px;line-height:1.7}
+ol.list .lv{font-size:11px;background:var(--kami);border-radius:99px;padding:4px 10px;white-space:nowrap;color:var(--sumi-2);margin-top:5px}
+.empty{font-size:13.5px;color:var(--sumi-3);padding:12px 0}
+
+.promise{border:1px solid var(--waku);border-radius:14px;padding:24px 22px;background:#FFF}
+.promise h4{font-family:var(--min);font-size:21px;font-weight:600;letter-spacing:.05em;margin:0 0 18px;line-height:1.6;color:var(--shu)}
+.promise ul{padding:0;margin:0;list-style:none}
+.promise li{margin:0 0 17px;font-size:14.5px;line-height:2;color:var(--sumi-2);padding-left:19px;position:relative}
+.promise li::before{content:"";position:absolute;left:0;top:13px;width:7px;height:7px;border-radius:50%;background:var(--shu)}
+.promise li:last-child{margin-bottom:0}
+.promise li b{color:var(--sumi);font-weight:700}
+
+textarea{width:100%;min-height:220px;font-family:var(--go);font-size:13.5px;line-height:2;border:1px solid var(--kei);
+  background:#FFF;padding:15px;color:var(--sumi);resize:vertical;border-radius:10px}
+.fine{font-size:12.5px;color:var(--sumi-3);line-height:2}
+.fine ul{padding-left:1.3em;margin:8px 0}
+.fine li{margin:6px 0}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--sumi);color:var(--haku);font-size:13.5px;
+  padding:12px 22px;border-radius:99px;z-index:99;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+footer.cl{margin-top:68px;padding-top:22px;border-top:1px solid var(--kei);font-size:11.5px;color:var(--sumi-3);line-height:2}
+footer.cl .l1{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 16px}
+footer.cl button{background:none;border:0;padding:0;color:var(--sumi-3);text-decoration:underline;cursor:pointer;font-size:11.5px}
+@media print{
+  body{background:#fff;font-size:12px}
+  .brand,.toolbar,.btnrow,.noprint,.summary .acts{display:none!important}
+  .panel,.kpi>div,.summary,.promise,.sheet{background:#fff}
+  h3.grp{page-break-after:avoid}.panel,.kpi,ol.list li{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="brand">
+  <a class="mark" href="#" data-home><i></i>表現科学研究所</a>
+  <span class="ver">名もなき家事診断 ふたり版 ver.3</span>
+</header>
+
+<!-- 0 表紙 -->
+<section class="step on" id="s0">
+  <div class="sheet">
+    <div class="ad-head">
+      <p class="ad-tag">見えないものを、数える。</p>
+      <p class="ad-lab"><i></i>表現科学研究所</p>
+    </div>
+    <figure class="illust"><svg viewBox="0 0 1200 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="キッチンに立つふたりと、その間に浮かぶ家事のアイコン">
+<rect width="1200" height="540" fill="#FAF6F3"/>
+
+<!-- 窓 -->
+<rect x="96" y="92" width="190" height="156" rx="3" fill="#FFFFFF"/>
+<rect x="99" y="95" width="184" height="150" rx="3" fill="none" stroke="#EBE3D9" stroke-width="6"/>
+<path d="M191,95 V245 M99,170 H283" stroke="#EBE3D9" stroke-width="6"/>
+
+<!-- 棚 -->
+<rect x="938" y="168" width="202" height="8" rx="4" fill="#EBE3D9"/>
+<rect x="966" y="126" width="34" height="42" rx="6" fill="#F0B6B6"/>
+<rect x="1012" y="136" width="30" height="32" rx="6" fill="#DCE7EE"/>
+<circle cx="1082" cy="150" r="18" fill="#E6D6C1"/>
+
+<!-- 人物A（朱のセーターに白いエプロン） -->
+<path d="M360,262 C318,264 292,290 286,332 L274,440 L446,440 L434,332 C428,290 402,264 360,262 Z" fill="#D4484C"/>
+<path d="M330,268 L390,268 L396,318 L404,440 L316,440 L324,318 Z" fill="#FFFFFF"/>
+<path d="M336,268 L352,250 M384,268 L368,250" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+<rect x="344" y="232" width="32" height="38" rx="15" fill="#EDC4A2"/>
+<ellipse cx="360" cy="196" rx="50" ry="56" fill="#F4D4BA"/>
+<path d="M360,124 C310,124 300,166 302,212 C303,236 306,252 300,268 L328,268 C324,248 324,228 326,210 C330,184 342,172 360,172 C378,172 390,184 394,210 C396,228 396,248 392,268 L420,268 C414,252 417,236 418,212 C420,166 410,124 360,124 Z" fill="#3E3732"/>
+<circle cx="328" cy="213" r="9" fill="#F0B6B6" opacity=".5"/>
+<circle cx="392" cy="213" r="9" fill="#F0B6B6" opacity=".5"/>
+<path d="M334,197 q9,-10 18,0 M368,197 q9,-10 18,0" stroke="#3E3732" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+<path d="M350,219 q10,10 20,0" stroke="#3E3732" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+<path d="M302,310 C266,348 280,398 320,414" stroke="#C53E42" stroke-width="34" fill="none" stroke-linecap="round"/>
+<path d="M418,310 C454,348 440,398 400,414" stroke="#C53E42" stroke-width="34" fill="none" stroke-linecap="round"/>
+
+<!-- 人物B（藍のシャツ） -->
+<path d="M840,276 C802,278 778,302 772,340 L762,440 L918,440 L908,340 C902,302 878,278 840,276 Z" fill="#5F87A0"/>
+<path d="M840,276 L826,300 L840,320 L854,300 Z" fill="#FFFFFF" opacity=".85"/>
+<rect x="826" y="248" width="28" height="36" rx="13" fill="#EDC4A2"/>
+<ellipse cx="840" cy="214" rx="46" ry="52" fill="#F4D4BA"/>
+<path d="M840,152 C798,152 790,186 793,216 L795,226 C797,208 808,197 840,197 C872,197 883,208 885,226 L887,216 C890,186 882,152 840,152 Z" fill="#4C433D"/>
+<circle cx="812" cy="229" r="8" fill="#F0B6B6" opacity=".45"/>
+<circle cx="868" cy="229" r="8" fill="#F0B6B6" opacity=".45"/>
+<path d="M818,214 q8,-9 16,0 M846,214 q8,-9 16,0" stroke="#4C433D" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+<path d="M832,235 q8,8 16,0" stroke="#4C433D" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+<path d="M788,326 C766,360 776,400 808,414" stroke="#517A94" stroke-width="31" fill="none" stroke-linecap="round"/>
+<path d="M892,326 C914,360 904,400 872,414" stroke="#517A94" stroke-width="31" fill="none" stroke-linecap="round"/>
+
+<!-- ふたりのあいだに浮かぶ、家事のしるし -->
+<circle cx="530" cy="185" r="30" fill="#D4484C"/>
+<path d="M530,167 V186 L543,194" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="586" y="248" width="58" height="42" rx="10" fill="#D4484C"/>
+<path d="M602,290 L600,306 L620,290 Z" fill="#D4484C"/>
+<circle cx="603" cy="269" r="4" fill="#FFFFFF"/><circle cx="615" cy="269" r="4" fill="#FFFFFF"/><circle cx="627" cy="269" r="4" fill="#FFFFFF"/>
+<rect x="609" y="118" width="46" height="58" rx="7" fill="#FFFFFF" stroke="#D7D0C7" stroke-width="4"/>
+<path d="M620,135 H644 M620,148 H644 M620,161 H634" stroke="#D7D0C7" stroke-width="4" stroke-linecap="round"/>
+<rect x="690" y="212" width="54" height="50" rx="6" fill="#FFFFFF" stroke="#D7D0C7" stroke-width="4"/>
+<path d="M690,228 H744" stroke="#D7D0C7" stroke-width="4"/>
+<circle cx="704" cy="242" r="3.5" fill="#D7D0C7"/><circle cx="717" cy="242" r="3.5" fill="#D7D0C7"/><circle cx="730" cy="242" r="3.5" fill="#D7D0C7"/><circle cx="704" cy="253" r="3.5" fill="#D7D0C7"/>
+<rect x="489" y="270" width="48" height="54" rx="7" fill="#FFFFFF" stroke="#D7D0C7" stroke-width="4"/>
+<path d="M500,288 l6,6 l10,-12 M500,308 l6,6 l10,-12" stroke="#D7D0C7" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="572" cy="140" r="5" fill="#F0B6B6"/><circle cx="700" cy="170" r="4" fill="#F0B6B6"/><circle cx="560" cy="330" r="4" fill="#D7D0C7"/>
+
+<!-- カウンター -->
+<rect x="0" y="440" width="1200" height="22" fill="#E6D6C1"/>
+<rect x="0" y="462" width="1200" height="78" fill="#FFFFFF"/>
+<path d="M0,463 H1200" stroke="#F2EBE2" stroke-width="3"/>
+<path d="M300,470 V540 M620,470 V540 M940,470 V540" stroke="#F6F1E9" stroke-width="3"/>
+<rect x="258" y="496" width="30" height="7" rx="3.5" fill="#EDE6DC"/>
+<rect x="578" y="496" width="30" height="7" rx="3.5" fill="#EDE6DC"/>
+<rect x="898" y="496" width="30" height="7" rx="3.5" fill="#EDE6DC"/>
+
+<!-- カウンターの上 -->
+<path d="M342,388 q9,-12 0,-23 q-9,-12 0,-21 M378,388 q9,-12 0,-23 q-9,-12 0,-21" stroke="#F0B6B6" stroke-width="5" fill="none" stroke-linecap="round" opacity=".85"/>
+<rect x="320" y="392" width="80" height="48" rx="7" fill="#F2EEE9" stroke="#E3DDD5" stroke-width="3"/>
+<ellipse cx="360" cy="392" rx="47" ry="9" fill="#E3DDD5"/>
+<circle cx="360" cy="379" r="7" fill="#BAB4AC"/>
+<rect x="786" y="400" width="108" height="40" rx="6" fill="#E6D6C1"/>
+<path d="M804,400 V440 M822,400 V440 M840,400 V440 M858,400 V440 M876,400 V440" stroke="#D8C5AA" stroke-width="3"/>
+<path d="M798,402 q13,-15 26,0 Z" fill="#FFFFFF"/>
+<path d="M824,402 q14,-19 28,0 Z" fill="#DCE7EE"/>
+<path d="M852,402 q13,-13 26,0 Z" fill="#FFFFFF"/>
+<rect x="120" y="412" width="104" height="28" rx="6" fill="#E6D6C1"/>
+<circle cx="146" cy="404" r="11" fill="#D4484C" opacity=".75"/>
+<circle cx="172" cy="402" r="13" fill="#7FA477" opacity=".8"/>
+<circle cx="199" cy="406" r="9" fill="#D4484C" opacity=".6"/>
+<path d="M1066,440 L1076,402 L1112,402 L1122,440 Z" fill="#E6D6C1"/>
+<path d="M1094,402 C1094,374 1076,364 1062,362 C1066,386 1078,398 1094,402 Z" fill="#7FA477"/>
+<path d="M1094,402 C1094,368 1112,356 1128,354 C1124,382 1112,396 1094,402 Z" fill="#93B389"/>
+
+<!-- 手（道具の上） -->
+<circle cx="322" cy="414" r="17" fill="#F4D4BA"/>
+<circle cx="398" cy="414" r="17" fill="#F4D4BA"/>
+<circle cx="806" cy="414" r="15" fill="#F4D4BA"/>
+<circle cx="874" cy="414" r="15" fill="#F4D4BA"/>
+</svg></figure>
+    <div class="strip"><svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="家事のこまごまとしたしるし">
+<g>
+<rect x="0" y="0" width="100" height="100" fill="#FBEFEF"/>
+<rect x="33" y="44" width="34" height="26" rx="4" fill="#D4484C"/>
+<ellipse cx="50" cy="44" rx="21" ry="5" fill="#B2383C"/>
+<circle cx="50" cy="37" r="4" fill="#B2383C"/>
+<path d="M44,30 q5,-7 0,-13 M56,30 q5,-7 0,-13" stroke="#D4484C" stroke-width="3.4" fill="none" stroke-linecap="round" opacity=".7"/>
+</g>
+<g>
+<rect x="100" y="0" width="100" height="100" fill="#F6F3EF"/>
+<path d="M150,30 v8" stroke="#A49D94" stroke-width="3" stroke-linecap="round"/>
+<path d="M150,25 a6,6 0 1 1 -4,10" stroke="#A49D94" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M150,38 L128,52 L133,58 L141,54 V72 h18 V54 l8,4 l5,-6 Z" fill="#5F87A0"/>
+</g>
+<g>
+<rect x="200" y="0" width="100" height="100" fill="#FBEFEF"/>
+<rect x="228" y="30" width="44" height="42" rx="4" fill="#FFFFFF" stroke="#D4484C" stroke-width="3.4"/>
+<path d="M228,42 H272" stroke="#D4484C" stroke-width="3.4"/>
+<circle cx="239" cy="53" r="3.2" fill="#D4484C"/><circle cx="250" cy="53" r="3.2" fill="#D4484C"/><circle cx="261" cy="53" r="3.2" fill="#D4484C"/>
+<circle cx="239" cy="63" r="3.2" fill="#F0B6B6"/><circle cx="250" cy="63" r="3.2" fill="#F0B6B6"/>
+</g>
+<g>
+<rect x="300" y="0" width="100" height="100" fill="#F6F3EF"/>
+<circle cx="350" cy="50" r="22" fill="none" stroke="#5F87A0" stroke-width="3.4"/>
+<path d="M350,36 V51 L360,57" stroke="#5F87A0" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g>
+<rect x="400" y="0" width="100" height="100" fill="#FBEFEF"/>
+<path d="M432,42 h36 l4,32 h-44 Z" fill="#D4484C"/>
+<path d="M441,42 v-5 a9,9 0 0 1 18,0 v5" stroke="#B2383C" stroke-width="3.4" fill="none"/>
+</g>
+<g>
+<rect x="500" y="0" width="100" height="100" fill="#F6F3EF"/>
+<path d="M534,40 q16,-10 32,0 l5,34 h-42 Z" fill="#A49D94"/>
+<path d="M543,40 q7,-12 14,0" stroke="#726B63" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+</g>
+<g>
+<rect x="600" y="0" width="100" height="100" fill="#FBEFEF"/>
+<rect x="631" y="30" width="38" height="44" rx="4" fill="#FFFFFF" stroke="#D4484C" stroke-width="3.4"/>
+<path d="M640,44 h20 M640,54 h20 M640,64 h12" stroke="#D4484C" stroke-width="3.4" stroke-linecap="round"/>
+</g>
+</svg></div>
+
+    <div class="tate-wrap">
+      <div class="tate">
+        <h1>やってるわたしと、<br>みえてるあなた。</h1>
+        <p class="lead">家のことで、ちょっと気まずくなるとき。<br>問題は「やってない」ことじゃなくて、<br><b>「見えてない」こと</b>なのかもしれません。<br>おなじ六十個の質問に、ふたりが別々に答える。<br>食い違ったところだけを、そっと並べます。</p>
+        <p class="sign">ふたりで答える、無料の診断です。</p>
+      </div>
+    </div>
+
+    <div class="lockup">
+      <span class="mk"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<circle cx="32" cy="32" r="30" fill="none" stroke="#D4484C" stroke-width="2.6"/>
+<path d="M19,16 a22,22 0 0 0 0,32" fill="none" stroke="#D4484C" stroke-width="3.4" stroke-linecap="round"/>
+<path d="M45,16 a22,22 0 0 1 0,32" fill="none" stroke="#D4484C" stroke-width="3.4" stroke-linecap="round"/>
+<circle cx="32" cy="32" r="6" fill="#D4484C"/>
+</svg></span>
+      <span class="lk-g"><span class="lk-t">名もなき家事診断</span><span class="lk-sub">ふたり版「やってる？見えてる？」</span></span>
+      <span class="lk-s">TWO VIEWS,<br>ONE HOME</span>
+    </div>
+
+    <div class="cta">
+      <button class="btn primary big" id="start">はじめてみる</button>
+      <button class="btn ghost" id="haveCode">コードを受け取った方は、こちら</button>
+    </div>
+    <div id="codeIn" hidden style="margin-top:14px">
+      <div class="codebox"><input type="text" id="codeField" placeholder="ここに貼りつけてください" autocomplete="off"><button class="btn sm" id="codeGo">読み込む</button></div>
+    </div>
+
+    <ul class="facts">
+      <li><b>3〜5分</b>ひとり六十個に、ぽんぽん答えるだけ。</li>
+      <li><b>伏せたまま</b>相手の答えは、ふたりとも終わるまで見えません。</li>
+      <li><b>端末の中だけ</b>名前もメールもいりません。どこにも送りません。</li>
+    </ul>
+  </div>
+
+  <h2 class="h2">この診断で、わかること。</h2>
+  <div class="cards3">
+    <div class="c"><h3>ふたりの申告を足すと、100%を超えます。</h3><p>ふしぎなんですけど、超えるんです。ぴったり噛み合っていれば100%になるはずなのに。超えた分が「取り合い」、足りない分が「どっちもやってないつもり」。重みづけをしていない、そのままの数字です。</p></div>
+    <div class="c"><h3>相手からは、あなたがこう見えている。</h3><p>自分で答えた分担と、もうひとりの答えから計算した「相手から見たあなた」。このふたつを並べます。差の分だけ、話が噛み合っていません。</p></div>
+    <div class="c"><h3>見えていない仕事に、名前がつきます。</h3><p>どっちも「自分」と答えた項目。どっちも「相手」と答えた項目。そもそも「うちにはない」と食い違った項目。ぜんぶ、名前で出します。</p></div>
+  </div>
+
+  <h2 class="h2">やることは、4つだけ。</h2>
+  <ol class="flow">
+    <li><b>おうちのことを選ぶ。</b><span>ひとりめが、最初に選びます。</span></li>
+    <li><b>ひとりめが答える。</b><span>60個に、1タップずつ。</span></li>
+    <li><b>もうひとりに渡す。</b><span>この端末を渡すか、QRで送るか。</span></li>
+    <li><b>ふたりで、ひらく。</b><span>食い違ったところだけが並びます。</span></li>
+  </ol>
+
+  <h2 class="h2">はじめる前に、少しだけ。</h2>
+  <details class="doc"><summary>この診断が、測っていること</summary><div class="db">
+    <p>測っているのは、家事の量ではありません。ふたりの答えの<b>食い違い</b>だけです。「この家事は何点」という重みづけを、いっさい使っていません。だから、点数の付け方が当たっているかどうかで結果がブレることがない。ここが、この診断のいちばん強いところだと思っています。</p>
+    <p>じつは心理学のほうで、何十年も前からわかっていることがあります。ふたりで何かをしたあと、それぞれに「自分の貢献は何割?」と聞くと、合計が100%を超えるんです。何度やっても、そうなる。自分のしたことは覚えていて、相手のしたことは見えにくいからで、責任感や誠実さの話ではありません。その差が、あなたの家ではどのくらいか。それを見ています。</p>
+  </div></details>
+  <details class="doc"><summary>60個の質問の、選び方</summary><div class="db">
+    <p>ひとり版（312項目）から、6つの領域・40の小分類がぜんぶ入るように60個を選びました。手を動かす仕事と、決める・覚える・気を配る仕事を、ほぼ同じ数ずつ。<b>見える仕事と見えない仕事とで、一致率がどれだけ違うか</b>。それを比べたかったからです。</p>
+    <ul>
+      <li>ぜんぶではありません。介護、ペット、持ち家の手入れなどは、まだ足りていません。</li>
+      <li>1項目に1つしか答えられないので、「やるのは自分、決めるのは相手」のような混ざったものは表せません。そのときは、頭を使っているほうを選んでください。</li>
+      <li>医学的・心理学的な診断ではありません。</li>
+    </ul>
+  </div></details>
+  <details class="doc"><summary>つくっている人たちのこと</summary><div class="db">
+    <p>表現科学研究所は、声や言葉の「伝わり方」を数字で捉えようとしている研究ブランドです。おなじ内容なのに、言い方で受け取られ方が変わってしまうのはなぜか。それを、測れるものに分けて調べています。</p>
+    <p>この診断は、その「見えないものを数える」やり方を、家のことに持ちこんでみたものです。</p>
+  </div></details>
+</section>
+
+<!-- 1 世帯 -->
+<section class="step" id="s1">
+  <h2 class="sec"><span class="n">STEP 1</span>まず、おうちのこと。</h2>
+  <p class="note">ここで選んだ形に当てはまらない質問は、ふたりとも最初から出てきません。<b>選ぶのは、ひとりめだけです。</b></p>
+  <div class="field"><label>大人は、何人ですか</label><div class="chips" id="q-house"></div></div>
+  <div class="field" id="wrap-kids"><label>いっしょに暮らしている子ども<br><span class="hint" style="margin:0">いくつでも選べます。いなければ、選ばなくて大丈夫です。</span></label><div class="chips" id="q-kids"></div></div>
+  <div class="btnrow"><button class="btn ghost" data-go="0">戻る</button><button class="btn primary" id="toQ">質問にすすむ</button></div>
+</section>
+
+<!-- 2 回答 -->
+<section class="step" id="s2">
+  <h2 class="sec"><span class="n">STEP 2</span><span id="qhead">ひとりめの番です。</span></h2>
+  <p class="note" id="qnote"></p>
+  <details class="doc"><summary>どう答えたらいいか、迷ったら</summary><div class="db">
+    <p><b>自分</b>＝だいたい自分がやっている（決めている・覚えている）。<b>半々</b>＝おなじくらい分けている。<b>相手</b>＝だいたいもうひとりがやっている。<b>外部</b>＝食洗機、乾燥機、自動引落など、人の手を使っていない。<b>なし</b>＝うちでは、そもそも起きない。</p>
+    <p>「手を動かすのは相手だけど、決めているのは自分」。そういうときは、<b>頭を使っているほう</b>を選んでください。この診断が見たいのは、そこなので。</p>
+    <p>迷ったら、直感でいいです。迷った時間は、結果に何も影響しません。</p>
+  </div></details>
+  <div class="toolbar"><div class="bar"><i id="pbar"></i></div>
+    <div class="tline"><span><b id="pnum">0</b> / <span id="ptot">60</span> 項目　<span id="pleft"></span></span>
+    <span><button class="btn sm ghost" id="nextBlank">まだのところへ</button></span></div></div>
+  <div id="qlist"></div>
+  <div class="btnrow"><button class="btn ghost" id="qback">もどる</button><button class="btn primary" id="qdone" disabled>答えおわりました</button><span class="msg" id="qmsg"></span></div>
+</section>
+
+<!-- 3 引き継ぎ -->
+<section class="step" id="s3">
+  <h2 class="sec"><span class="n">STEP 3</span>もうひとりに、渡します。</h2>
+  <p class="note">ひとりめの答えは、いま伏せました。ここから先は、ふたりめが答えおわるまで出てきません。のぞき見のしようがないので、安心して渡してください。</p>
+  <div class="handoff">
+    <h4><em>A</em>この端末を、そのまま渡す</h4>
+    <p>いちばんかんたんです。渡された人は、まっさらな状態から始まります。</p>
+    <button class="btn b2" id="swap">ふたりめの番をはじめる</button>
+  </div>
+  <div class="handoff">
+    <h4><em>B</em>相手の端末で、あとから</h4>
+    <p>QRを読んでもらうか、リンクを送ってください。入っているのは答えだけ。名前も連絡先も入りません。</p>
+    <div id="qrbox"></div>
+    <div class="codebox">
+      <button class="btn sm" id="copyLink">リンクをコピー</button>
+      <button class="btn sm ghost" id="copyCode">コードだけコピー</button>
+    </div>
+    <p class="fine" style="margin-top:12px">ふたりめが答えおわると、その端末に結果が出ます。結果をこちらに戻すためのコードも、そこで作れます。</p>
+  </div>
+  <div class="btnrow"><button class="btn ghost" data-go="0">さいしょのページへ</button></div>
+</section>
+
+<!-- 4 約束 -->
+<section class="step" id="s4">
+  <h2 class="sec"><span class="n">STEP 4</span>ひらく前に、ひとつだけ。</h2>
+  <p class="note">ふたりぶん、そろいました。あとはひらくだけなんですが、その前に。</p>
+  <div class="promise">
+    <h4>この数字は、<br>責めるための道具ではありません。</h4>
+    <ul>
+      <li><b>食い違いは、どちらかの落ち度ではありません。</b><span>自分のしたことは思い出せて、相手のしたことは見えにくい。だれが答えても、こうなります。</span></li>
+      <li><b>正解は出てきません。</b><span>どっちが正しいかは、判定していません。ずれている場所を指さすだけです。</span></li>
+      <li><b>できれば、ふたりでひらいてください。</b><span>片方が先に見て、あとで要約して伝える。それ自体が、また新しいずれになってしまうので。</span></li>
+      <li><b>しんどいときは、閉じてください。</b><span>この結果が相手を責める材料になりそうなら、見なくていいです。ほんとうに。</span></li>
+    </ul>
+  </div>
+  <div class="btnrow"><button class="btn primary big" id="openResult">ふたりで、ひらく</button></div>
+</section>
+
+<!-- 5 結果 -->
+<section class="step" id="s5"><div id="report"></div>
+  <div class="btnrow noprint">
+    <button class="btn ghost" id="printBtn">印刷 / PDFにする</button>
+    <button class="btn ghost" id="backCode">この結果を、相手にも送る</button>
+    <button class="btn ghost" data-go="0">さいしょから</button>
+  </div>
+  <div id="backBox" hidden>
+    <div class="handoff"><h4>おなじ結果を、相手の端末でも</h4>
+      <p>ふたりぶんの答えが入ったリンクです。受け取った人は、まったくおなじ結果を見られます。</p>
+      <div id="qrbox2"></div>
+      <div class="codebox"><button class="btn sm" id="copyLink2">リンクをコピー</button><button class="btn sm ghost" id="copyCode2">コードだけコピー</button></div>
+    </div>
+  </div>
+</section>
+
+<footer class="cl">
+  <div class="l1"><span>名もなき家事診断 ふたり版 ver.3（60項目）　つくっているのは、表現科学研究所です。</span><span>入力も結果も、この端末のブラウザの中だけに残ります。</span></div>
+  <div class="noprint">これは医学的・心理学的な診断ではありません。　<button type="button" id="wipe">保存したものを消す</button></div>
+</footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>//---------------------------------------------------------------------
+//
+// QR Code Generator for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//  http://www.opensource.org/licenses/mit-license.php
+//
+// The word 'QR Code' is registered trademark of
+// DENSO WAVE INCORPORATED
+//  http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+
+var qrcode = function() {
+
+  //---------------------------------------------------------------------
+  // qrcode
+  //---------------------------------------------------------------------
+
+  /**
+   * qrcode
+   * @param typeNumber 1 to 40
+   * @param errorCorrectionLevel 'L','M','Q','H'
+   */
+  var qrcode = function(typeNumber, errorCorrectionLevel) {
+
+    var PAD0 = 0xEC;
+    var PAD1 = 0x11;
+
+    var _typeNumber = typeNumber;
+    var _errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel];
+    var _modules = null;
+    var _moduleCount = 0;
+    var _dataCache = null;
+    var _dataList = [];
+
+    var _this = {};
+
+    var makeImpl = function(test, maskPattern) {
+
+      _moduleCount = _typeNumber * 4 + 17;
+      _modules = function(moduleCount) {
+        var modules = new Array(moduleCount);
+        for (var row = 0; row < moduleCount; row += 1) {
+          modules[row] = new Array(moduleCount);
+          for (var col = 0; col < moduleCount; col += 1) {
+            modules[row][col] = null;
+          }
+        }
+        return modules;
+      }(_moduleCount);
+
+      setupPositionProbePattern(0, 0);
+      setupPositionProbePattern(_moduleCount - 7, 0);
+      setupPositionProbePattern(0, _moduleCount - 7);
+      setupPositionAdjustPattern();
+      setupTimingPattern();
+      setupTypeInfo(test, maskPattern);
+
+      if (_typeNumber >= 7) {
+        setupTypeNumber(test);
+      }
+
+      if (_dataCache == null) {
+        _dataCache = createData(_typeNumber, _errorCorrectionLevel, _dataList);
+      }
+
+      mapData(_dataCache, maskPattern);
+    };
+
+    var setupPositionProbePattern = function(row, col) {
+
+      for (var r = -1; r <= 7; r += 1) {
+
+        if (row + r <= -1 || _moduleCount <= row + r) continue;
+
+        for (var c = -1; c <= 7; c += 1) {
+
+          if (col + c <= -1 || _moduleCount <= col + c) continue;
+
+          if ( (0 <= r && r <= 6 && (c == 0 || c == 6) )
+              || (0 <= c && c <= 6 && (r == 0 || r == 6) )
+              || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+            _modules[row + r][col + c] = true;
+          } else {
+            _modules[row + r][col + c] = false;
+          }
+        }
+      }
+    };
+
+    var getBestMaskPattern = function() {
+
+      var minLostPoint = 0;
+      var pattern = 0;
+
+      for (var i = 0; i < 8; i += 1) {
+
+        makeImpl(true, i);
+
+        var lostPoint = QRUtil.getLostPoint(_this);
+
+        if (i == 0 || minLostPoint > lostPoint) {
+          minLostPoint = lostPoint;
+          pattern = i;
+        }
+      }
+
+      return pattern;
+    };
+
+    var setupTimingPattern = function() {
+
+      for (var r = 8; r < _moduleCount - 8; r += 1) {
+        if (_modules[r][6] != null) {
+          continue;
+        }
+        _modules[r][6] = (r % 2 == 0);
+      }
+
+      for (var c = 8; c < _moduleCount - 8; c += 1) {
+        if (_modules[6][c] != null) {
+          continue;
+        }
+        _modules[6][c] = (c % 2 == 0);
+      }
+    };
+
+    var setupPositionAdjustPattern = function() {
+
+      var pos = QRUtil.getPatternPosition(_typeNumber);
+
+      for (var i = 0; i < pos.length; i += 1) {
+
+        for (var j = 0; j < pos.length; j += 1) {
+
+          var row = pos[i];
+          var col = pos[j];
+
+          if (_modules[row][col] != null) {
+            continue;
+          }
+
+          for (var r = -2; r <= 2; r += 1) {
+
+            for (var c = -2; c <= 2; c += 1) {
+
+              if (r == -2 || r == 2 || c == -2 || c == 2
+                  || (r == 0 && c == 0) ) {
+                _modules[row + r][col + c] = true;
+              } else {
+                _modules[row + r][col + c] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var setupTypeNumber = function(test) {
+
+      var bits = QRUtil.getBCHTypeNumber(_typeNumber);
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[Math.floor(i / 3)][i % 3 + _moduleCount - 8 - 3] = mod;
+      }
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[i % 3 + _moduleCount - 8 - 3][Math.floor(i / 3)] = mod;
+      }
+    };
+
+    var setupTypeInfo = function(test, maskPattern) {
+
+      var data = (_errorCorrectionLevel << 3) | maskPattern;
+      var bits = QRUtil.getBCHTypeInfo(data);
+
+      // vertical
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 6) {
+          _modules[i][8] = mod;
+        } else if (i < 8) {
+          _modules[i + 1][8] = mod;
+        } else {
+          _modules[_moduleCount - 15 + i][8] = mod;
+        }
+      }
+
+      // horizontal
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 8) {
+          _modules[8][_moduleCount - i - 1] = mod;
+        } else if (i < 9) {
+          _modules[8][15 - i - 1 + 1] = mod;
+        } else {
+          _modules[8][15 - i - 1] = mod;
+        }
+      }
+
+      // fixed module
+      _modules[_moduleCount - 8][8] = (!test);
+    };
+
+    var mapData = function(data, maskPattern) {
+
+      var inc = -1;
+      var row = _moduleCount - 1;
+      var bitIndex = 7;
+      var byteIndex = 0;
+      var maskFunc = QRUtil.getMaskFunction(maskPattern);
+
+      for (var col = _moduleCount - 1; col > 0; col -= 2) {
+
+        if (col == 6) col -= 1;
+
+        while (true) {
+
+          for (var c = 0; c < 2; c += 1) {
+
+            if (_modules[row][col - c] == null) {
+
+              var dark = false;
+
+              if (byteIndex < data.length) {
+                dark = ( ( (data[byteIndex] >>> bitIndex) & 1) == 1);
+              }
+
+              var mask = maskFunc(row, col - c);
+
+              if (mask) {
+                dark = !dark;
+              }
+
+              _modules[row][col - c] = dark;
+              bitIndex -= 1;
+
+              if (bitIndex == -1) {
+                byteIndex += 1;
+                bitIndex = 7;
+              }
+            }
+          }
+
+          row += inc;
+
+          if (row < 0 || _moduleCount <= row) {
+            row -= inc;
+            inc = -inc;
+            break;
+          }
+        }
+      }
+    };
+
+    var createBytes = function(buffer, rsBlocks) {
+
+      var offset = 0;
+
+      var maxDcCount = 0;
+      var maxEcCount = 0;
+
+      var dcdata = new Array(rsBlocks.length);
+      var ecdata = new Array(rsBlocks.length);
+
+      for (var r = 0; r < rsBlocks.length; r += 1) {
+
+        var dcCount = rsBlocks[r].dataCount;
+        var ecCount = rsBlocks[r].totalCount - dcCount;
+
+        maxDcCount = Math.max(maxDcCount, dcCount);
+        maxEcCount = Math.max(maxEcCount, ecCount);
+
+        dcdata[r] = new Array(dcCount);
+
+        for (var i = 0; i < dcdata[r].length; i += 1) {
+          dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset];
+        }
+        offset += dcCount;
+
+        var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+        var rawPoly = qrPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+        var modPoly = rawPoly.mod(rsPoly);
+        ecdata[r] = new Array(rsPoly.getLength() - 1);
+        for (var i = 0; i < ecdata[r].length; i += 1) {
+          var modIndex = i + modPoly.getLength() - ecdata[r].length;
+          ecdata[r][i] = (modIndex >= 0)? modPoly.getAt(modIndex) : 0;
+        }
+      }
+
+      var totalCodeCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalCodeCount += rsBlocks[i].totalCount;
+      }
+
+      var data = new Array(totalCodeCount);
+      var index = 0;
+
+      for (var i = 0; i < maxDcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < dcdata[r].length) {
+            data[index] = dcdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      for (var i = 0; i < maxEcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < ecdata[r].length) {
+            data[index] = ecdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      return data;
+    };
+
+    var createData = function(typeNumber, errorCorrectionLevel, dataList) {
+
+      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectionLevel);
+
+      var buffer = qrBitBuffer();
+
+      for (var i = 0; i < dataList.length; i += 1) {
+        var data = dataList[i];
+        buffer.put(data.getMode(), 4);
+        buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+        data.write(buffer);
+      }
+
+      // calc num max data.
+      var totalDataCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalDataCount += rsBlocks[i].dataCount;
+      }
+
+      if (buffer.getLengthInBits() > totalDataCount * 8) {
+        throw 'code length overflow. ('
+          + buffer.getLengthInBits()
+          + '>'
+          + totalDataCount * 8
+          + ')';
+      }
+
+      // end code
+      if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+        buffer.put(0, 4);
+      }
+
+      // padding
+      while (buffer.getLengthInBits() % 8 != 0) {
+        buffer.putBit(false);
+      }
+
+      // padding
+      while (true) {
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD0, 8);
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD1, 8);
+      }
+
+      return createBytes(buffer, rsBlocks);
+    };
+
+    _this.addData = function(data, mode) {
+
+      mode = mode || 'Byte';
+
+      var newData = null;
+
+      switch(mode) {
+      case 'Numeric' :
+        newData = qrNumber(data);
+        break;
+      case 'Alphanumeric' :
+        newData = qrAlphaNum(data);
+        break;
+      case 'Byte' :
+        newData = qr8BitByte(data);
+        break;
+      case 'Kanji' :
+        newData = qrKanji(data);
+        break;
+      default :
+        throw 'mode:' + mode;
+      }
+
+      _dataList.push(newData);
+      _dataCache = null;
+    };
+
+    _this.isDark = function(row, col) {
+      if (row < 0 || _moduleCount <= row || col < 0 || _moduleCount <= col) {
+        throw row + ',' + col;
+      }
+      return _modules[row][col];
+    };
+
+    _this.getModuleCount = function() {
+      return _moduleCount;
+    };
+
+    _this.make = function() {
+      if (_typeNumber < 1) {
+        var typeNumber = 1;
+
+        for (; typeNumber < 40; typeNumber++) {
+          var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, _errorCorrectionLevel);
+          var buffer = qrBitBuffer();
+
+          for (var i = 0; i < _dataList.length; i++) {
+            var data = _dataList[i];
+            buffer.put(data.getMode(), 4);
+            buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+            data.write(buffer);
+          }
+
+          var totalDataCount = 0;
+          for (var i = 0; i < rsBlocks.length; i++) {
+            totalDataCount += rsBlocks[i].dataCount;
+          }
+
+          if (buffer.getLengthInBits() <= totalDataCount * 8) {
+            break;
+          }
+        }
+
+        _typeNumber = typeNumber;
+      }
+
+      makeImpl(false, getBestMaskPattern() );
+    };
+
+    _this.createTableTag = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var qrHtml = '';
+
+      qrHtml += '<table style="';
+      qrHtml += ' border-width: 0px; border-style: none;';
+      qrHtml += ' border-collapse: collapse;';
+      qrHtml += ' padding: 0px; margin: ' + margin + 'px;';
+      qrHtml += '">';
+      qrHtml += '<tbody>';
+
+      for (var r = 0; r < _this.getModuleCount(); r += 1) {
+
+        qrHtml += '<tr>';
+
+        for (var c = 0; c < _this.getModuleCount(); c += 1) {
+          qrHtml += '<td style="';
+          qrHtml += ' border-width: 0px; border-style: none;';
+          qrHtml += ' border-collapse: collapse;';
+          qrHtml += ' padding: 0px; margin: 0px;';
+          qrHtml += ' width: ' + cellSize + 'px;';
+          qrHtml += ' height: ' + cellSize + 'px;';
+          qrHtml += ' background-color: ';
+          qrHtml += _this.isDark(r, c)? '#000000' : '#ffffff';
+          qrHtml += ';';
+          qrHtml += '"/>';
+        }
+
+        qrHtml += '</tr>';
+      }
+
+      qrHtml += '</tbody>';
+      qrHtml += '</table>';
+
+      return qrHtml;
+    };
+
+    _this.createSvgTag = function(cellSize, margin, alt, title) {
+
+      var opts = {};
+      if (typeof arguments[0] == 'object') {
+        // Called by options.
+        opts = arguments[0];
+        // overwrite cellSize and margin.
+        cellSize = opts.cellSize;
+        margin = opts.margin;
+        alt = opts.alt;
+        title = opts.title;
+      }
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      // Compose alt property surrogate
+      alt = (typeof alt === 'string') ? {text: alt} : alt || {};
+      alt.text = alt.text || null;
+      alt.id = (alt.text) ? alt.id || 'qrcode-description' : null;
+
+      // Compose title property surrogate
+      title = (typeof title === 'string') ? {text: title} : title || {};
+      title.text = title.text || null;
+      title.id = (title.text) ? title.id || 'qrcode-title' : null;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var c, mc, r, mr, qrSvg='', rect;
+
+      rect = 'l' + cellSize + ',0 0,' + cellSize +
+        ' -' + cellSize + ',0 0,-' + cellSize + 'z ';
+
+      qrSvg += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"';
+      qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : '';
+      qrSvg += ' viewBox="0 0 ' + size + ' ' + size + '" ';
+      qrSvg += ' preserveAspectRatio="xMinYMin meet"';
+      qrSvg += (title.text || alt.text) ? ' role="img" aria-labelledby="' +
+          escapeXml([title.id, alt.id].join(' ').trim() ) + '"' : '';
+      qrSvg += '>';
+      qrSvg += (title.text) ? '<title id="' + escapeXml(title.id) + '">' +
+          escapeXml(title.text) + '</title>' : '';
+      qrSvg += (alt.text) ? '<description id="' + escapeXml(alt.id) + '">' +
+          escapeXml(alt.text) + '</description>' : '';
+      qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
+      qrSvg += '<path d="';
+
+      for (r = 0; r < _this.getModuleCount(); r += 1) {
+        mr = r * cellSize + margin;
+        for (c = 0; c < _this.getModuleCount(); c += 1) {
+          if (_this.isDark(r, c) ) {
+            mc = c*cellSize+margin;
+            qrSvg += 'M' + mc + ',' + mr + rect;
+          }
+        }
+      }
+
+      qrSvg += '" stroke="transparent" fill="black"/>';
+      qrSvg += '</svg>';
+
+      return qrSvg;
+    };
+
+    _this.createDataURL = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      return createDataURL(size, size, function(x, y) {
+        if (min <= x && x < max && min <= y && y < max) {
+          var c = Math.floor( (x - min) / cellSize);
+          var r = Math.floor( (y - min) / cellSize);
+          return _this.isDark(r, c)? 0 : 1;
+        } else {
+          return 1;
+        }
+      } );
+    };
+
+    _this.createImgTag = function(cellSize, margin, alt) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+
+      var img = '';
+      img += '<img';
+      img += '\u0020src="';
+      img += _this.createDataURL(cellSize, margin);
+      img += '"';
+      img += '\u0020width="';
+      img += size;
+      img += '"';
+      img += '\u0020height="';
+      img += size;
+      img += '"';
+      if (alt) {
+        img += '\u0020alt="';
+        img += escapeXml(alt);
+        img += '"';
+      }
+      img += '/>';
+
+      return img;
+    };
+
+    var escapeXml = function(s) {
+      var escaped = '';
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charAt(i);
+        switch(c) {
+        case '<': escaped += '&lt;'; break;
+        case '>': escaped += '&gt;'; break;
+        case '&': escaped += '&amp;'; break;
+        case '"': escaped += '&quot;'; break;
+        default : escaped += c; break;
+        }
+      }
+      return escaped;
+    };
+
+    var _createHalfASCII = function(margin) {
+      var cellSize = 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r1, r2, p;
+
+      var blocks = {
+        '██': '█',
+        '█ ': '▀',
+        ' █': '▄',
+        '  ': ' '
+      };
+
+      var blocksLastLineNoMargin = {
+        '██': '▀',
+        '█ ': '▀',
+        ' █': ' ',
+        '  ': ' '
+      };
+
+      var ascii = '';
+      for (y = 0; y < size; y += 2) {
+        r1 = Math.floor((y - min) / cellSize);
+        r2 = Math.floor((y + 1 - min) / cellSize);
+        for (x = 0; x < size; x += 1) {
+          p = '█';
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r1, Math.floor((x - min) / cellSize))) {
+            p = ' ';
+          }
+
+          if (min <= x && x < max && min <= y+1 && y+1 < max && _this.isDark(r2, Math.floor((x - min) / cellSize))) {
+            p += ' ';
+          }
+          else {
+            p += '█';
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          ascii += (margin < 1 && y+1 >= max) ? blocksLastLineNoMargin[p] : blocks[p];
+        }
+
+        ascii += '\n';
+      }
+
+      if (size % 2 && margin > 0) {
+        return ascii.substring(0, ascii.length - size - 1) + Array(size+1).join('▀');
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.createASCII = function(cellSize, margin) {
+      cellSize = cellSize || 1;
+
+      if (cellSize < 2) {
+        return _createHalfASCII(margin);
+      }
+
+      cellSize -= 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r, p;
+
+      var white = Array(cellSize+1).join('██');
+      var black = Array(cellSize+1).join('  ');
+
+      var ascii = '';
+      var line = '';
+      for (y = 0; y < size; y += 1) {
+        r = Math.floor( (y - min) / cellSize);
+        line = '';
+        for (x = 0; x < size; x += 1) {
+          p = 1;
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r, Math.floor((x - min) / cellSize))) {
+            p = 0;
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          line += p ? white : black;
+        }
+
+        for (r = 0; r < cellSize; r += 1) {
+          ascii += line + '\n';
+        }
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.renderTo2dContext = function(context, cellSize) {
+      cellSize = cellSize || 2;
+      var length = _this.getModuleCount();
+      for (var row = 0; row < length; row++) {
+        for (var col = 0; col < length; col++) {
+          context.fillStyle = _this.isDark(row, col) ? 'black' : 'white';
+          context.fillRect(row * cellSize, col * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrcode.stringToBytes
+  //---------------------------------------------------------------------
+
+  qrcode.stringToBytesFuncs = {
+    'default' : function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        bytes.push(c & 0xff);
+      }
+      return bytes;
+    }
+  };
+
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs['default'];
+
+  //---------------------------------------------------------------------
+  // qrcode.createStringToBytes
+  //---------------------------------------------------------------------
+
+  /**
+   * @param unicodeData base64 string of byte array.
+   * [16bit Unicode],[16bit Bytes], ...
+   * @param numChars
+   */
+  qrcode.createStringToBytes = function(unicodeData, numChars) {
+
+    // create conversion map.
+
+    var unicodeMap = function() {
+
+      var bin = base64DecodeInputStream(unicodeData);
+      var read = function() {
+        var b = bin.read();
+        if (b == -1) throw 'eof';
+        return b;
+      };
+
+      var count = 0;
+      var unicodeMap = {};
+      while (true) {
+        var b0 = bin.read();
+        if (b0 == -1) break;
+        var b1 = read();
+        var b2 = read();
+        var b3 = read();
+        var k = String.fromCharCode( (b0 << 8) | b1);
+        var v = (b2 << 8) | b3;
+        unicodeMap[k] = v;
+        count += 1;
+      }
+      if (count != numChars) {
+        throw count + ' != ' + numChars;
+      }
+
+      return unicodeMap;
+    }();
+
+    var unknownChar = '?'.charCodeAt(0);
+
+    return function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        if (c < 128) {
+          bytes.push(c);
+        } else {
+          var b = unicodeMap[s.charAt(i)];
+          if (typeof b == 'number') {
+            if ( (b & 0xff) == b) {
+              // 1byte
+              bytes.push(b);
+            } else {
+              // 2bytes
+              bytes.push(b >>> 8);
+              bytes.push(b & 0xff);
+            }
+          } else {
+            bytes.push(unknownChar);
+          }
+        }
+      }
+      return bytes;
+    };
+  };
+
+  //---------------------------------------------------------------------
+  // QRMode
+  //---------------------------------------------------------------------
+
+  var QRMode = {
+    MODE_NUMBER :    1 << 0,
+    MODE_ALPHA_NUM : 1 << 1,
+    MODE_8BIT_BYTE : 1 << 2,
+    MODE_KANJI :     1 << 3
+  };
+
+  //---------------------------------------------------------------------
+  // QRErrorCorrectionLevel
+  //---------------------------------------------------------------------
+
+  var QRErrorCorrectionLevel = {
+    L : 1,
+    M : 0,
+    Q : 3,
+    H : 2
+  };
+
+  //---------------------------------------------------------------------
+  // QRMaskPattern
+  //---------------------------------------------------------------------
+
+  var QRMaskPattern = {
+    PATTERN000 : 0,
+    PATTERN001 : 1,
+    PATTERN010 : 2,
+    PATTERN011 : 3,
+    PATTERN100 : 4,
+    PATTERN101 : 5,
+    PATTERN110 : 6,
+    PATTERN111 : 7
+  };
+
+  //---------------------------------------------------------------------
+  // QRUtil
+  //---------------------------------------------------------------------
+
+  var QRUtil = function() {
+
+    var PATTERN_POSITION_TABLE = [
+      [],
+      [6, 18],
+      [6, 22],
+      [6, 26],
+      [6, 30],
+      [6, 34],
+      [6, 22, 38],
+      [6, 24, 42],
+      [6, 26, 46],
+      [6, 28, 50],
+      [6, 30, 54],
+      [6, 32, 58],
+      [6, 34, 62],
+      [6, 26, 46, 66],
+      [6, 26, 48, 70],
+      [6, 26, 50, 74],
+      [6, 30, 54, 78],
+      [6, 30, 56, 82],
+      [6, 30, 58, 86],
+      [6, 34, 62, 90],
+      [6, 28, 50, 72, 94],
+      [6, 26, 50, 74, 98],
+      [6, 30, 54, 78, 102],
+      [6, 28, 54, 80, 106],
+      [6, 32, 58, 84, 110],
+      [6, 30, 58, 86, 114],
+      [6, 34, 62, 90, 118],
+      [6, 26, 50, 74, 98, 122],
+      [6, 30, 54, 78, 102, 126],
+      [6, 26, 52, 78, 104, 130],
+      [6, 30, 56, 82, 108, 134],
+      [6, 34, 60, 86, 112, 138],
+      [6, 30, 58, 86, 114, 142],
+      [6, 34, 62, 90, 118, 146],
+      [6, 30, 54, 78, 102, 126, 150],
+      [6, 24, 50, 76, 102, 128, 154],
+      [6, 28, 54, 80, 106, 132, 158],
+      [6, 32, 58, 84, 110, 136, 162],
+      [6, 26, 54, 82, 110, 138, 166],
+      [6, 30, 58, 86, 114, 142, 170]
+    ];
+    var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0);
+    var G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0);
+    var G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
+
+    var _this = {};
+
+    var getBCHDigit = function(data) {
+      var digit = 0;
+      while (data != 0) {
+        digit += 1;
+        data >>>= 1;
+      }
+      return digit;
+    };
+
+    _this.getBCHTypeInfo = function(data) {
+      var d = data << 10;
+      while (getBCHDigit(d) - getBCHDigit(G15) >= 0) {
+        d ^= (G15 << (getBCHDigit(d) - getBCHDigit(G15) ) );
+      }
+      return ( (data << 10) | d) ^ G15_MASK;
+    };
+
+    _this.getBCHTypeNumber = function(data) {
+      var d = data << 12;
+      while (getBCHDigit(d) - getBCHDigit(G18) >= 0) {
+        d ^= (G18 << (getBCHDigit(d) - getBCHDigit(G18) ) );
+      }
+      return (data << 12) | d;
+    };
+
+    _this.getPatternPosition = function(typeNumber) {
+      return PATTERN_POSITION_TABLE[typeNumber - 1];
+    };
+
+    _this.getMaskFunction = function(maskPattern) {
+
+      switch (maskPattern) {
+
+      case QRMaskPattern.PATTERN000 :
+        return function(i, j) { return (i + j) % 2 == 0; };
+      case QRMaskPattern.PATTERN001 :
+        return function(i, j) { return i % 2 == 0; };
+      case QRMaskPattern.PATTERN010 :
+        return function(i, j) { return j % 3 == 0; };
+      case QRMaskPattern.PATTERN011 :
+        return function(i, j) { return (i + j) % 3 == 0; };
+      case QRMaskPattern.PATTERN100 :
+        return function(i, j) { return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 == 0; };
+      case QRMaskPattern.PATTERN101 :
+        return function(i, j) { return (i * j) % 2 + (i * j) % 3 == 0; };
+      case QRMaskPattern.PATTERN110 :
+        return function(i, j) { return ( (i * j) % 2 + (i * j) % 3) % 2 == 0; };
+      case QRMaskPattern.PATTERN111 :
+        return function(i, j) { return ( (i * j) % 3 + (i + j) % 2) % 2 == 0; };
+
+      default :
+        throw 'bad maskPattern:' + maskPattern;
+      }
+    };
+
+    _this.getErrorCorrectPolynomial = function(errorCorrectLength) {
+      var a = qrPolynomial([1], 0);
+      for (var i = 0; i < errorCorrectLength; i += 1) {
+        a = a.multiply(qrPolynomial([1, QRMath.gexp(i)], 0) );
+      }
+      return a;
+    };
+
+    _this.getLengthInBits = function(mode, type) {
+
+      if (1 <= type && type < 10) {
+
+        // 1 - 9
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 10;
+        case QRMode.MODE_ALPHA_NUM : return 9;
+        case QRMode.MODE_8BIT_BYTE : return 8;
+        case QRMode.MODE_KANJI     : return 8;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 27) {
+
+        // 10 - 26
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 12;
+        case QRMode.MODE_ALPHA_NUM : return 11;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 10;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 41) {
+
+        // 27 - 40
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 14;
+        case QRMode.MODE_ALPHA_NUM : return 13;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 12;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else {
+        throw 'type:' + type;
+      }
+    };
+
+    _this.getLostPoint = function(qrcode) {
+
+      var moduleCount = qrcode.getModuleCount();
+
+      var lostPoint = 0;
+
+      // LEVEL1
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount; col += 1) {
+
+          var sameCount = 0;
+          var dark = qrcode.isDark(row, col);
+
+          for (var r = -1; r <= 1; r += 1) {
+
+            if (row + r < 0 || moduleCount <= row + r) {
+              continue;
+            }
+
+            for (var c = -1; c <= 1; c += 1) {
+
+              if (col + c < 0 || moduleCount <= col + c) {
+                continue;
+              }
+
+              if (r == 0 && c == 0) {
+                continue;
+              }
+
+              if (dark == qrcode.isDark(row + r, col + c) ) {
+                sameCount += 1;
+              }
+            }
+          }
+
+          if (sameCount > 5) {
+            lostPoint += (3 + sameCount - 5);
+          }
+        }
+      };
+
+      // LEVEL2
+
+      for (var row = 0; row < moduleCount - 1; row += 1) {
+        for (var col = 0; col < moduleCount - 1; col += 1) {
+          var count = 0;
+          if (qrcode.isDark(row, col) ) count += 1;
+          if (qrcode.isDark(row + 1, col) ) count += 1;
+          if (qrcode.isDark(row, col + 1) ) count += 1;
+          if (qrcode.isDark(row + 1, col + 1) ) count += 1;
+          if (count == 0 || count == 4) {
+            lostPoint += 3;
+          }
+        }
+      }
+
+      // LEVEL3
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount - 6; col += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row, col + 1)
+              &&  qrcode.isDark(row, col + 2)
+              &&  qrcode.isDark(row, col + 3)
+              &&  qrcode.isDark(row, col + 4)
+              && !qrcode.isDark(row, col + 5)
+              &&  qrcode.isDark(row, col + 6) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount - 6; row += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row + 1, col)
+              &&  qrcode.isDark(row + 2, col)
+              &&  qrcode.isDark(row + 3, col)
+              &&  qrcode.isDark(row + 4, col)
+              && !qrcode.isDark(row + 5, col)
+              &&  qrcode.isDark(row + 6, col) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      // LEVEL4
+
+      var darkCount = 0;
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount; row += 1) {
+          if (qrcode.isDark(row, col) ) {
+            darkCount += 1;
+          }
+        }
+      }
+
+      var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+      lostPoint += ratio * 10;
+
+      return lostPoint;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // QRMath
+  //---------------------------------------------------------------------
+
+  var QRMath = function() {
+
+    var EXP_TABLE = new Array(256);
+    var LOG_TABLE = new Array(256);
+
+    // initialize tables
+    for (var i = 0; i < 8; i += 1) {
+      EXP_TABLE[i] = 1 << i;
+    }
+    for (var i = 8; i < 256; i += 1) {
+      EXP_TABLE[i] = EXP_TABLE[i - 4]
+        ^ EXP_TABLE[i - 5]
+        ^ EXP_TABLE[i - 6]
+        ^ EXP_TABLE[i - 8];
+    }
+    for (var i = 0; i < 255; i += 1) {
+      LOG_TABLE[EXP_TABLE[i] ] = i;
+    }
+
+    var _this = {};
+
+    _this.glog = function(n) {
+
+      if (n < 1) {
+        throw 'glog(' + n + ')';
+      }
+
+      return LOG_TABLE[n];
+    };
+
+    _this.gexp = function(n) {
+
+      while (n < 0) {
+        n += 255;
+      }
+
+      while (n >= 256) {
+        n -= 255;
+      }
+
+      return EXP_TABLE[n];
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrPolynomial
+  //---------------------------------------------------------------------
+
+  function qrPolynomial(num, shift) {
+
+    if (typeof num.length == 'undefined') {
+      throw num.length + '/' + shift;
+    }
+
+    var _num = function() {
+      var offset = 0;
+      while (offset < num.length && num[offset] == 0) {
+        offset += 1;
+      }
+      var _num = new Array(num.length - offset + shift);
+      for (var i = 0; i < num.length - offset; i += 1) {
+        _num[i] = num[i + offset];
+      }
+      return _num;
+    }();
+
+    var _this = {};
+
+    _this.getAt = function(index) {
+      return _num[index];
+    };
+
+    _this.getLength = function() {
+      return _num.length;
+    };
+
+    _this.multiply = function(e) {
+
+      var num = new Array(_this.getLength() + e.getLength() - 1);
+
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        for (var j = 0; j < e.getLength(); j += 1) {
+          num[i + j] ^= QRMath.gexp(QRMath.glog(_this.getAt(i) ) + QRMath.glog(e.getAt(j) ) );
+        }
+      }
+
+      return qrPolynomial(num, 0);
+    };
+
+    _this.mod = function(e) {
+
+      if (_this.getLength() - e.getLength() < 0) {
+        return _this;
+      }
+
+      var ratio = QRMath.glog(_this.getAt(0) ) - QRMath.glog(e.getAt(0) );
+
+      var num = new Array(_this.getLength() );
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        num[i] = _this.getAt(i);
+      }
+
+      for (var i = 0; i < e.getLength(); i += 1) {
+        num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i) ) + ratio);
+      }
+
+      // recursive call
+      return qrPolynomial(num, 0).mod(e);
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // QRRSBlock
+  //---------------------------------------------------------------------
+
+  var QRRSBlock = function() {
+
+    var RS_BLOCK_TABLE = [
+
+      // L
+      // M
+      // Q
+      // H
+
+      // 1
+      [1, 26, 19],
+      [1, 26, 16],
+      [1, 26, 13],
+      [1, 26, 9],
+
+      // 2
+      [1, 44, 34],
+      [1, 44, 28],
+      [1, 44, 22],
+      [1, 44, 16],
+
+      // 3
+      [1, 70, 55],
+      [1, 70, 44],
+      [2, 35, 17],
+      [2, 35, 13],
+
+      // 4
+      [1, 100, 80],
+      [2, 50, 32],
+      [2, 50, 24],
+      [4, 25, 9],
+
+      // 5
+      [1, 134, 108],
+      [2, 67, 43],
+      [2, 33, 15, 2, 34, 16],
+      [2, 33, 11, 2, 34, 12],
+
+      // 6
+      [2, 86, 68],
+      [4, 43, 27],
+      [4, 43, 19],
+      [4, 43, 15],
+
+      // 7
+      [2, 98, 78],
+      [4, 49, 31],
+      [2, 32, 14, 4, 33, 15],
+      [4, 39, 13, 1, 40, 14],
+
+      // 8
+      [2, 121, 97],
+      [2, 60, 38, 2, 61, 39],
+      [4, 40, 18, 2, 41, 19],
+      [4, 40, 14, 2, 41, 15],
+
+      // 9
+      [2, 146, 116],
+      [3, 58, 36, 2, 59, 37],
+      [4, 36, 16, 4, 37, 17],
+      [4, 36, 12, 4, 37, 13],
+
+      // 10
+      [2, 86, 68, 2, 87, 69],
+      [4, 69, 43, 1, 70, 44],
+      [6, 43, 19, 2, 44, 20],
+      [6, 43, 15, 2, 44, 16],
+
+      // 11
+      [4, 101, 81],
+      [1, 80, 50, 4, 81, 51],
+      [4, 50, 22, 4, 51, 23],
+      [3, 36, 12, 8, 37, 13],
+
+      // 12
+      [2, 116, 92, 2, 117, 93],
+      [6, 58, 36, 2, 59, 37],
+      [4, 46, 20, 6, 47, 21],
+      [7, 42, 14, 4, 43, 15],
+
+      // 13
+      [4, 133, 107],
+      [8, 59, 37, 1, 60, 38],
+      [8, 44, 20, 4, 45, 21],
+      [12, 33, 11, 4, 34, 12],
+
+      // 14
+      [3, 145, 115, 1, 146, 116],
+      [4, 64, 40, 5, 65, 41],
+      [11, 36, 16, 5, 37, 17],
+      [11, 36, 12, 5, 37, 13],
+
+      // 15
+      [5, 109, 87, 1, 110, 88],
+      [5, 65, 41, 5, 66, 42],
+      [5, 54, 24, 7, 55, 25],
+      [11, 36, 12, 7, 37, 13],
+
+      // 16
+      [5, 122, 98, 1, 123, 99],
+      [7, 73, 45, 3, 74, 46],
+      [15, 43, 19, 2, 44, 20],
+      [3, 45, 15, 13, 46, 16],
+
+      // 17
+      [1, 135, 107, 5, 136, 108],
+      [10, 74, 46, 1, 75, 47],
+      [1, 50, 22, 15, 51, 23],
+      [2, 42, 14, 17, 43, 15],
+
+      // 18
+      [5, 150, 120, 1, 151, 121],
+      [9, 69, 43, 4, 70, 44],
+      [17, 50, 22, 1, 51, 23],
+      [2, 42, 14, 19, 43, 15],
+
+      // 19
+      [3, 141, 113, 4, 142, 114],
+      [3, 70, 44, 11, 71, 45],
+      [17, 47, 21, 4, 48, 22],
+      [9, 39, 13, 16, 40, 14],
+
+      // 20
+      [3, 135, 107, 5, 136, 108],
+      [3, 67, 41, 13, 68, 42],
+      [15, 54, 24, 5, 55, 25],
+      [15, 43, 15, 10, 44, 16],
+
+      // 21
+      [4, 144, 116, 4, 145, 117],
+      [17, 68, 42],
+      [17, 50, 22, 6, 51, 23],
+      [19, 46, 16, 6, 47, 17],
+
+      // 22
+      [2, 139, 111, 7, 140, 112],
+      [17, 74, 46],
+      [7, 54, 24, 16, 55, 25],
+      [34, 37, 13],
+
+      // 23
+      [4, 151, 121, 5, 152, 122],
+      [4, 75, 47, 14, 76, 48],
+      [11, 54, 24, 14, 55, 25],
+      [16, 45, 15, 14, 46, 16],
+
+      // 24
+      [6, 147, 117, 4, 148, 118],
+      [6, 73, 45, 14, 74, 46],
+      [11, 54, 24, 16, 55, 25],
+      [30, 46, 16, 2, 47, 17],
+
+      // 25
+      [8, 132, 106, 4, 133, 107],
+      [8, 75, 47, 13, 76, 48],
+      [7, 54, 24, 22, 55, 25],
+      [22, 45, 15, 13, 46, 16],
+
+      // 26
+      [10, 142, 114, 2, 143, 115],
+      [19, 74, 46, 4, 75, 47],
+      [28, 50, 22, 6, 51, 23],
+      [33, 46, 16, 4, 47, 17],
+
+      // 27
+      [8, 152, 122, 4, 153, 123],
+      [22, 73, 45, 3, 74, 46],
+      [8, 53, 23, 26, 54, 24],
+      [12, 45, 15, 28, 46, 16],
+
+      // 28
+      [3, 147, 117, 10, 148, 118],
+      [3, 73, 45, 23, 74, 46],
+      [4, 54, 24, 31, 55, 25],
+      [11, 45, 15, 31, 46, 16],
+
+      // 29
+      [7, 146, 116, 7, 147, 117],
+      [21, 73, 45, 7, 74, 46],
+      [1, 53, 23, 37, 54, 24],
+      [19, 45, 15, 26, 46, 16],
+
+      // 30
+      [5, 145, 115, 10, 146, 116],
+      [19, 75, 47, 10, 76, 48],
+      [15, 54, 24, 25, 55, 25],
+      [23, 45, 15, 25, 46, 16],
+
+      // 31
+      [13, 145, 115, 3, 146, 116],
+      [2, 74, 46, 29, 75, 47],
+      [42, 54, 24, 1, 55, 25],
+      [23, 45, 15, 28, 46, 16],
+
+      // 32
+      [17, 145, 115],
+      [10, 74, 46, 23, 75, 47],
+      [10, 54, 24, 35, 55, 25],
+      [19, 45, 15, 35, 46, 16],
+
+      // 33
+      [17, 145, 115, 1, 146, 116],
+      [14, 74, 46, 21, 75, 47],
+      [29, 54, 24, 19, 55, 25],
+      [11, 45, 15, 46, 46, 16],
+
+      // 34
+      [13, 145, 115, 6, 146, 116],
+      [14, 74, 46, 23, 75, 47],
+      [44, 54, 24, 7, 55, 25],
+      [59, 46, 16, 1, 47, 17],
+
+      // 35
+      [12, 151, 121, 7, 152, 122],
+      [12, 75, 47, 26, 76, 48],
+      [39, 54, 24, 14, 55, 25],
+      [22, 45, 15, 41, 46, 16],
+
+      // 36
+      [6, 151, 121, 14, 152, 122],
+      [6, 75, 47, 34, 76, 48],
+      [46, 54, 24, 10, 55, 25],
+      [2, 45, 15, 64, 46, 16],
+
+      // 37
+      [17, 152, 122, 4, 153, 123],
+      [29, 74, 46, 14, 75, 47],
+      [49, 54, 24, 10, 55, 25],
+      [24, 45, 15, 46, 46, 16],
+
+      // 38
+      [4, 152, 122, 18, 153, 123],
+      [13, 74, 46, 32, 75, 47],
+      [48, 54, 24, 14, 55, 25],
+      [42, 45, 15, 32, 46, 16],
+
+      // 39
+      [20, 147, 117, 4, 148, 118],
+      [40, 75, 47, 7, 76, 48],
+      [43, 54, 24, 22, 55, 25],
+      [10, 45, 15, 67, 46, 16],
+
+      // 40
+      [19, 148, 118, 6, 149, 119],
+      [18, 75, 47, 31, 76, 48],
+      [34, 54, 24, 34, 55, 25],
+      [20, 45, 15, 61, 46, 16]
+    ];
+
+    var qrRSBlock = function(totalCount, dataCount) {
+      var _this = {};
+      _this.totalCount = totalCount;
+      _this.dataCount = dataCount;
+      return _this;
+    };
+
+    var _this = {};
+
+    var getRsBlockTable = function(typeNumber, errorCorrectionLevel) {
+
+      switch(errorCorrectionLevel) {
+      case QRErrorCorrectionLevel.L :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+      case QRErrorCorrectionLevel.M :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+      case QRErrorCorrectionLevel.Q :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+      case QRErrorCorrectionLevel.H :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+      default :
+        return undefined;
+      }
+    };
+
+    _this.getRSBlocks = function(typeNumber, errorCorrectionLevel) {
+
+      var rsBlock = getRsBlockTable(typeNumber, errorCorrectionLevel);
+
+      if (typeof rsBlock == 'undefined') {
+        throw 'bad rs block @ typeNumber:' + typeNumber +
+            '/errorCorrectionLevel:' + errorCorrectionLevel;
+      }
+
+      var length = rsBlock.length / 3;
+
+      var list = [];
+
+      for (var i = 0; i < length; i += 1) {
+
+        var count = rsBlock[i * 3 + 0];
+        var totalCount = rsBlock[i * 3 + 1];
+        var dataCount = rsBlock[i * 3 + 2];
+
+        for (var j = 0; j < count; j += 1) {
+          list.push(qrRSBlock(totalCount, dataCount) );
+        }
+      }
+
+      return list;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrBitBuffer
+  //---------------------------------------------------------------------
+
+  var qrBitBuffer = function() {
+
+    var _buffer = [];
+    var _length = 0;
+
+    var _this = {};
+
+    _this.getBuffer = function() {
+      return _buffer;
+    };
+
+    _this.getAt = function(index) {
+      var bufIndex = Math.floor(index / 8);
+      return ( (_buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+    };
+
+    _this.put = function(num, length) {
+      for (var i = 0; i < length; i += 1) {
+        _this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+      }
+    };
+
+    _this.getLengthInBits = function() {
+      return _length;
+    };
+
+    _this.putBit = function(bit) {
+
+      var bufIndex = Math.floor(_length / 8);
+      if (_buffer.length <= bufIndex) {
+        _buffer.push(0);
+      }
+
+      if (bit) {
+        _buffer[bufIndex] |= (0x80 >>> (_length % 8) );
+      }
+
+      _length += 1;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrNumber
+  //---------------------------------------------------------------------
+
+  var qrNumber = function(data) {
+
+    var _mode = QRMode.MODE_NUMBER;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _data;
+
+      var i = 0;
+
+      while (i + 2 < data.length) {
+        buffer.put(strToNum(data.substring(i, i + 3) ), 10);
+        i += 3;
+      }
+
+      if (i < data.length) {
+        if (data.length - i == 1) {
+          buffer.put(strToNum(data.substring(i, i + 1) ), 4);
+        } else if (data.length - i == 2) {
+          buffer.put(strToNum(data.substring(i, i + 2) ), 7);
+        }
+      }
+    };
+
+    var strToNum = function(s) {
+      var num = 0;
+      for (var i = 0; i < s.length; i += 1) {
+        num = num * 10 + chatToNum(s.charAt(i) );
+      }
+      return num;
+    };
+
+    var chatToNum = function(c) {
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      }
+      throw 'illegal char :' + c;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrAlphaNum
+  //---------------------------------------------------------------------
+
+  var qrAlphaNum = function(data) {
+
+    var _mode = QRMode.MODE_ALPHA_NUM;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var s = _data;
+
+      var i = 0;
+
+      while (i + 1 < s.length) {
+        buffer.put(
+          getCode(s.charAt(i) ) * 45 +
+          getCode(s.charAt(i + 1) ), 11);
+        i += 2;
+      }
+
+      if (i < s.length) {
+        buffer.put(getCode(s.charAt(i) ), 6);
+      }
+    };
+
+    var getCode = function(c) {
+
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      } else if ('A' <= c && c <= 'Z') {
+        return c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+      } else {
+        switch (c) {
+        case ' ' : return 36;
+        case '$' : return 37;
+        case '%' : return 38;
+        case '*' : return 39;
+        case '+' : return 40;
+        case '-' : return 41;
+        case '.' : return 42;
+        case '/' : return 43;
+        case ':' : return 44;
+        default :
+          throw 'illegal char :' + c;
+        }
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qr8BitByte
+  //---------------------------------------------------------------------
+
+  var qr8BitByte = function(data) {
+
+    var _mode = QRMode.MODE_8BIT_BYTE;
+    var _data = data;
+    var _bytes = qrcode.stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _bytes.length;
+    };
+
+    _this.write = function(buffer) {
+      for (var i = 0; i < _bytes.length; i += 1) {
+        buffer.put(_bytes[i], 8);
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrKanji
+  //---------------------------------------------------------------------
+
+  var qrKanji = function(data) {
+
+    var _mode = QRMode.MODE_KANJI;
+    var _data = data;
+
+    var stringToBytes = qrcode.stringToBytesFuncs['SJIS'];
+    if (!stringToBytes) {
+      throw 'sjis not supported.';
+    }
+    !function(c, code) {
+      // self test for sjis support.
+      var test = stringToBytes(c);
+      if (test.length != 2 || ( (test[0] << 8) | test[1]) != code) {
+        throw 'sjis not supported.';
+      }
+    }('\u53cb', 0x9746);
+
+    var _bytes = stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return ~~(_bytes.length / 2);
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _bytes;
+
+      var i = 0;
+
+      while (i + 1 < data.length) {
+
+        var c = ( (0xff & data[i]) << 8) | (0xff & data[i + 1]);
+
+        if (0x8140 <= c && c <= 0x9FFC) {
+          c -= 0x8140;
+        } else if (0xE040 <= c && c <= 0xEBBF) {
+          c -= 0xC140;
+        } else {
+          throw 'illegal char at ' + (i + 1) + '/' + c;
+        }
+
+        c = ( (c >>> 8) & 0xff) * 0xC0 + (c & 0xff);
+
+        buffer.put(c, 13);
+
+        i += 2;
+      }
+
+      if (i < data.length) {
+        throw 'illegal char at ' + (i + 1);
+      }
+    };
+
+    return _this;
+  };
+
+  //=====================================================================
+  // GIF Support etc.
+  //
+
+  //---------------------------------------------------------------------
+  // byteArrayOutputStream
+  //---------------------------------------------------------------------
+
+  var byteArrayOutputStream = function() {
+
+    var _bytes = [];
+
+    var _this = {};
+
+    _this.writeByte = function(b) {
+      _bytes.push(b & 0xff);
+    };
+
+    _this.writeShort = function(i) {
+      _this.writeByte(i);
+      _this.writeByte(i >>> 8);
+    };
+
+    _this.writeBytes = function(b, off, len) {
+      off = off || 0;
+      len = len || b.length;
+      for (var i = 0; i < len; i += 1) {
+        _this.writeByte(b[i + off]);
+      }
+    };
+
+    _this.writeString = function(s) {
+      for (var i = 0; i < s.length; i += 1) {
+        _this.writeByte(s.charCodeAt(i) );
+      }
+    };
+
+    _this.toByteArray = function() {
+      return _bytes;
+    };
+
+    _this.toString = function() {
+      var s = '';
+      s += '[';
+      for (var i = 0; i < _bytes.length; i += 1) {
+        if (i > 0) {
+          s += ',';
+        }
+        s += _bytes[i];
+      }
+      s += ']';
+      return s;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64EncodeOutputStream
+  //---------------------------------------------------------------------
+
+  var base64EncodeOutputStream = function() {
+
+    var _buffer = 0;
+    var _buflen = 0;
+    var _length = 0;
+    var _base64 = '';
+
+    var _this = {};
+
+    var writeEncoded = function(b) {
+      _base64 += String.fromCharCode(encode(b & 0x3f) );
+    };
+
+    var encode = function(n) {
+      if (n < 0) {
+        // error.
+      } else if (n < 26) {
+        return 0x41 + n;
+      } else if (n < 52) {
+        return 0x61 + (n - 26);
+      } else if (n < 62) {
+        return 0x30 + (n - 52);
+      } else if (n == 62) {
+        return 0x2b;
+      } else if (n == 63) {
+        return 0x2f;
+      }
+      throw 'n:' + n;
+    };
+
+    _this.writeByte = function(n) {
+
+      _buffer = (_buffer << 8) | (n & 0xff);
+      _buflen += 8;
+      _length += 1;
+
+      while (_buflen >= 6) {
+        writeEncoded(_buffer >>> (_buflen - 6) );
+        _buflen -= 6;
+      }
+    };
+
+    _this.flush = function() {
+
+      if (_buflen > 0) {
+        writeEncoded(_buffer << (6 - _buflen) );
+        _buffer = 0;
+        _buflen = 0;
+      }
+
+      if (_length % 3 != 0) {
+        // padding
+        var padlen = 3 - _length % 3;
+        for (var i = 0; i < padlen; i += 1) {
+          _base64 += '=';
+        }
+      }
+    };
+
+    _this.toString = function() {
+      return _base64;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64DecodeInputStream
+  //---------------------------------------------------------------------
+
+  var base64DecodeInputStream = function(str) {
+
+    var _str = str;
+    var _pos = 0;
+    var _buffer = 0;
+    var _buflen = 0;
+
+    var _this = {};
+
+    _this.read = function() {
+
+      while (_buflen < 8) {
+
+        if (_pos >= _str.length) {
+          if (_buflen == 0) {
+            return -1;
+          }
+          throw 'unexpected end of file./' + _buflen;
+        }
+
+        var c = _str.charAt(_pos);
+        _pos += 1;
+
+        if (c == '=') {
+          _buflen = 0;
+          return -1;
+        } else if (c.match(/^\s$/) ) {
+          // ignore if whitespace.
+          continue;
+        }
+
+        _buffer = (_buffer << 6) | decode(c.charCodeAt(0) );
+        _buflen += 6;
+      }
+
+      var n = (_buffer >>> (_buflen - 8) ) & 0xff;
+      _buflen -= 8;
+      return n;
+    };
+
+    var decode = function(c) {
+      if (0x41 <= c && c <= 0x5a) {
+        return c - 0x41;
+      } else if (0x61 <= c && c <= 0x7a) {
+        return c - 0x61 + 26;
+      } else if (0x30 <= c && c <= 0x39) {
+        return c - 0x30 + 52;
+      } else if (c == 0x2b) {
+        return 62;
+      } else if (c == 0x2f) {
+        return 63;
+      } else {
+        throw 'c:' + c;
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // gifImage (B/W)
+  //---------------------------------------------------------------------
+
+  var gifImage = function(width, height) {
+
+    var _width = width;
+    var _height = height;
+    var _data = new Array(width * height);
+
+    var _this = {};
+
+    _this.setPixel = function(x, y, pixel) {
+      _data[y * _width + x] = pixel;
+    };
+
+    _this.write = function(out) {
+
+      //---------------------------------
+      // GIF Signature
+
+      out.writeString('GIF87a');
+
+      //---------------------------------
+      // Screen Descriptor
+
+      out.writeShort(_width);
+      out.writeShort(_height);
+
+      out.writeByte(0x80); // 2bit
+      out.writeByte(0);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Global Color Map
+
+      // black
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+
+      // white
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+
+      //---------------------------------
+      // Image Descriptor
+
+      out.writeString(',');
+      out.writeShort(0);
+      out.writeShort(0);
+      out.writeShort(_width);
+      out.writeShort(_height);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Local Color Map
+
+      //---------------------------------
+      // Raster Data
+
+      var lzwMinCodeSize = 2;
+      var raster = getLZWRaster(lzwMinCodeSize);
+
+      out.writeByte(lzwMinCodeSize);
+
+      var offset = 0;
+
+      while (raster.length - offset > 255) {
+        out.writeByte(255);
+        out.writeBytes(raster, offset, 255);
+        offset += 255;
+      }
+
+      out.writeByte(raster.length - offset);
+      out.writeBytes(raster, offset, raster.length - offset);
+      out.writeByte(0x00);
+
+      //---------------------------------
+      // GIF Terminator
+      out.writeString(';');
+    };
+
+    var bitOutputStream = function(out) {
+
+      var _out = out;
+      var _bitLength = 0;
+      var _bitBuffer = 0;
+
+      var _this = {};
+
+      _this.write = function(data, length) {
+
+        if ( (data >>> length) != 0) {
+          throw 'length over';
+        }
+
+        while (_bitLength + length >= 8) {
+          _out.writeByte(0xff & ( (data << _bitLength) | _bitBuffer) );
+          length -= (8 - _bitLength);
+          data >>>= (8 - _bitLength);
+          _bitBuffer = 0;
+          _bitLength = 0;
+        }
+
+        _bitBuffer = (data << _bitLength) | _bitBuffer;
+        _bitLength = _bitLength + length;
+      };
+
+      _this.flush = function() {
+        if (_bitLength > 0) {
+          _out.writeByte(_bitBuffer);
+        }
+      };
+
+      return _this;
+    };
+
+    var getLZWRaster = function(lzwMinCodeSize) {
+
+      var clearCode = 1 << lzwMinCodeSize;
+      var endCode = (1 << lzwMinCodeSize) + 1;
+      var bitLength = lzwMinCodeSize + 1;
+
+      // Setup LZWTable
+      var table = lzwTable();
+
+      for (var i = 0; i < clearCode; i += 1) {
+        table.add(String.fromCharCode(i) );
+      }
+      table.add(String.fromCharCode(clearCode) );
+      table.add(String.fromCharCode(endCode) );
+
+      var byteOut = byteArrayOutputStream();
+      var bitOut = bitOutputStream(byteOut);
+
+      // clear code
+      bitOut.write(clearCode, bitLength);
+
+      var dataIndex = 0;
+
+      var s = String.fromCharCode(_data[dataIndex]);
+      dataIndex += 1;
+
+      while (dataIndex < _data.length) {
+
+        var c = String.fromCharCode(_data[dataIndex]);
+        dataIndex += 1;
+
+        if (table.contains(s + c) ) {
+
+          s = s + c;
+
+        } else {
+
+          bitOut.write(table.indexOf(s), bitLength);
+
+          if (table.size() < 0xfff) {
+
+            if (table.size() == (1 << bitLength) ) {
+              bitLength += 1;
+            }
+
+            table.add(s + c);
+          }
+
+          s = c;
+        }
+      }
+
+      bitOut.write(table.indexOf(s), bitLength);
+
+      // end code
+      bitOut.write(endCode, bitLength);
+
+      bitOut.flush();
+
+      return byteOut.toByteArray();
+    };
+
+    var lzwTable = function() {
+
+      var _map = {};
+      var _size = 0;
+
+      var _this = {};
+
+      _this.add = function(key) {
+        if (_this.contains(key) ) {
+          throw 'dup key:' + key;
+        }
+        _map[key] = _size;
+        _size += 1;
+      };
+
+      _this.size = function() {
+        return _size;
+      };
+
+      _this.indexOf = function(key) {
+        return _map[key];
+      };
+
+      _this.contains = function(key) {
+        return typeof _map[key] != 'undefined';
+      };
+
+      return _this;
+    };
+
+    return _this;
+  };
+
+  var createDataURL = function(width, height, getPixel) {
+    var gif = gifImage(width, height);
+    for (var y = 0; y < height; y += 1) {
+      for (var x = 0; x < width; x += 1) {
+        gif.setPixel(x, y, getPixel(x, y) );
+      }
+    }
+
+    var b = byteArrayOutputStream();
+    gif.write(b);
+
+    var base64 = base64EncodeOutputStream();
+    var bytes = b.toByteArray();
+    for (var i = 0; i < bytes.length; i += 1) {
+      base64.writeByte(bytes[i]);
+    }
+    base64.flush();
+
+    return 'data:image/gif;base64,' + base64;
+  };
+
+  //---------------------------------------------------------------------
+  // returns qrcode function.
+
+  return qrcode;
+}();
+
+// multibyte support
+!function() {
+
+  qrcode.stringToBytesFuncs['UTF-8'] = function(s) {
+    // http://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array
+    function toUTF8Array(str) {
+      var utf8 = [];
+      for (var i=0; i < str.length; i++) {
+        var charcode = str.charCodeAt(i);
+        if (charcode < 0x80) utf8.push(charcode);
+        else if (charcode < 0x800) {
+          utf8.push(0xc0 | (charcode >> 6),
+              0x80 | (charcode & 0x3f));
+        }
+        else if (charcode < 0xd800 || charcode >= 0xe000) {
+          utf8.push(0xe0 | (charcode >> 12),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+        // surrogate pair
+        else {
+          i++;
+          // UTF-16 encodes 0x10000-0x10FFFF by
+          // subtracting 0x10000 and splitting the
+          // 20 bits of 0x0-0xFFFFF into two halves
+          charcode = 0x10000 + (((charcode & 0x3ff)<<10)
+            | (str.charCodeAt(i) & 0x3ff));
+          utf8.push(0xf0 | (charcode >>18),
+              0x80 | ((charcode>>12) & 0x3f),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+      }
+      return utf8;
+    }
+    return toUTF8Array(s);
+  };
+
+}();
+
+(function (factory) {
+  if (typeof define === 'function' && define.amd) {
+      define([], factory);
+  } else if (typeof exports === 'object') {
+      module.exports = factory();
+  }
+}(function () {
+    return qrcode;
+}));
+
+//---------------------------------------------------------------------
+//
+// QR Code Generator for JavaScript UTF8 Support (optional)
+//
+// Copyright (c) 2011 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//  http://www.opensource.org/licenses/mit-license.php
+//
+// The word 'QR Code' is registered trademark of
+// DENSO WAVE INCORPORATED
+//  http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+
+!function(qrcode) {
+
+  //---------------------------------------------------------------------
+  // overwrite qrcode.stringToBytes
+  //---------------------------------------------------------------------
+
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
+
+}(qrcode);
+</script>
+<script>
+const ITEMS = [{"id":4,"c":"食事","s":"計画","n":"昨日と同じメニューにならないか思い出す","t":"情報型","req":""},{"id":8,"c":"食事","s":"計画","n":"使いかけ食材から逆算して献立を決める","t":"判断型","req":""},{"id":11,"c":"食事","s":"在庫・買い物","n":"冷蔵庫の在庫を確認する","t":"情報型","req":""},{"id":26,"c":"食事","s":"下ごしらえ","n":"野菜を切る","t":"身体型","req":""},{"id":30,"c":"食事","s":"下ごしらえ","n":"解凍のタイミングを逆算する","t":"判断型","req":""},{"id":31,"c":"食事","s":"調理","n":"複数の鍋を同時進行で管理する","t":"判断型","req":""},{"id":39,"c":"食事","s":"調理","n":"全品を温かいうちに出せるよう時間を合わせる","t":"判断型","req":""},{"id":41,"c":"食事","s":"配膳","n":"盛り付ける","t":"身体型","req":""},{"id":43,"c":"食事","s":"配膳","n":"家族を食卓に呼ぶ・待つ","t":"感情型","req":""},{"id":46,"c":"食事","s":"片付け","n":"食べ残しの処理を判断する","t":"判断型","req":""},{"id":47,"c":"食事","s":"片付け","n":"食器を洗う／食洗機に入れる","t":"身体型","req":""},{"id":59,"c":"食事","s":"管理","n":"家族が食べた量を観察する","t":"感情型","req":""},{"id":67,"c":"洗濯","s":"回収","n":"家中に落ちている衣類を集める","t":"身体型","req":""},{"id":68,"c":"洗濯","s":"回収","n":"ポケットの中身を確認する","t":"身体型","req":""},{"id":72,"c":"洗濯","s":"仕分け","n":"手洗い・ネットが必要な物を分ける","t":"判断型","req":""},{"id":73,"c":"洗濯","s":"仕分け","n":"汚れの程度で前処理を判断する","t":"判断型","req":""},{"id":76,"c":"洗濯","s":"洗浄","n":"洗濯機を回す","t":"身体型","req":""},{"id":80,"c":"洗濯","s":"洗浄","n":"洗濯機の終了時刻を覚えておく","t":"情報型","req":""},{"id":83,"c":"洗濯","s":"乾燥","n":"天気予報を見て干し方を決める","t":"判断型","req":""},{"id":84,"c":"洗濯","s":"乾燥","n":"洗濯物を干す","t":"身体型","req":""},{"id":91,"c":"洗濯","s":"収納","n":"洗濯物を畳む","t":"身体型","req":""},{"id":92,"c":"洗濯","s":"収納","n":"家族ごとに仕分ける","t":"身体型","req":""},{"id":110,"c":"洗濯","s":"メンテ・補修","n":"タオルの交換サイクルを管理する","t":"情報型","req":""},{"id":111,"c":"掃除","s":"リビング","n":"散らかった物を元の場所に戻す","t":"身体型","req":""},{"id":118,"c":"掃除","s":"リビング","n":"おもちゃを分類して戻す","t":"身体型","req":""},{"id":121,"c":"掃除","s":"キッチン","n":"コンロ周りの油汚れを拭く","t":"身体型","req":""},{"id":136,"c":"掃除","s":"浴室","n":"風呂の追い焚き・湯量を管理する","t":"判断型","req":""},{"id":143,"c":"掃除","s":"洗面所","n":"床の髪の毛を拾う","t":"身体型","req":""},{"id":147,"c":"掃除","s":"トイレ","n":"トイレットペーパーを補充・在庫管理する","t":"情報型","req":""},{"id":151,"c":"掃除","s":"玄関・その他","n":"靴を並べる","t":"身体型","req":""},{"id":166,"c":"掃除","s":"ゴミ","n":"分別ルールを判断する","t":"判断型","req":""},{"id":173,"c":"掃除","s":"設備メンテ","n":"電池をストック管理・交換する","t":"情報型","req":""},{"id":181,"c":"子育て","s":"生活習慣","n":"子どもを起こす・起きるまで見守る","t":"感情型","req":"kid"},{"id":192,"c":"子育て","s":"生活習慣","n":"スクリーンタイムを管理する","t":"感情型","req":"kid"},{"id":194,"c":"子育て","s":"園・学校","n":"プリントを読んで予定を把握する","t":"情報型","req":"school"},{"id":197,"c":"子育て","s":"園・学校","n":"翌日の持ち物を準備する","t":"情報型","req":"kid"},{"id":209,"c":"子育て","s":"学習","n":"宿題の有無を確認する","t":"情報型","req":"school"},{"id":210,"c":"子育て","s":"学習","n":"宿題に付き添う・教える","t":"感情型","req":"school"},{"id":223,"c":"子育て","s":"健康・医療","n":"体調不良時の登園・登校を判断する","t":"判断型","req":"kid"},{"id":230,"c":"子育て","s":"習い事","n":"習い事の送迎をする","t":"身体型","req":"kid"},{"id":233,"c":"子育て","s":"習い事","n":"やめ時・続け時を判断する","t":"感情型","req":"kid"},{"id":237,"c":"子育て","s":"行事・イベント","n":"写真を撮る・整理する","t":"情報型","req":"kid"},{"id":242,"c":"子育て","s":"情緒・関係","n":"きょうだい喧嘩を仲裁する","t":"感情型","req":"kid"},{"id":243,"c":"子育て","s":"情緒・関係","n":"感情の変化に気づく","t":"感情型","req":"kid"},{"id":254,"c":"子育て","s":"衣類・持ち物","n":"落とし物・忘れ物を探す","t":"身体型","req":"kid"},{"id":256,"c":"家計","s":"記録","n":"家計簿をつける","t":"情報型","req":""},{"id":262,"c":"家計","s":"支払い","n":"口座残高を管理する","t":"情報型","req":""},{"id":270,"c":"家計","s":"契約・見直し","n":"住宅ローン・家賃を管理する","t":"情報型","req":""},{"id":271,"c":"家計","s":"資産","n":"積立・投資の設定と確認をする","t":"判断型","req":""},{"id":275,"c":"家計","s":"税・公的手続き","n":"年末調整・確定申告をする","t":"情報型","req":""},{"id":282,"c":"家計","s":"ポイント・特典","n":"還元率の高い支払い方法を選ぶ","t":"判断型","req":""},{"id":286,"c":"関係・メンタル","s":"家族観察","n":"家族の体調変化に気づく","t":"感情型","req":""},{"id":288,"c":"関係・メンタル","s":"家族観察","n":"家族全員の予定を頭に入れておく","t":"情報型","req":""},{"id":293,"c":"関係・メンタル","s":"コミュニケーション","n":"感謝を言葉にする","t":"感情型","req":""},{"id":295,"c":"関係・メンタル","s":"コミュニケーション","n":"子どもの前での言い方を選ぶ","t":"感情型","req":""},{"id":298,"c":"関係・メンタル","s":"贈答・儀礼","n":"お礼状・お返しを送る","t":"判断型","req":""},{"id":305,"c":"関係・メンタル","s":"対外関係","n":"宅配・再配達を管理する","t":"情報型","req":""},{"id":306,"c":"関係・メンタル","s":"対外関係","n":"実家・義実家と連絡を取る","t":"感情型","req":"partner"},{"id":311,"c":"関係・メンタル","s":"自己ケア","n":"「後でやること」を頭の中に保持し続ける","t":"情報型","req":""},{"id":312,"c":"関係・メンタル","s":"自己ケア","n":"やることの優先順位を組み替える","t":"判断型","req":""}];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const OPTS=['me','half','pt','ext','na'];
+const LBL={me:'自分',half:'半々',pt:'相手',ext:'外部',na:'なし'};
+const SHARE={me:1,half:.5,pt:0};
+const DIG={'':0,me:1,half:2,pt:3,ext:4,na:5}, UND=['',...OPTS];
+const KEY='ymd.v1';
+const HOUSE=[['duo','大人2人'],['fam','大人2人＋子ども'],['multi','三世代同居'],['other','その他']];
+const KIDS=[['pre','未就学'],['ele','小学生'],['teen','中高生']];
+const S={house:null,kids:[],A:{},B:{},role:'A',step:0};
+let POOL=[];
+
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._h);toast._h=setTimeout(()=>t.classList.remove('on'),1900);};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({ts:Date.now(),S}));}catch(e){}};
+
+/* ---- 適用判定 ---- */
+function applicable(it){
+  if(it.req==='kid'&&!S.kids.length) return false;
+  if(it.req==='pre'&&!S.kids.includes('pre')) return false;
+  if(it.req==='school'&&!(S.kids.includes('ele')||S.kids.includes('teen'))) return false;
+  if(it.req==='teen'&&!S.kids.includes('teen')) return false;
+  return true;
+}
+const buildPool=()=>{POOL=ITEMS.filter(applicable);};
+
+/* ---- コード化：世帯＋回答を base6→byte→base64url ---- */
+function encode(withB){
+  const hi=HOUSE.findIndex(h=>h[0]===S.house), kb=(S.kids.includes('pre')?1:0)|(S.kids.includes('ele')?2:0)|(S.kids.includes('teen')?4:0);
+  const bytes=[1, hi|(kb<<3), withB?1:0];
+  const packs=[S.A]; if(withB) packs.push(S.B);
+  packs.forEach(ans=>{
+    const d=ITEMS.map(i=>applicable(i)?DIG[ans[i.id]||'']:0);
+    for(let k=0;k<d.length;k+=3) bytes.push(d[k]+(d[k+1]||0)*6+(d[k+2]||0)*36);
+  });
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decode(str){
+  try{
+    const b=atob(str.replace(/-/g,'+').replace(/_/g,'/'));
+    const by=[...b].map(c=>c.charCodeAt(0));
+    if(by[0]!==1) return null;
+    const hi=by[1]&7, kb=by[1]>>3;
+    S.house=(HOUSE[hi]||HOUSE[0])[0];
+    S.kids=[]; if(kb&1)S.kids.push('pre'); if(kb&2)S.kids.push('ele'); if(kb&4)S.kids.push('teen');
+    buildPool();
+    const per=Math.ceil(ITEMS.length/3), hasB=by[2]===1;
+    const rd=off=>{const a={};ITEMS.forEach((it,n)=>{const byteI=off+((n/3)|0),v=by[byteI];if(v==null)return;
+      const d=[v%6,((v/6)|0)%6,((v/36)|0)%6][n%3]; if(d) a[it.id]=UND[d];});return a;};
+    S.A=rd(3); if(hasB) S.B=rd(3+per);
+    return hasB?'both':'A';
+  }catch(e){ return null; }
+}
+const linkFor=code=>location.href.split('#')[0]+'#c='+code;
+function drawQR(el,text){
+  el.innerHTML='';
+  try{
+    let t=4; let q;
+    for(;t<=20;t++){ try{ q=qrcode(t,'M'); q.addData(text); q.make(); break; }catch(e){ q=null; } }
+    if(!q) throw 0;
+    el.innerHTML=q.createImgTag(4,0);
+  }catch(e){ el.innerHTML='<span class="fine">QRを作れませんでした。リンクをコピーして送ってください。</span>'; }
+}
+function copy(t,msg){
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(()=>toast(msg),()=>toast('コピーできませんでした'));
+  else{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast(msg);}
+}
+
+/* ---- 画面遷移 ---- */
+function go(n){ S.step=n; $$('.step').forEach(s=>s.classList.remove('on')); $('#s'+n).classList.add('on'); window.scrollTo({top:0,behavior:'instant'}); save(); }
+document.body.addEventListener('click',e=>{
+  const h=e.target.closest('[data-home]'); if(h){e.preventDefault();go(0);return;}
+  const g=e.target.closest('[data-go]'); if(g) go(+g.dataset.go);
+});
+
+/* ---- 世帯 ---- */
+function chips(el,opts,key,multi){
+  el.innerHTML=opts.map(([v,l])=>`<button type="button" class="chip" data-v="${v}" aria-pressed="false">${l}</button>`).join('');
+  el.onclick=e=>{const b=e.target.closest('.chip'); if(!b)return;
+    if(multi){const on=b.getAttribute('aria-pressed')==='true'; b.setAttribute('aria-pressed',on?'false':'true');
+      S[key]=[...el.querySelectorAll('[aria-pressed="true"]')].map(x=>x.dataset.v);}
+    else{[...el.children].forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); S[key]=b.dataset.v;
+      $('#wrap-kids').style.display=(b.dataset.v==='duo')?'none':'block'; if(b.dataset.v==='duo'){S.kids=[];$$('#q-kids .chip').forEach(x=>x.setAttribute('aria-pressed','false'));}}
+    save();};
+}
+chips($('#q-house'),HOUSE,'house',false); chips($('#q-kids'),KIDS,'kids',true);
+$('#start').onclick=()=>{S.role='A';S.A={};S.B={};go(1);};
+$('#haveCode').onclick=()=>{const b=$('#codeIn');b.hidden=!b.hidden; if(!b.hidden) $('#codeField').focus();};
+$('#codeGo').onclick=()=>{
+  let v=$('#codeField').value.trim(); if(!v) return;
+  if(v.includes('#c=')) v=v.split('#c=')[1];
+  const r=decode(v);
+  if(!r){toast('コードが読みとれませんでした');return;}
+  if(r==='both'){ go(4); } else { S.role='B'; renderQ(); go(2); }
+};
+$('#toQ').onclick=()=>{ if(!S.house){toast('大人の人数を選んでください');return;} buildPool(); S.role='A'; renderQ(); go(2); };
+
+/* ---- 回答 ---- */
+function renderQ(){
+  const isB=S.role==='B';
+  $('#qhead').textContent=isB?'ふたりめの番です。':'ひとりめの番です。';
+  $('#qnote').innerHTML=isB
+    ? '<b>ひとりめの答えは、出てきません。</b>あなたから見えているとおりに答えてください。「自分」はあなた、「相手」はもうひとりのことです。'
+    : '「自分」はあなた、「相手」はもうひとりの大人のことです。答えおわったら、そのまま相手に渡します。';
+  $('#ptot').textContent=POOL.length;
+  $('#pbar').className=isB?'b':'a';
+  const cats=[...new Set(POOL.map(i=>i.c))];
+  let n=0;
+  $('#qlist').innerHTML=cats.map(c=>`<h3 class="grp"><span class="a">${c}</span></h3>`+
+    POOL.filter(i=>i.c===c).map(i=>{n++;return `<div class="qitem" data-q="${i.id}">
+      <div class="qn"><span class="ix">${String(n).padStart(2,'0')}</span><span>${i.n}<em class="tag">${i.t.replace('型','')}</em></span></div>
+      <div class="seg ${isB?'bview':''}" data-id="${i.id}">${OPTS.map(o=>`<button type="button" class="${o}" data-o="${o}" aria-pressed="false">${LBL[o]}</button>`).join('')}</div></div>`;}).join('')
+  ).join('');
+  const cur=isB?S.B:S.A;
+  Object.keys(cur).forEach(id=>paint(id,cur[id]));
+  prog();
+}
+function paint(id,o){const seg=document.querySelector(`.seg[data-id="${id}"]`); if(!seg)return;
+  [...seg.children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.o===o?'true':'false'));}
+$('#qlist').addEventListener('click',e=>{
+  const b=e.target.closest('.seg button'); if(!b)return;
+  const id=+b.closest('.seg').dataset.id, o=b.dataset.o;
+  (S.role==='B'?S.B:S.A)[id]=o; paint(id,o); prog();
+  const cur=S.role==='B'?S.B:S.A;
+  const nx=POOL.find(i=>!cur[i.id]);
+  if(nx){const el=document.querySelector(`.qitem[data-q="${nx.id}"]`);
+    const r=el.getBoundingClientRect(); if(r.top<80||r.bottom>innerHeight-40) el.scrollIntoView({block:'center',behavior:'smooth'});}
+});
+function prog(){
+  const cur=S.role==='B'?S.B:S.A, n=POOL.filter(i=>cur[i.id]).length;
+  $('#pnum').textContent=n; $('#pbar').style.width=(n/POOL.length*100)+'%';
+  $('#pleft').textContent=n<POOL.length?`あと ${POOL.length-n}`:'ぜんぶ答えました';
+  $('#qdone').disabled=n<POOL.length;
+  $('#qmsg').textContent=n<POOL.length?`ぜんぶ答えると、次へすすめます。あと ${POOL.length-n}個です。`:'';
+  save();
+}
+$('#nextBlank').onclick=()=>{const cur=S.role==='B'?S.B:S.A, nx=POOL.find(i=>!cur[i.id]);
+  if(!nx){toast('もう、ぜんぶ答えています');return;}
+  const el=document.querySelector(`.qitem[data-q="${nx.id}"]`); el.scrollIntoView({block:'center',behavior:'smooth'});
+  el.classList.add('hl'); setTimeout(()=>el.classList.remove('hl'),1600);};
+$('#qback').onclick=()=>go(S.role==='B'?0:1);
+$('#qdone').onclick=()=>{
+  if(S.role==='A'){ const code=encode(false); drawQR($('#qrbox'),linkFor(code)); $('#copyLink').onclick=()=>copy(linkFor(code),'リンクをコピーしました'); $('#copyCode').onclick=()=>copy(code,'コードをコピーしました'); go(3); }
+  else go(4);
+};
+$('#swap').onclick=()=>{S.role='B';S.B={};renderQ();go(2);};
+$('#openResult').onclick=()=>{render();go(5);};
+$('#printBtn').onclick=()=>window.print();
+$('#backCode').onclick=()=>{const box=$('#backBox');box.hidden=!box.hidden;
+  if(!box.hidden){const c=encode(true);drawQR($('#qrbox2'),linkFor(c));
+    $('#copyLink2').onclick=()=>copy(linkFor(c),'リンクをコピーしました');$('#copyCode2').onclick=()=>copy(c,'コードをコピーしました');
+    box.scrollIntoView({behavior:'smooth',block:'start'});}};
+$('#wipe').onclick=()=>{if(confirm('この端末に残っている答えを消します。よろしいですか？')){try{localStorage.removeItem(KEY);}catch(e){}location.hash='';location.reload();}};
+
+/* ---- 突き合わせ ---- */
+function classify(a,b){
+  if(a==='na'&&b==='na') return null;                      // 対象外
+  if(a==='na'||b==='na') return 'exist';                   // 存在のずれ
+  if(a==='ext'&&b==='ext') return 'ok';
+  if(a==='ext'||b==='ext') return 'means';                 // 手段のずれ
+  const s=SHARE[a]+SHARE[b];
+  return s===1?'ok':(s>1?'grab':'drop');
+}
+function analyse(){
+  const R={n:0,ok:0,grab:0,drop:0,exist:0,means:0,rows:[],sumA:0,sumB:0,nShare:0,byType:{},byCat:{}};
+  ['情報型','判断型','身体型','感情型'].forEach(t=>R.byType[t]={n:0,ok:0});
+  POOL.forEach(i=>{
+    const a=S.A[i.id],b=S.B[i.id]; if(!a||!b) return;
+    const k=classify(a,b); if(!k) return;
+    R.n++; R[k]++;
+    R.byType[i.t].n++; if(k==='ok') R.byType[i.t].ok++;
+    R.byCat[i.c]=R.byCat[i.c]||{n:0,ok:0}; R.byCat[i.c].n++; if(k==='ok') R.byCat[i.c].ok++;
+    if(a in SHARE && b in SHARE){ R.sumA+=SHARE[a]; R.sumB+=SHARE[b]; R.nShare++; }
+    R.rows.push({...i,a,b,k});
+  });
+  return R;
+}
+const pc=(a,b)=>b>0?Math.round(a/b*100):0;
+
+function render(){
+  const R=analyse();
+  const okRate=pc(R.ok,R.n);
+  const selfA=R.nShare?Math.round(R.sumA/R.nShare*100):0;
+  const selfB=R.nShare?Math.round(R.sumB/R.nShare*100):0;
+  const seenA=100-selfB;                     // ふたりめから見たひとりめ
+  const seenB=100-selfA;
+  const total=selfA+selfB;                   // 100なら完全整合
+  const over=total-100;
+  const gapA=selfA-seenA, gapB=selfB-seenB;
+  const body=R.byType['身体型'], invisN=R.byType['情報型'].n+R.byType['判断型'].n+R.byType['感情型'].n,
+        invisOk=R.byType['情報型'].ok+R.byType['判断型'].ok+R.byType['感情型'].ok;
+  const bodyRate=pc(body.ok,body.n), invisRate=pc(invisOk,invisN);
+  const order={grab:0,exist:1,drop:2,means:3};
+  const talk=R.rows.filter(r=>r.k!=='ok').sort((x,y)=>(order[x.k]-order[y.k])||(x.t==='身体型'?1:-1));
+  const grabs=R.rows.filter(r=>r.k==='grab'), drops=R.rows.filter(r=>r.k==='drop'), exists=R.rows.filter(r=>r.k==='exist');
+  const KIND={ok:['一致','ふたりの答えが噛み合っている'],grab:['取り合い','どちらも「自分がやっている」と答えた'],drop:['抜け','どちらも「相手がやっている」と答えた'],exist:['存在のずれ','片方が「うちでは発生しない」と答えた'],means:['手段のずれ','片方が「外部（家電・外注）」と答えた']};
+  const band = okRate>=80?'ふたりの見え方は、よく揃っています。'
+             : okRate>=65?'だいたい揃っていますが、ずれも残っています。'
+             : okRate>=50?'半分くらいで、見え方が食い違っています。'
+             : '見え方の食い違いが、かなりあります。';
+
+  $('#report').innerHTML=`
+  <h2 class="sec"><span class="n">STEP 5</span>ふたりの、答え合わせ。</h2>
+  <p class="note">${R.n}個を突き合わせました。どちらが正しいかは、判定していません。ずれているところだけを、順に並べます。</p>
+
+  <div class="summary">
+    <div class="top">
+      <span class="lb">ふたりの答えが、そろったところ</span>
+      <div class="big">${okRate}<small>%</small></div>
+      <div class="band">${band}</div>
+      <p class="desc">${R.n}個のうち ${R.ok}個で、ふたりの答えが噛み合いました。のこりの ${R.n-R.ok}個が、話してみる価値のあるところです。</p>
+    </div>
+    <div class="three">
+      <div><span class="lb">取り合い</span><b>${R.grab}<small>個</small></b></div>
+      <div><span class="lb">抜け</span><b>${R.drop}<small>個</small></b></div>
+      <div><span class="lb">そもそも</span><b>${R.exist}<small>個</small></b></div>
+    </div>
+    <div class="acts noprint"><button class="btn sm" id="copyMemo">話すとき用のメモをコピー</button></div>
+  </div>
+
+  <h3 class="grp"><span class="a">A</span>ふたりの申告を、足してみます。</h3>
+  <p class="fine">それぞれが「自分の分」と答えた割合の合計です。ぴったり噛み合っていれば、<b>ちょうど100%</b>になるはずのもの。重みづけをいっさい使っていない、そのままの数字です。</p>
+  <div class="kpi">
+    <div><span class="lb">ふたりの申告を足すと</span><div class="vl">${total}<small>%</small></div><div class="sb">噛み合っていれば100%</div></div>
+    <div><span class="lb">はみ出した分</span><div class="vl">${over>0?'+':''}${over}<small>pt</small></div><div class="sb">${over>0?'この分だけ、ふたり合わせて多めに見ています':over<0?'この分だけ、どちらも自分の担当だと思っていません':'ぴたりと、一致しました'}</div></div>
+    <div><span class="lb">くらべた質問</span><div class="vl">${R.nShare}<small>個</small></div><div class="sb">外部・なしを除いた数</div></div>
+  </div>
+  <div class="panel mark"><h5>${over>=20?'ふたりとも、自分の分を多めに見ています。':over>=8?'すこしだけ、おたがい多めに見ています。':over<=-8?'どちらも自分の担当だと思っていない場所があります。':'申告は、よく噛み合っています。'}</h5>
+    <p>${over>=8
+      ? `合計は ${total}%。100%を ${over}ポイント超えました。<b>これは、どの家でも起こります。</b>自分のしたことは覚えていて、相手のしたことは見えにくい。それだけのことです。だから、超えたこと自体は責める材料になりません。大事なのは、<b>どの項目で起きているか</b>のほう。下の一覧を見てください。`
+      : over<=-8
+      ? `合計は ${total}%。100%に ${-over}ポイント足りていません。つまり<b>どちらも「相手がやっている」と思っている項目</b>がある、ということです。ほんとうに誰もやっていないのか、それとも気づかれないまま片方が片づけているのか。たしかめる価値があります。`
+      : `合計 ${total}%。ふたりの見え方は、よく噛み合っています。`}</p></div>
+
+  <h3 class="grp"><span class="a">B</span>相手からは、こう見えています。</h3>
+  <p class="fine">上が自分で答えた分担。下が、もうひとりの答えから計算した「相手から見たあなた」。この差の分だけ、話が噛み合っていません。</p>
+  <div class="panel">
+    <div class="bars">
+      <div class="brow a"><span class="bl">ひとりめ<br><small>自分では</small></span><span class="tr"><i style="width:${selfA}%"></i></span><span class="pcnum">${selfA}%</span></div>
+      <div class="brow b"><span class="bl">ひとりめ<br><small>相手からは</small></span><span class="tr"><i style="width:${seenA}%"></i></span><span class="pcnum">${seenA}%</span></div>
+      <div class="gapbar">差は <b>${Math.abs(gapA)}pt</b>　${gapA>0?'自分で思っているほうが、高い':gapA<0?'相手から見たほうが、高い':'ぴったり同じ'}</div>
+    </div>
+    <div class="bars" style="margin-top:22px;padding-top:16px;border-top:1px solid var(--kei)">
+      <div class="brow b"><span class="bl">ふたりめ<br><small>自分では</small></span><span class="tr"><i style="width:${selfB}%"></i></span><span class="pcnum">${selfB}%</span></div>
+      <div class="brow a"><span class="bl">ふたりめ<br><small>相手からは</small></span><span class="tr"><i style="width:${seenB}%"></i></span><span class="pcnum">${seenB}%</span></div>
+      <div class="gapbar">差は <b>${Math.abs(gapB)}pt</b>　${gapB>0?'自分で思っているほうが、高い':gapB<0?'相手から見たほうが、高い':'ぴったり同じ'}</div>
+    </div>
+    <p class="fine" style="margin-top:14px">棒の色は、その数字を答えたほうの色です（朱＝ひとりめの答え／藍＝ふたりめの答え）。</p>
+    <p class="fine" style="margin-top:8px">${Math.abs(gapA)>=Math.abs(gapB)
+      ? `ずれが大きいのは<b>ひとりめ</b>のほうです（${Math.abs(gapA)}pt）。ひとりめがやっている仕事のうち、それだけがふたりめに届いていない、ということになります。`
+      : `ずれが大きいのは<b>ふたりめ</b>のほうです（${Math.abs(gapB)}pt）。ふたりめがやっている仕事のうち、それだけがひとりめに届いていない、ということになります。`}</p>
+  </div>
+
+  <h3 class="grp"><span class="a">C</span>ぜんぶを、いちどに。</h3>
+  <p class="fine">1マスが質問1個です。上から順に、${[...new Set(R.rows.map(r=>r.c))].join('・')}。緑が多ければ、よく噛み合っています。</p>
+  <div class="map">${R.rows.map(r=>`<i class="${r.k==='means'?'exist':r.k}" title="${r.n}"></i>`).join('')}</div>
+  <div class="legend"><span><em class="ok"></em>一致 ${R.ok}</span><span><em class="grab"></em>取り合い ${R.grab}</span><span><em class="drop"></em>抜け ${R.drop}</span><span><em class="exist"></em>そもそも・やり方のずれ ${R.exist+R.means}</span></div>
+
+  <h3 class="grp"><span class="a">D</span>見える仕事と、見えない仕事。</h3>
+  <p class="fine">手を動かす仕事と、決める・覚える・気を配る仕事。この2つを比べます。ここが、いちばんの見どころだと思っています。</p>
+  <div class="kpi">
+    <div><span class="lb">見える仕事は</span><div class="vl">${bodyRate}<small>%</small></div><div class="sb">手を動かす仕事 ${body.n}個</div></div>
+    <div><span class="lb">見えない仕事は</span><div class="vl">${invisRate}<small>%</small></div><div class="sb">決める・覚える・気を配る ${invisN}個</div></div>
+    <div><span class="lb">その差</span><div class="vl">${bodyRate-invisRate>0?'+':''}${bodyRate-invisRate}<small>pt</small></div><div class="sb">見える側が、どれだけ揃いやすいか</div></div>
+  </div>
+  <table class="tb"><thead><tr><th style="text-align:left">仕事の種類</th><th>質問</th><th>そろった</th><th>一致率</th></tr></thead>
+  <tbody>${['情報型','判断型','身体型','感情型'].map(t=>`<tr><td class="h">${t}</td><td>${R.byType[t].n}</td><td>${R.byType[t].ok}</td><td><b>${pc(R.byType[t].ok,R.byType[t].n)}%</b></td></tr>`).join('')}</tbody></table>
+  <div class="panel"><p>${bodyRate-invisRate>=10
+    ? `見える仕事は ${bodyRate}% そろっているのに、見えない仕事は ${invisRate}%。<b>差は ${bodyRate-invisRate}ポイントです。</b>手を動かす仕事は目に入るから、答えが揃う。決める・覚える・気を配る仕事は、目に入らないから揃わない。「手伝おうか」では解決しないのは、たぶんこのためです。`
+    : invisRate-bodyRate>=10
+    ? `見えない仕事のほうが、${invisRate-bodyRate}ポイントそろっています。頭のなかの仕事が、ふたりのあいだで言葉になっている、ということ。めずらしいことです。むしろ手を動かす仕事の担当があいまいになっていないか、下の一覧を見てください。`
+    : `見える仕事 ${bodyRate}%、見えない仕事 ${invisRate}%。どちらも、おなじくらい揃っています。`}</p></div>
+
+  <h3 class="grp"><span class="a">E</span>どのあたりで、ずれているか。</h3>
+  <table class="tb"><thead><tr><th style="text-align:left">領域</th><th>質問</th><th>そろった</th><th>一致率</th></tr></thead>
+  <tbody>${Object.keys(R.byCat).map(c=>{const v=R.byCat[c],p=pc(v.ok,v.n);
+    return `<tr><td class="h">${c}</td><td>${v.n}</td><td>${v.ok}</td><td style="background:rgba(110,148,99,${(p/100*0.28).toFixed(3)})"><b>${p}%</b></td></tr>`;}).join('')}</tbody></table>
+
+  <h3 class="grp"><span class="a">F</span>どちらも「自分」と答えたもの。</h3>
+  <p class="fine">取り合いになっている仕事です。片方のはたらきが、もう片方にまるごと届いていない場所、とも言えます。</p>
+  ${grabs.length?`<ol class="list">${grabs.map(r=>`<li><div class="bd"><div class="t">${r.n}</div><div class="d">${r.c}・${r.t}</div></div><span class="lv">どちらも自分</span></li>`).join('')}</ol>`:'<p class="empty">ありませんでした。ここは、よく噛み合っています。</p>'}
+
+  <h3 class="grp"><span class="a">G</span>どちらも「相手」と答えたもの。</h3>
+  <p class="fine">ほんとうに誰もやっていないのか、それとも気づかれないまま片方が片づけているのか。たしかめてみる価値があります。</p>
+  ${drops.length?`<ol class="list">${drops.map(r=>`<li><div class="bd"><div class="t">${r.n}</div><div class="d">${r.c}・${r.t}</div></div><span class="lv">どちらも相手</span></li>`).join('')}</ol>`:'<p class="empty">ありませんでした。担当の空白はなさそうです。</p>'}
+
+  <h3 class="grp"><span class="a">H</span>「うちには、ない」と答えたもの。</h3>
+  <p class="fine">片方が「うちでは起きない」と答えて、もう片方は「誰かがやっている」と答えた項目。いちばん見えていない場所です。</p>
+  ${exists.length?`<ol class="list">${exists.map(r=>`<li><div class="bd"><div class="t">${r.n}</div><div class="d">${r.c}・${r.t}　ひとりめ「${LBL[r.a]}」／ふたりめ「${LBL[r.b]}」</div></div><span class="lv">そもそものずれ</span></li>`).join('')}</ol>`:'<p class="empty">ありませんでした。何が起きているかについては、ふたりとも同じように見えています。</p>'}
+
+  <h3 class="grp"><span class="a">I</span>話してみるなら、この順に。</h3>
+  <p class="fine">ずれたところを、見えにくい順に並べました。上のほうは、事実をたしかめるだけで片づくものが多いはずです。</p>
+  ${talk.length?`<ol class="list">${talk.slice(0,20).map(r=>`<li><div class="bd"><div class="t">${r.n}</div>
+    <div class="d">${r.c}・${r.t}　ひとりめ「${LBL[r.a]}」／ふたりめ「${LBL[r.b]}」</div></div><span class="lv">${KIND[r.k][0]}</span></li>`).join('')}</ol>
+    ${talk.length>20?`<p class="fine">このほかに ${talk.length-20}個あります。</p>`:''}`:'<p class="empty">ずれたところは、ありませんでした。</p>'}
+
+  <h3 class="grp"><span class="a">J</span>そのまま使える、メモ。</h3>
+  <p class="fine">結果を文章にしておきました。書きかえて使ってください。</p>
+  <textarea id="memo"></textarea>
+  <div class="noprint" style="margin-top:8px"><button class="btn sm" id="copyMemo2">メモをコピーする</button></div>
+
+  <h3 class="grp"><span class="a">おことわり</span>この診断で、わからないこと。</h3>
+  <div class="fine"><ul>
+    <li>測っているのは<b>ふたりの答えの食い違い</b>だけです。家事の量や時間や重さは扱っていません（それは、ひとり版（312項目）のほうの役目です）。</li>
+    <li>一致率も申告合計も、質問1個を1票として数えています。重みづけをしていないので、大きな家事も小さな家事も、おなじ1票です。</li>
+    <li>60個で、ぜんぶではありません。介護、ペット、持ち家の手入れなどは足りていません。</li>
+    <li>1項目に1つしか答えられないので、「やるのは自分、決めるのは相手」のような混ざったものは表せません。</li>
+    <li>食い違いは、記憶のしくみから、だれにでも起こります。<b>数字の大きさは、誠実さや愛情の量とは関係ありません。</b></li>
+    <li>医学的・心理学的な診断ではありません。どちらが正しいかを決めるためのものでも、ありません。</li>
+  </ul></div>`;
+
+  const d=new Date(), ds=`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+  $('#memo').value=
+`【名もなき家事診断 ふたり版】${ds}
+
+ふたりの答えがそろったところ：${okRate}%（${R.n}個のうち ${R.ok}個）
+ふたりの申告を足すと：${total}%（噛み合っていれば100%）
+
+■ ひとりめ　自分では ${selfA}% ／ 相手からは ${seenA}%（差 ${Math.abs(gapA)}pt）
+■ ふたりめ　自分では ${selfB}% ／ 相手からは ${seenB}%（差 ${Math.abs(gapB)}pt）
+
+■ 見える仕事は ${bodyRate}% そろった ／ 見えない仕事は ${invisRate}%
+
+■ どちらも「自分」と答えたもの（取り合い）${R.grab}個
+${grabs.slice(0,5).map((r,k)=>`${k+1}. ${r.n}`).join('\n')||'（なし）'}
+
+■ どちらも「相手」と答えたもの（抜け）${R.drop}個
+${drops.slice(0,5).map((r,k)=>`${k+1}. ${r.n}`).join('\n')||'（なし）'}
+
+■ 「うちには、ない」と食い違ったもの ${R.exist}個
+${exists.slice(0,5).map((r,k)=>`${k+1}. ${r.n}`).join('\n')||'（なし）'}
+
+食い違いは、だれが答えても起こります。
+自分のしたことは覚えていて、相手のしたことは見えにくいから。
+だから、責めるための数字ではありません。
+どこを揃えるかを決めるために、出した数字です。
+
+（名もなき家事診断 ふたり版 ver.3 ／ 表現科学研究所）`;
+  const cp=()=>copy($('#memo').value,'メモをコピーしました');
+  $('#copyMemo').onclick=cp; $('#copyMemo2').onclick=cp;
+}
+
+/* ---- 起動 ---- */
+(function(){
+  const h=location.hash;
+  if(h.startsWith('#c=')){
+    const r=decode(h.slice(3));
+    history.replaceState(null,'',location.pathname+location.search);
+    if(r==='both'){ go(4); return; }
+    if(r==='A'){ S.role='B'; S.B={}; renderQ(); go(2); toast('ひとりめの答えを読みこみました'); return; }
+    toast('リンクが読みとれませんでした');
+  }
+  try{const j=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(j&&j.S&&j.S.house){Object.assign(S,j.S);buildPool();
+      $$('#q-house .chip').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===S.house?'true':'false'));
+      $$('#q-kids .chip').forEach(x=>x.setAttribute('aria-pressed',S.kids.includes(x.dataset.v)?'true':'false'));
+      $('#wrap-kids').style.display=(S.house==='duo')?'none':'block';
+      if(S.step===2){renderQ();go(2);toast('前回のつづきから再開しました');}
+    }}catch(e){}
+})();
+</script>
+</body>
+</html>

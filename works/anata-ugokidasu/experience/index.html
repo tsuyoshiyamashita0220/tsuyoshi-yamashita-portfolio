@@ -1,0 +1,891 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>あなたがいると、動きだす。</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500&family=DM+Mono&display=swap">
+<style>
+/* Layout: 全面キャンバス。文字は中央の細い柱に浮かべ、上に現在地、下に声メーターと進み具合 */
+:root{
+  --ink:#070b18;
+  --navy:#172447;
+  --gold:#EDC64F;
+  --paper:#F1EEE4;
+  --mist:rgba(241,238,228,.66);
+  --line:rgba(237,198,79,.38);
+  --f-display:"Shippori Mincho","Yu Mincho","Hiragino Mincho ProN",serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  --f-mono:"DM Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--f-body);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#b{position:fixed;inset:0;width:100%;height:100%;display:block;pointer-events:none;opacity:0;transition:opacity 1.2s ease}
+#b.on{opacity:1}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;background:var(--ink)}
+.rail{position:fixed;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top,0px)) 18px 0;pointer-events:none;font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;color:var(--mist)}
+.rail .brand{text-align:right}
+#tag{color:var(--gold)}
+.stage{position:fixed;transition:opacity .45s ease,background .6s ease;inset:0;display:flex;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(70px + env(safe-area-inset-top,0px)) 24px calc(110px + env(safe-area-inset-bottom,0px));pointer-events:none;text-align:center}
+.stage.read{pointer-events:auto;background:rgba(7,11,24,.62)}
+.stage.hide{opacity:0}
+.stage-inner{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:30rem;margin:auto}
+#eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.2em;color:var(--gold);min-height:1em}
+#head{margin:0;word-break:keep-all;overflow-wrap:anywhere;font-family:var(--f-display);font-weight:800;font-size:clamp(28px,8.2vw,52px);line-height:1.35;letter-spacing:.05em;text-wrap:balance;text-shadow:0 2px 24px rgba(7,11,24,.8)}
+#sub{margin:0;white-space:pre-line;font-size:15px;line-height:1.9;color:var(--mist);max-width:24rem;text-wrap:pretty;text-shadow:0 1px 12px rgba(7,11,24,.9)}
+.uses{display:grid;gap:8px;max-width:24rem;text-align:left;margin:0;padding:12px 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(7,11,24,.55)}
+.uses span{white-space:pre-line}
+.uses div{display:grid;grid-template-columns:4.6em 1fr;gap:8px;align-items:baseline;font-size:13.5px;line-height:1.7;color:var(--paper)}
+.uses b{font:400 11px/1.9 var(--f-mono);letter-spacing:.12em;color:var(--gold)}
+#cta{pointer-events:auto;margin-top:10px;font:500 15px/1 var(--f-body);letter-spacing:.12em;color:var(--gold);background:rgba(7,11,24,.35);border:1px solid var(--line);border-radius:999px;padding:16px 30px;cursor:pointer}
+#head.long{font-size:clamp(23px,6.4vw,40px)}
+.note{margin:0;font-size:12px;color:var(--mist);letter-spacing:.04em}
+.endmark{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:6px}
+.endmark .last{margin:0;font-family:var(--f-display);font-weight:800;font-size:clamp(22px,6vw,32px);letter-spacing:.06em;color:var(--gold);text-shadow:0 2px 20px rgba(7,11,24,.9)}
+.endmark .endbrand{margin:0;font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;line-height:1.9;color:var(--mist)}
+#toAbout{pointer-events:auto;font:500 14px/1 var(--f-body);letter-spacing:.1em;color:var(--ink);background:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:15px 26px;cursor:pointer}
+#toAbout:focus-visible,#again:focus-visible,#copyMail:focus-visible{outline:2px solid var(--paper);outline-offset:4px}
+.about{position:fixed;inset:0;z-index:20;overflow-y:auto;-webkit-overflow-scrolling:touch;background-color:var(--navy);background-image:linear-gradient(rgba(237,198,79,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(237,198,79,.07) 1px,transparent 1px);background-size:24px 24px;color:var(--paper);-webkit-user-select:text;user-select:text}
+.about-inner{min-height:100%;box-sizing:border-box;max-width:34rem;margin:0 auto;padding:calc(48px + env(safe-area-inset-top,0px)) 22px calc(48px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+.about-mark{display:flex;align-items:center;gap:16px}
+.logo{flex:none;width:112px;height:112px;margin-bottom:10px;border-radius:50%;background:var(--gold);color:var(--navy);display:grid;place-items:center;font:700 28px/1 var(--f-mono);letter-spacing:.02em}
+.about-name{font-family:var(--f-display);font-weight:800;font-size:28px;letter-spacing:.1em}
+.about-en{font-family:var(--f-mono);font-size:12px;letter-spacing:.18em;color:var(--gold);margin-top:4px}
+.about-en span{color:var(--mist);letter-spacing:.06em;margin-left:6px}
+.about-lead{margin:28px 0 0;font-family:var(--f-display);font-weight:800;font-size:clamp(26px,7.4vw,38px);line-height:1.45;letter-spacing:.05em;color:var(--gold);text-wrap:balance}
+
+.about-body{white-space:pre-line;font-size:15px;line-height:1.95;color:var(--paper)}
+.about h2{margin:14px 0 0;padding-top:16px;border-top:1px solid var(--line);font:500 12px/1 var(--f-body);letter-spacing:.24em;color:var(--gold)}
+.cycle{list-style:none;margin:0;padding:0;display:grid;gap:6px;counter-reset:c}
+.cycle li{counter-increment:c;display:grid;grid-template-columns:2.2em 1fr auto;align-items:baseline;gap:10px;padding:10px 12px;background:rgba(7,11,24,.35);border-left:2px solid var(--gold)}
+.cycle li::before{content:counter(c,decimal-leading-zero);font:400 11px/1 var(--f-mono);color:var(--gold)}
+.cycle b{font-family:var(--f-display);font-weight:600;font-size:17px;letter-spacing:.08em}
+.cycle span{font:400 11px/1 var(--f-mono);color:var(--mist);letter-spacing:.06em}
+.about-note{font-size:13.5px;line-height:1.9;color:var(--mist)}
+.list{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.list li{position:relative;padding-left:18px;font-size:14.5px;line-height:1.85}
+.list li::before{content:"";position:absolute;left:0;top:.75em;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.series{margin:0;padding:0;list-style:none;display:grid;gap:2px}
+.series li{display:grid;grid-template-columns:3.4em 1fr;gap:4px 10px;padding:12px 0;border-bottom:1px solid rgba(237,198,79,.18);font-size:15px;line-height:1.6}
+.series li > span{font:400 12px/1.6 var(--f-mono);color:var(--gold)}
+.series em{grid-column:2;font-style:normal;font-size:12px;color:var(--mist)}
+.series li.now{color:var(--gold)}
+.contact{display:flex;flex-direction:column;gap:12px;font-size:15px}
+.contact a{color:var(--gold);text-underline-offset:4px}
+.mail{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.mail span{font-family:var(--f-mono);font-size:14px;letter-spacing:.04em}
+#copyMail{font:500 12px/1 var(--f-body);color:var(--gold);background:transparent;border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer}
+#again{align-self:center;margin-top:44px;font:500 15px/1 var(--f-body);letter-spacing:.12em;color:var(--gold);background:transparent;border:1px solid var(--line);border-radius:999px;padding:16px 30px;cursor:pointer}
+#cta:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+.foot{position:fixed;left:0;right:0;bottom:0;padding:0 18px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;pointer-events:none;transition:opacity .45s ease}
+.meter{display:flex;align-items:center;gap:12px;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;color:var(--mist)}
+.meter .bar{flex:1;height:6px;border-radius:3px;background:rgba(241,238,228,.12);overflow:hidden}
+#meterFill{height:100%;width:0;background:var(--gold);border-radius:3px}
+.vowels{display:flex;justify-content:center;gap:12px;pointer-events:auto}
+.vowels button{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:rgba(7,11,24,.45);color:var(--mist);font:600 19px/1 var(--f-display);touch-action:none;cursor:pointer;transition:background .3s,color .3s}
+.vowels button.got{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.vowels button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.prog{height:1px;background:rgba(241,238,228,.14)}
+#progFill{height:100%;width:0;background:var(--gold);transition:width .2s linear}
+@media (prefers-reduced-motion: reduce){.stage,.foot{transition:none}}
+</style>
+
+<canvas id="c" aria-label="声と指で動く映像"></canvas>
+<canvas id="b" aria-hidden="true"></canvas>
+
+<div class="rail">
+  <span id="tag">INTERACTIVE EXPERIMENT #001</span>
+  <span class="brand">表現科学研究所<br>HYOGEN LAB 408</span>
+</div>
+
+<div class="stage" id="stage">
+  <div class="stage-inner">
+    <div id="eyebrow">HYOGEN LAB 408 ／ 実験 001</div>
+    <h1 id="head" class="long">あなたがいると、動きだす。</h1>
+    <p id="sub">これは、見るだけの映像ではありません。
+
+触る。
+声を出す。
+黙る。
+
+あなたが何かをすると、映像も何かをします。
+
+たぶん、作品を見ているつもりが、
+途中から、作品に見られていることに気づきます。</p>
+    <div class="uses" id="uses" hidden>
+      <div><b>いま</b><span id="useNow"></span></div>
+      <div><b>これから</b><span id="useNext"></span></div>
+    </div>
+    <div class="endmark" id="endmark" hidden>
+      <p class="last">表現は、反応で完成する。</p>
+      <p class="endbrand">表現科学研究所<br>HYOGEN LAB 408</p>
+    </div>
+    <button id="cta" type="button">参加する</button>
+    <button id="toAbout" type="button" hidden>HYOGEN LAB 408 について</button>
+    <p class="note" id="note">マイクを使います。音は、この端末の外へ送りません。</p>
+  </div>
+</div>
+
+<section class="about" id="about" hidden aria-label="表現科学研究所 HYOGEN LAB 408">
+  <div class="about-inner">
+    <span class="logo" aria-hidden="true">408+</span>
+    <div class="about-name">表現科学研究所</div>
+    <div class="about-en">HYOGEN LAB 408</div>
+    <p class="about-lead">表現は、<br>反応で完成する。</p>
+    <button id="again" type="button">もう一度、参加する</button>
+  </div>
+</section>
+
+<div class="foot" id="foot">
+  <div class="vowels" id="vowels" hidden>
+    <button type="button" data-v="0" aria-label="あ">あ</button><button type="button" data-v="1" aria-label="い">い</button><button type="button" data-v="2" aria-label="う">う</button><button type="button" data-v="3" aria-label="え">え</button><button type="button" data-v="4" aria-label="お">お</button>
+  </div>
+  <div class="meter" id="meter" hidden>
+    <span id="meterLabel">声の大きさ</span>
+    <div class="bar"><div id="meterFill"></div></div>
+  </div>
+  <div class="prog"><div id="progFill"></div></div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const canvas = $('c'), stageEl = $('stage'), eyebrow = $('eyebrow'), head = $('head'), sub = $('sub'), cta = $('cta');
+  const tag = $('tag'), meter = $('meter'), meterFill = $('meterFill'), meterLabel = $('meterLabel'), progFill = $('progFill');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const usesEl = $('uses'), useNow = $('useNow'), useNext = $('useNext');
+  function show(e, h, s, c, uses, end) {
+    stageEl.classList.add('hide');
+    clearTimeout(show.t);
+    show.t = setTimeout(() => {
+      eyebrow.textContent = e || ''; head.textContent = h || ''; sub.textContent = s || '';
+      head.classList.toggle('long', (h || '').length > 12);
+      stageEl.classList.toggle('read', !!c); stageEl.scrollTop = 0;
+      $('endmark').hidden = !end; $('toAbout').hidden = !end; $('note').hidden = true;
+      usesEl.hidden = !uses; if (uses) { useNow.textContent = uses[0]; useNext.textContent = uses[1]; }
+      cta.hidden = !c; if (c) cta.textContent = c;
+      stageEl.classList.remove('hide');
+    }, 450);
+  }
+  function fail(msg) {
+    eyebrow.textContent = 'ごめんなさい'; head.textContent = 'この端末では表示できません';
+    sub.textContent = msg; cta.hidden = true;
+  }
+
+  const gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false, stencil: false });
+  if (!gl) { fail('WebGL2に対応したブラウザ（最新のSafariやChrome）で開いてください。'); return; }
+  const hasF32 = !!gl.getExtension('EXT_color_buffer_float');
+  gl.getExtension('EXT_color_buffer_half_float');
+
+  // ---------- シェーダー ----------
+  const VS = `#version 300 es
+  precision highp float;
+  in vec2 aPos; uniform vec2 texel;
+  out vec2 vUv, vL, vR, vT, vB;
+  void main(){
+    vUv = aPos*.5+.5;
+    vL = vUv - vec2(texel.x,0.); vR = vUv + vec2(texel.x,0.);
+    vT = vUv + vec2(0.,texel.y); vB = vUv - vec2(0.,texel.y);
+    gl_Position = vec4(aPos,0.,1.);
+  }`;
+  const H = `#version 300 es
+  precision highp float; precision highp sampler2D;
+  in vec2 vUv, vL, vR, vT, vB; out vec4 o;
+  float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)))*43758.5453); }
+  `;
+  const FS = {
+    splat: H+`uniform sampler2D uTarget; uniform float aspect; uniform vec3 color; uniform vec2 point; uniform float radius;
+      void main(){ vec2 p = vUv - point; p.x *= aspect; vec3 s = exp(-dot(p,p)/radius)*color; o = vec4(texture(uTarget,vUv).xyz + s, 1.); }`,
+    adv: H+`uniform sampler2D uVelocity, uSource; uniform vec2 simTexel; uniform float dt, dissipation;
+      void main(){ vec2 c = vUv - dt*texture(uVelocity,vUv).xy*simTexel; vec4 r = texture(uSource,c)/(1.+dissipation*dt); o = vec4(r.xyz,1.); }`,
+    div: H+`uniform sampler2D uVelocity;
+      void main(){ float L=texture(uVelocity,vL).x, R=texture(uVelocity,vR).x, T=texture(uVelocity,vT).y, B=texture(uVelocity,vB).y;
+        vec2 C=texture(uVelocity,vUv).xy;
+        if(vL.x<0.) L=-C.x; if(vR.x>1.) R=-C.x; if(vT.y>1.) T=-C.y; if(vB.y<0.) B=-C.y;
+        o = vec4(.5*(R-L+T-B),0.,0.,1.); }`,
+    curl: H+`uniform sampler2D uVelocity;
+      void main(){ float L=texture(uVelocity,vL).y, R=texture(uVelocity,vR).y, T=texture(uVelocity,vT).x, B=texture(uVelocity,vB).x;
+        o = vec4(.5*(R-L-T+B),0.,0.,1.); }`,
+    vort: H+`uniform sampler2D uVelocity, uCurl; uniform float curl, dt;
+      void main(){ float L=texture(uCurl,vL).x, R=texture(uCurl,vR).x, T=texture(uCurl,vT).x, B=texture(uCurl,vB).x, C=texture(uCurl,vUv).x;
+        vec2 f = .5*vec2(abs(T)-abs(B), abs(R)-abs(L)); f /= length(f)+1e-4; f *= curl*C; f.y *= -1.;
+        vec2 v = texture(uVelocity,vUv).xy + f*dt; o = vec4(clamp(v,-1000.,1000.),0.,1.); }`,
+    pres: H+`uniform sampler2D uPressure, uDivergence;
+      void main(){ float L=texture(uPressure,vL).x, R=texture(uPressure,vR).x, T=texture(uPressure,vT).x, B=texture(uPressure,vB).x;
+        float d = texture(uDivergence,vUv).x; o = vec4((L+R+B+T-d)*.25,0.,0.,1.); }`,
+    grad: H+`uniform sampler2D uPressure, uVelocity;
+      void main(){ float L=texture(uPressure,vL).x, R=texture(uPressure,vR).x, T=texture(uPressure,vT).x, B=texture(uPressure,vB).x;
+        vec2 v = texture(uVelocity,vUv).xy - vec2(R-L,T-B); o = vec4(v,0.,1.); }`,
+    clear: H+`uniform sampler2D uTexture; uniform float value;
+      void main(){ o = value*texture(uTexture,vUv); }`,
+    disp: H+`uniform sampler2D uTexture; uniform vec3 bg;
+      void main(){ vec3 c = texture(uTexture,vUv).rgb; vec3 col = bg + (1.-exp(-c*2.2));
+        float v = length(vUv-.5); col *= 1.-v*v*.9; o = vec4(col,1.); }`,
+    sdf: H+`uniform vec2 uAspectOff; uniform float uTime, uLevel, uAlpha; uniform vec4 uW; uniform float uWO;
+      mat2 rot(float a){ float c=cos(a), s=sin(a); return mat2(c,-s,s,c); }
+      float sdTorus(vec3 p, vec2 t){ vec2 q = vec2(length(p.xz)-t.x, p.y); return length(q)-t.y; }
+      float sdEll(vec3 p, vec3 r){ float k0 = length(p/r); float k1 = length(p/(r*r)); return k0*(k0-1.)/max(k1,1e-4); }
+      float sdRBox(vec3 p, vec3 b, float r){ vec3 q = abs(p)-b; return length(max(q,0.)) + min(max(q.x,max(q.y,q.z)),0.) - r; }
+      float sdCyl(vec3 p, float h, float r){ vec2 d = abs(vec2(length(p.xz),p.y)) - vec2(r,h); return min(max(d.x,d.y),0.) + length(max(d,0.)); }
+      float map(vec3 p){
+        p.y -= uAspectOff.y;
+        p.xz *= rot(sin(uTime*.5)*.6); p.yz *= rot(.25 + sin(uTime*.37)*.15);
+        float dA = sdTorus(p.xzy, vec2(.78,.26));
+        float dI = sdEll(p, vec3(1.2,.26,.45));
+        float dU = sdCyl(p.xzy, .62, .26);
+        float dE = sdRBox(p, vec3(.72,.38,.3), .14);
+        float dO = sdEll(p, vec3(.8,.95,.8));
+        float s = uW.x+uW.y+uW.z+uW.w+uWO;
+        float d = (dA*uW.x + dI*uW.y + dU*uW.z + dE*uW.w + dO*uWO)/max(s,1e-3);
+        d += sin(p.x*7.+uTime*3.)*sin(p.y*7.-uTime*2.)*sin(p.z*7.)*.035*(.3+uLevel*1.5);
+        return d;
+      }
+      void main(){
+        float asp = uAspectOff.x; vec2 uv = (vUv-.5)*vec2(asp,1.); if(asp < 1.) uv /= asp;
+        vec3 ro = vec3(0.,0.,3.2), rd = normalize(vec3(uv,-1.2));
+        vec3 oc = ro - vec3(0.,uAspectOff.y,0.); float bb = dot(oc,rd), cc = dot(oc,oc)-2.9, h = bb*bb-cc;
+        if(h < 0.){ o = vec4(0.); return; }
+        float t = max(-bb-sqrt(h),0.), tEnd = -bb+sqrt(h), md = 1e3; bool hit = false;
+        for(int i=0;i<72;i++){ vec3 p = ro+rd*t; float d = map(p); md = min(md,d); if(d < .002){ hit = true; break; } t += d*.8; if(t > tEnd) break; }
+        vec3 gold = vec3(.93,.78,.31), navy = vec3(.09,.14,.28);
+        if(hit){
+          vec3 p = ro+rd*t; vec2 e = vec2(.002,-.002);
+          vec3 n = normalize(e.xyy*map(p+e.xyy) + e.yyx*map(p+e.yyx) + e.yxy*map(p+e.yxy) + e.xxx*map(p+e.xxx));
+          vec3 l = normalize(vec3(.6,.8,.5)); float dif = max(dot(n,l),0.); float fr = pow(1.-max(dot(n,-rd),0.),3.);
+          float sp = pow(max(dot(reflect(rd,n),l),0.),24.);
+          vec3 col = navy*(.35+.65*dif) + gold*(fr*.9 + sp*.8) + gold*.15*dif;
+          o = vec4(col*uAlpha, uAlpha);
+        } else {
+          o = vec4(gold*exp(-md*7.)*.35*uAlpha, 0.);
+        }
+      }`,
+    rdinit: H+`void main(){ o = vec4(1.,0.,0.,1.); }`,
+    rd: H+`uniform sampler2D uState; uniform vec2 texel; uniform float uFeed, uKill, uErase;
+      void main(){
+        vec2 c = texture(uState,vUv).rg;
+        vec2 lap = -c + .2*(texture(uState,vL).rg + texture(uState,vR).rg + texture(uState,vT).rg + texture(uState,vB).rg)
+          + .05*(texture(uState,vUv+texel).rg + texture(uState,vUv-texel).rg + texture(uState,vUv+vec2(texel.x,-texel.y)).rg + texture(uState,vUv+vec2(-texel.x,texel.y)).rg);
+        float a = c.x, b = c.y, abb = a*b*b;
+        a += lap.x - abb + uFeed*(1.-a);
+        b += .5*lap.y + abb - (uKill+uFeed)*b;
+        b *= 1.-uErase;
+        o = vec4(clamp(a,0.,1.), clamp(b,0.,1.), 0., 1.);
+      }`,
+    rdseed: H+`uniform sampler2D uState; uniform vec2 point; uniform float radius, aspect;
+      void main(){ vec4 s = texture(uState,vUv); vec2 p = vUv-point; p.x *= aspect; float g = exp(-dot(p,p)/radius);
+        o = vec4(mix(s.x, .5, step(.3,g)), max(s.y, step(.3,g)*.5), 0., 1.); }`,
+    rdshow: H+`uniform sampler2D uState; uniform vec2 uSize; uniform float uAlpha;
+      float Bv(vec2 uv){ vec2 p = uv*uSize-.5; vec2 f = fract(p); ivec2 i = ivec2(floor(p)), m = ivec2(uSize)-1, z = ivec2(0);
+        float a = texelFetch(uState,clamp(i,z,m),0).g, b = texelFetch(uState,clamp(i+ivec2(1,0),z,m),0).g;
+        float c = texelFetch(uState,clamp(i+ivec2(0,1),z,m),0).g, d = texelFetch(uState,clamp(i+ivec2(1,1),z,m),0).g;
+        return mix(mix(a,b,f.x), mix(c,d,f.x), f.y); }
+      void main(){
+        float b = Bv(vUv); vec2 e = 1./uSize;
+        float gx = Bv(vUv+vec2(e.x,0.)) - Bv(vUv-vec2(e.x,0.)), gy = Bv(vUv+vec2(0.,e.y)) - Bv(vUv-vec2(0.,e.y));
+        float v = smoothstep(.12,.32,b); float lit = clamp(.5 + (-gx*.6 + gy*.8)*6., 0., 1.);
+        vec3 col = vec3(.93,.78,.31)*(.3 + .8*lit);
+        float a = v*uAlpha*.7; o = vec4(col*a, a);
+      }`,
+    pinit: H+`void main(){ o = vec4(.5,-1.,0.,hash(vUv*91.7)); }`,
+    pupd: H+`uniform sampler2D uState, uVelocity; uniform vec2 simTexel; uniform float dt, time, spawn, spread, lift;
+      void main(){ vec4 s = texture(uState,vUv); vec2 p = s.xy; float life = s.z;
+        if(life > 0.){
+          vec2 v = texture(uVelocity,p).xy*simTexel;
+          p += v*dt; p.y += lift*dt*(.4+.6*s.w);
+          life -= dt*(.22+.3*s.w);
+          if(p.y > 1.05 || p.x < -.05 || p.x > 1.05) life = 0.;
+        } else {
+          float t = mod(time, 97.);
+          if(hash(vUv*913.1 + t) < spawn){
+            float a = hash(vUv*77.7 + t*1.3), b = hash(vUv*31.3 - t);
+            p = vec2(.5 + (a-.5)*spread, .02 + b*.05); life = 1.;
+          }
+        }
+        o = vec4(p, life, s.w); }`
+  };
+  const PVS = `#version 300 es
+  precision highp float; precision highp sampler2D;
+  in float aIndex; uniform sampler2D uState; uniform float N, pointSize;
+  out float vLife; out float vSeed;
+  void main(){
+    ivec2 ij = ivec2(int(mod(aIndex,N)), int(floor(aIndex/N)));
+    vec4 s = texelFetch(uState, ij, 0);
+    vLife = s.z; vSeed = s.w;
+    gl_Position = s.z > 0. ? vec4(s.xy*2.-1.,0.,1.) : vec4(3.,3.,0.,1.);
+    gl_PointSize = pointSize*(.6+.9*s.w);
+  }`;
+  const PFS = `#version 300 es
+  precision highp float;
+  in float vLife; in float vSeed; out vec4 o;
+  void main(){
+    float d = length(gl_PointCoord-.5);
+    float a = smoothstep(.5,0.,d)*min(vLife*1.6,1.)*.55;
+    vec3 col = mix(vec3(.93,.78,.31), vec3(1.,.95,.82), vSeed);
+    o = vec4(col*a, a);
+  }`;
+
+  function compile(type, src) {
+    const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  function program(vs, fs) {
+    const p = gl.createProgram();
+    gl.attachShader(p, compile(gl.VERTEX_SHADER, vs)); gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+    gl.bindAttribLocation(p, 0, vs === PVS ? 'aIndex' : 'aPos');
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    const u = {}; const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < n; i++) { const nm = gl.getActiveUniform(p, i).name; u[nm] = gl.getUniformLocation(p, nm); }
+    return { p, u };
+  }
+  let P = {};
+  try {
+    for (const k in FS) P[k] = program(VS, FS[k]);
+    P.prend = program(PVS, PFS);
+  } catch (e) { console.error(e); fail('映像の準備に失敗しました。別のブラウザで試してください。'); return; }
+
+  // ---------- 描画の土台 ----------
+  const quad = gl.createVertexArray(); gl.bindVertexArray(quad);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,-1,1,1,1,1,-1]), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0,1,2,0,2,3]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+  const N = 256, COUNT = N * N;
+  const pvao = gl.createVertexArray(); gl.bindVertexArray(pvao);
+  const idx = new Float32Array(COUNT); for (let i = 0; i < COUNT; i++) idx[i] = i;
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, idx, gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 1, gl.FLOAT, false, 0, 0);
+  gl.bindVertexArray(null);
+
+  function blit(t) {
+    gl.bindVertexArray(quad);
+    if (t) { gl.viewport(0, 0, t.w, t.h); gl.bindFramebuffer(gl.FRAMEBUFFER, t.fbo); }
+    else { gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight); gl.bindFramebuffer(gl.FRAMEBUFFER, null); }
+    gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+  }
+  function target(w, h, ifmt, type, filter) {
+    gl.activeTexture(gl.TEXTURE0);
+    const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, ifmt, w, h, 0, gl.RGBA, type, null);
+    const fbo = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    const ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+    gl.viewport(0, 0, w, h); gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+    return { tex, fbo, w, h, ok, attach(i) { gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, tex); return i; } };
+  }
+  function pair(...a) {
+    let r = target(...a), w = target(...a);
+    return { get read() { return r; }, get write() { return w; }, swap() { const t = r; r = w; w = t; }, w: r.w, h: r.h, ok: r.ok && w.ok };
+  }
+  function res(r) {
+    let a = canvas.width / canvas.height; if (a < 1) a = 1 / a;
+    const lo = Math.round(r), hi = Math.round(r * a);
+    return canvas.width > canvas.height ? { w: hi, h: lo } : { w: lo, h: hi };
+  }
+
+  let dpr = 1, dye, vel, divg, curlT, pres, parts, rd;
+  function rdReset() { gl.disable(gl.BLEND); gl.useProgram(P.rdinit.p); blit(rd.write); rd.swap(); blit(rd.write); rd.swap(); }
+  function rdSeed(x, y, radius) {
+    const p = P.rdseed; gl.disable(gl.BLEND); gl.useProgram(p.p);
+    gl.uniform1i(p.u.uState, rd.read.attach(0)); gl.uniform2f(p.u.point, x, y);
+    gl.uniform1f(p.u.radius, radius); gl.uniform1f(p.u.aspect, canvas.width / canvas.height);
+    blit(rd.write); rd.swap();
+  }
+  function stepRD(iters, erase) {
+    const p = P.rd; gl.disable(gl.BLEND); gl.useProgram(p.p);
+    gl.uniform2f(p.u.texel, 1 / rd.w, 1 / rd.h); gl.uniform1f(p.u.uFeed, .0545); gl.uniform1f(p.u.uKill, .062);
+    for (let i = 0; i < iters; i++) {
+      gl.uniform1f(p.u.uErase, i === 0 ? erase : 0);
+      gl.uniform1i(p.u.uState, rd.read.attach(0)); blit(rd.write); rd.swap();
+    }
+  }
+  function setup() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.floor(canvas.clientWidth * dpr));
+    canvas.height = Math.max(1, Math.floor(canvas.clientHeight * dpr));
+    const s = res(128), d = res(512);
+    const HF = gl.RGBA16F, HT = gl.HALF_FLOAT;
+    dye = pair(d.w, d.h, HF, HT, gl.LINEAR);
+    vel = pair(s.w, s.h, HF, HT, gl.LINEAR);
+    divg = target(s.w, s.h, HF, HT, gl.NEAREST);
+    curlT = target(s.w, s.h, HF, HT, gl.NEAREST);
+    pres = pair(s.w, s.h, HF, HT, gl.NEAREST);
+    parts = hasF32 ? pair(N, N, gl.RGBA32F, gl.FLOAT, gl.NEAREST) : pair(N, N, HF, HT, gl.NEAREST);
+    const r = res(150);
+    rd = hasF32 ? pair(r.w, r.h, gl.RGBA32F, gl.FLOAT, gl.NEAREST) : pair(r.w, r.h, HF, HT, gl.LINEAR);
+    if (!(dye.ok && vel.ok && pres.ok && parts.ok && divg.ok && curlT.ok && rd.ok)) return false;
+    rdReset();
+    gl.useProgram(P.pinit.p); blit(parts.write); parts.swap(); blit(parts.write); parts.swap();
+    return true;
+  }
+  if (!setup()) { fail('この端末のブラウザは、必要な計算方式に対応していません。'); return; }
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(setup, 200); });
+
+  function splat(x, y, dx, dy, col, radius) {
+    const p = P.splat; gl.useProgram(p.p);
+    gl.uniform1f(p.u.aspect, canvas.width / canvas.height);
+    gl.uniform2f(p.u.point, x, y);
+    gl.uniform1f(p.u.radius, radius / 100);
+    gl.uniform1i(p.u.uTarget, vel.read.attach(0)); gl.uniform3f(p.u.color, dx, dy, 0);
+    blit(vel.write); vel.swap();
+    gl.uniform1i(p.u.uTarget, dye.read.attach(0)); gl.uniform3f(p.u.color, col[0], col[1], col[2]);
+    blit(dye.write); dye.swap();
+  }
+
+  function step(dt) {
+    gl.disable(gl.BLEND);
+    const tx = 1 / vel.w, ty = 1 / vel.h;
+    let p = P.curl; gl.useProgram(p.p); gl.uniform2f(p.u.texel, tx, ty);
+    gl.uniform1i(p.u.uVelocity, vel.read.attach(0)); blit(curlT);
+    p = P.vort; gl.useProgram(p.p); gl.uniform2f(p.u.texel, tx, ty);
+    gl.uniform1i(p.u.uVelocity, vel.read.attach(0)); gl.uniform1i(p.u.uCurl, curlT.attach(1));
+    gl.uniform1f(p.u.curl, 24); gl.uniform1f(p.u.dt, dt); blit(vel.write); vel.swap();
+    p = P.div; gl.useProgram(p.p); gl.uniform2f(p.u.texel, tx, ty);
+    gl.uniform1i(p.u.uVelocity, vel.read.attach(0)); blit(divg);
+    p = P.clear; gl.useProgram(p.p); gl.uniform1i(p.u.uTexture, pres.read.attach(0)); gl.uniform1f(p.u.value, .8);
+    blit(pres.write); pres.swap();
+    p = P.pres; gl.useProgram(p.p); gl.uniform2f(p.u.texel, tx, ty); gl.uniform1i(p.u.uDivergence, divg.attach(0));
+    for (let i = 0; i < 20; i++) { gl.uniform1i(p.u.uPressure, pres.read.attach(1)); blit(pres.write); pres.swap(); }
+    p = P.grad; gl.useProgram(p.p); gl.uniform2f(p.u.texel, tx, ty);
+    gl.uniform1i(p.u.uPressure, pres.read.attach(0)); gl.uniform1i(p.u.uVelocity, vel.read.attach(1));
+    blit(vel.write); vel.swap();
+    p = P.adv; gl.useProgram(p.p); gl.uniform2f(p.u.simTexel, tx, ty); gl.uniform1f(p.u.dt, dt);
+    gl.uniform1i(p.u.uVelocity, vel.read.attach(0)); gl.uniform1i(p.u.uSource, vel.read.attach(0));
+    gl.uniform1f(p.u.dissipation, .25); blit(vel.write); vel.swap();
+    gl.uniform1i(p.u.uVelocity, vel.read.attach(0)); gl.uniform1i(p.u.uSource, dye.read.attach(1));
+    gl.uniform1f(p.u.dissipation, .9); blit(dye.write); dye.swap();
+  }
+
+  function stepParticles(dt, t, spawn, spread, lift) {
+    const p = P.pupd; gl.useProgram(p.p);
+    gl.uniform1i(p.u.uState, parts.read.attach(0)); gl.uniform1i(p.u.uVelocity, vel.read.attach(1));
+    gl.uniform2f(p.u.simTexel, 1 / vel.w, 1 / vel.h);
+    gl.uniform1f(p.u.dt, dt); gl.uniform1f(p.u.time, t); gl.uniform1f(p.u.spawn, spawn);
+    gl.uniform1f(p.u.spread, spread); gl.uniform1f(p.u.lift, lift);
+    blit(parts.write); parts.swap();
+  }
+
+  function render() {
+    let p = P.disp; gl.useProgram(p.p); gl.uniform1i(p.u.uTexture, dye.read.attach(0));
+    gl.uniform3f(p.u.bg, .027, .043, .094); blit(null);
+    if (sdfA > .01) {
+      p = P.sdf; gl.useProgram(p.p); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      const a = canvas.width / canvas.height;
+      gl.uniform2f(p.u.uAspectOff, a, a < 1 ? 1.35 : 0.);
+      gl.uniform1f(p.u.uTime, T); gl.uniform1f(p.u.uLevel, level); gl.uniform1f(p.u.uAlpha, sdfA);
+      gl.uniform4f(p.u.uW, wv[0], wv[1], wv[2], wv[3]); gl.uniform1f(p.u.uWO, wv[4]);
+      blit(null);
+    }
+    if (rdA > .01) {
+      p = P.rdshow; gl.useProgram(p.p); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      gl.uniform1i(p.u.uState, rd.read.attach(0)); gl.uniform2f(p.u.uSize, rd.w, rd.h); gl.uniform1f(p.u.uAlpha, rdA);
+      blit(null);
+    }
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+    p = P.prend; gl.useProgram(p.p); gl.uniform1i(p.u.uState, parts.read.attach(0));
+    gl.uniform1f(p.u.N, N); gl.uniform1f(p.u.pointSize, 2.2 * dpr);
+    gl.bindVertexArray(pvao); gl.drawArrays(gl.POINTS, 0, COUNT);
+    gl.disable(gl.BLEND);
+  }
+
+  // ---------- 指 ----------
+  const ptr = { down: false, x: .5, y: .5, dx: 0, dy: 0, sinceDown: 0, downAt: 0 };
+  let dist = 0;
+  const pos = e => [e.clientX / innerWidth, 1 - e.clientY / innerHeight];
+  canvas.addEventListener('pointerdown', e => {
+    const [x, y] = pos(e); ptr.down = true; ptr.x = x; ptr.y = y; ptr.sinceDown = 0; ptr.downAt = performance.now();
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    if (state === 'intro') begin();
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!ptr.down && e.pointerType !== 'mouse') return;
+    const [x, y] = pos(e); const dx = x - ptr.x, dy = y - ptr.y;
+    ptr.dx += dx; ptr.dy += dy; ptr.x = x; ptr.y = y;
+    const m = Math.hypot(dx, dy); ptr.sinceDown += m;
+    if (state === 's1') dist += m;
+  });
+  const up = () => { ptr.down = false; };
+  canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
+  const aboutEl = $('about');
+  $('toAbout').addEventListener('click', () => { aboutEl.hidden = false; aboutEl.scrollTop = 0; });
+  $('again').addEventListener('click', () => { aboutEl.hidden = true; restart(); });
+  cta.addEventListener('click', () => { if (state === 'intro') begin(); else if (state === 'end') restart(); else if (pending) { clearTimeout(timer); const f = pending; pending = null; f(); } });
+
+  // ---------- 声 ----------
+  const audio = { ctx: null, an: null, buf: null, ok: false, floor: -60, calib: [] };
+  let micPromise = null;
+  function startMic() {
+    try { const C = window.AudioContext || window.webkitAudioContext; audio.ctx = new C(); audio.ctx.resume(); } catch (_) {}
+    micPromise = (async () => {
+      try {
+        if (!audio.ctx || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+        const st = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+        await audio.ctx.resume();
+        const src = audio.ctx.createMediaStreamSource(st);
+        audio.an = audio.ctx.createAnalyser(); audio.an.fftSize = 2048; src.connect(audio.an);
+        audio.buf = new Float32Array(audio.an.fftSize); audio.ok = true;
+      } catch (_) { audio.ok = false; }
+    })();
+  }
+  function micDb() {
+    if (!audio.ok) return null;
+    audio.an.getFloatTimeDomainData(audio.buf);
+    let s = 0; for (let i = 0; i < audio.buf.length; i++) s += audio.buf[i] * audio.buf[i];
+    return 20 * Math.log10(Math.sqrt(s / audio.buf.length) + 1e-7);
+  }
+  let level = 0, hold = 0;
+
+  // ---------- 流れ（シーン） ----------
+  let state = 'intro', energy = 0, timer = null;
+  let pending = null;
+  const later = (ms, fn) => { clearTimeout(timer); pending = fn; timer = setTimeout(() => { pending = null; fn(); }, ms); };
+  function begin() {
+    startMic();
+    state = 's1'; dist = 0;
+    tag.textContent = '01 ／ さわる';
+    show('', '指で、好きに。', 'なぞってみてください。\n\nあなたの指のあとを、\n色と流れが追いかけます。', null);
+  }
+  function restart() {
+    energy = 0; dist = 0; meter.hidden = true; progFill.style.width = '0%'; bcan.classList.remove('on');
+    vowelsEl.hidden = true; wv = [0,0,0,0,1];
+    state = 's1'; tag.textContent = '01 ／ さわる';
+    show('', '指で、好きに。', 'なぞってみてください。\n\nあなたの指のあとを、\n色と流れが追いかけます。', null);
+  }
+  async function enterS2() {
+    tag.textContent = '02 ／ 声を出す';
+    progFill.style.width = '0%';
+    if (micPromise) await micPromise;
+    meter.hidden = false;
+    if (audio.ok) {
+      meterLabel.textContent = '声の大きさ';
+      state = 's2calib'; audio.calib = [];
+      show('', 'ちょっとだけ、しーっ。', 'あなたの声を聞く前に、\nこの部屋の静かさを聞いています。', null);
+      later(1800, () => {
+        const c = audio.calib.slice().sort((a, b) => a - b);
+        if (c.length) audio.floor = Math.max(c[Math.floor(c.length * .5)], -80);
+        state = 's2';
+        show('', '声を、ひとつ。', '「あー」と、長く声を出してみてください。\n\n声が大きくなると、\n光の粒も増えていきます。', null);
+      });
+    } else {
+      meterLabel.textContent = '長押しの強さ';
+      state = 's2';
+      show('', '声を、ひとつ。', 'この画面ではマイクが使えません。\n\n画面を長押しすると、\n声のかわりになります。', null);
+    }
+  }
+
+  // ---------- 声の高さ ----------
+  const NOTE = ['ド','ド♯','レ','レ♯','ミ','ファ','ファ♯','ソ','ソ♯','ラ','ラ♯','シ'];
+  let corr = null;
+  function detectPitch() {
+    if (!audio.ok) return 0;
+    const b = audio.buf, sr = audio.ctx.sampleRate, n = b.length;
+    const minLag = Math.floor(sr / 1000), maxLag = Math.min(Math.floor(sr / 70), n >> 1), m = n - maxLag;
+    if (!corr || corr.length < maxLag + 2) corr = new Float32Array(maxLag + 2);
+    let e0 = 0; for (let i = 0; i < m; i++) e0 += b[i] * b[i];
+    if (e0 < 1e-4) return 0;
+    let max = 0;
+    for (let lag = minLag; lag <= maxLag; lag++) {
+      let sxy = 0, e1 = 0;
+      for (let i = 0; i < m; i++) { const v = b[i + lag]; sxy += b[i] * v; e1 += v * v; }
+      const c = sxy / Math.sqrt(e0 * e1 + 1e-12); corr[lag] = c; if (c > max) max = c;
+    }
+    if (max < .6) return 0;
+    for (let lag = minLag + 1; lag < maxLag; lag++) {
+      const c = corr[lag];
+      if (c > .9 * max && c >= corr[lag - 1] && c >= corr[lag + 1]) {
+        const a = corr[lag - 1], d = corr[lag + 1], den = a - 2 * c + d;
+        return sr / (lag + (den ? (a - d) / (2 * den) : 0));
+      }
+    }
+    return 0;
+  }
+  const L80 = Math.log2(80), L800 = Math.log2(800);
+  let pitchN = .4, hz = 0, voicedNow = false, voiced = 0, pMin = 1, pMax = 0;
+  function noteName(f) {
+    const midi = Math.round(69 + 12 * Math.log2(f / 440));
+    return NOTE[((midi % 12) + 12) % 12] + (Math.floor(midi / 12) - 1);
+  }
+
+  // ---------- 群れ（ボイド） ----------
+  const bcan = $('b'), bctx = bcan.getContext('2d');
+  const NB = 320, boids = [];
+  let BW = 1, BH = 1;
+  function bsize() {
+    BW = innerWidth; BH = innerHeight;
+    bcan.width = Math.floor(BW * dpr); bcan.height = Math.floor(BH * dpr);
+    bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  bsize(); addEventListener('resize', () => setTimeout(bsize, 250));
+  for (let i = 0; i < NB; i++) {
+    const a = Math.random() * Math.PI * 2;
+    boids.push({ x: Math.random() * BW, y: BH * (.3 + Math.random() * .4), vx: Math.cos(a) * 60, vy: Math.sin(a) * 60, w: Math.random() * 6.28 });
+  }
+  function updBoids(dt, t, energy) {
+    const sepR2 = 15 * 15, nbR2 = 48 * 48;
+    const maxS = 90 + 170 * energy, minS = 35;
+    const ty = BH * (.86 - pitchN * .72);
+    let gx = 0, gy = 0, gvx = 0, gvy = 0;
+    for (let i = 0; i < NB; i++) {
+      const b = boids[i];
+      let sx = 0, sy = 0, ax = 0, ay = 0, cx = 0, cy = 0, cn = 0;
+      for (let j = 0; j < NB; j++) {
+        if (i === j) continue;
+        const o = boids[j], dx = o.x - b.x, dy = o.y - b.y, d2 = dx * dx + dy * dy;
+        if (d2 < nbR2) {
+          ax += o.vx; ay += o.vy; cx += o.x; cy += o.y; cn++;
+          if (d2 < sepR2 && d2 > .01) { sx -= dx / d2; sy -= dy / d2; }
+        }
+      }
+      let fx = sx * 900, fy = sy * 900;
+      if (cn) { fx += (ax / cn - b.vx) * 1.4 + (cx / cn - b.x) * .9; fy += (ay / cn - b.vy) * 1.4 + (cy / cn - b.y) * .9; }
+      const tx = BW * (.5 + .36 * Math.sin(t * .35 + b.w * .15));
+      fx += (tx - b.x) * .25; fy += (ty - b.y) * (.9 + 1.6 * energy);
+      b.vx += fx * dt; b.vy += fy * dt;
+      const sp = Math.hypot(b.vx, b.vy) || 1, cl = Math.min(Math.max(sp, minS), maxS) / sp;
+      b.vx *= cl; b.vy *= cl;
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      if (b.x < -20) b.x = BW + 20; else if (b.x > BW + 20) b.x = -20;
+      if (b.y < 8) b.vy += 300 * dt; else if (b.y > BH - 8) b.vy -= 300 * dt;
+      gx += b.x; gy += b.y; gvx += b.vx; gvy += b.vy;
+    }
+    return [gx / NB, gy / NB, gvx / NB, gvy / NB];
+  }
+  function drawBoids() {
+    bctx.clearRect(0, 0, BW, BH);
+    const k = pitchN;
+    const r = Math.round(56 + (237 - 56) * k), g = Math.round(107 + (198 - 107) * k), bl = Math.round(242 + (79 - 242) * k);
+    bctx.strokeStyle = `rgba(${r},${g},${bl},.9)`; bctx.lineWidth = 2; bctx.lineCap = 'round';
+    bctx.beginPath();
+    for (const b of boids) { bctx.moveTo(b.x - b.vx * .07, b.y - b.vy * .07); bctx.lineTo(b.x, b.y); }
+    bctx.stroke();
+  }
+  function enterS3() {
+    state = 's3'; tag.textContent = '03 ／ 声を上げる';
+    progFill.style.width = '0%'; pMin = 1; pMax = 0; voiced = 0;
+    bcan.classList.add('on'); meter.hidden = false;
+    if (audio.ok) {
+      meterLabel.textContent = '声の高さ';
+      show('', '声を、空へ。', '低い声から、高い声へ。\nゆっくり変えてみてください。\n\nあなたの声につられて、\n群れも上がったり、下がったりします。', null);
+    } else {
+      meterLabel.textContent = '指の高さ';
+      show('', '声を、空へ。', 'この画面ではマイクが使えません。\n\n触れたまま指を上下に動かすと、\n声の高さのかわりになります。', null);
+    }
+  }
+
+  const inS3 = () => state === 's3' || state === 's3done';
+  const inS4 = () => state === 's4' || state === 's4done';
+  const inS5 = () => state === 's5' || state === 's5done' || state === 'end';
+  let silence = 0, rdA = 0, rdIters = 10, rdErase = 0, wasNoise = false;
+  const SEEDS = [[.5,.62],[.32,.72],[.68,.5],[.4,.36],[.62,.24],[.26,.18],[.76,.8]];
+  function rdSeeds() { SEEDS.forEach(([x, y]) => rdSeed(x, y, .002)); }
+  function enterS5() {
+    state = 's5'; tag.textContent = '05 ／ なにもしない';
+    progFill.style.width = '0%'; vowelsEl.hidden = true; meter.hidden = false; silence = 0;
+    level = 0; hold = 0; wasNoise = false;
+    rdReset(); rdSeeds();
+    show('', 'こんどは、なにもしないで。', '声を止めてください。\n触らなくても大丈夫。\n\nしばらく、\nただ待ってみてください。', null);
+  }
+
+  // ---------- 母音（シーン4） ----------
+  const VK = ['あ','い','う','え','お'];
+  const VF = [[800,1200],[300,2300],[350,1400],[500,1900],[500,900]];
+  const vowelsEl = $('vowels'), chips = [...vowelsEl.querySelectorAll('button')];
+  let wv = [0,0,0,0,1], got = [false,false,false,false,false], manualV = -1, curV = -1, vHold = 0, sdfA = 0, lpc = null;
+  chips.forEach((c, i) => {
+    c.addEventListener('pointerdown', e => { manualV = i; try { c.setPointerCapture(e.pointerId); } catch (_) {} });
+    const off = () => { if (manualV === i) manualV = -1; };
+    c.addEventListener('pointerup', off); c.addEventListener('pointercancel', off); c.addEventListener('lostpointercapture', off);
+  });
+  function formants() {
+    const b = audio.buf, sr = audio.ctx.sampleRate, D = Math.max(1, Math.round(sr / 8000)), fs = sr / D, n = Math.floor(b.length / D);
+    if (!lpc || lpc.length !== n) lpc = new Float64Array(n);
+    let prev = 0;
+    for (let i = 0; i < n; i++) {
+      let v = 0; for (let k = 0; k < D; k++) v += b[i * D + k]; v /= D;
+      const pe = v - .94 * prev; prev = v;
+      lpc[i] = pe * (.54 - .46 * Math.cos(2 * Math.PI * i / (n - 1)));
+    }
+    const ord = 10, R = new Float64Array(ord + 1);
+    for (let l = 0; l <= ord; l++) { let s = 0; for (let i = 0; i < n - l; i++) s += lpc[i] * lpc[i + l]; R[l] = s; }
+    if (R[0] < 1e-9) return null;
+    R[0] *= 1.0001;
+    const a = new Float64Array(ord + 1); a[0] = 1; let e = R[0];
+    for (let i = 1; i <= ord; i++) {
+      let acc = R[i]; for (let j = 1; j < i; j++) acc += a[j] * R[i - j];
+      const k = -acc / e, tmp = a.slice();
+      for (let j = 1; j < i; j++) a[j] = tmp[j] + k * tmp[i - j];
+      a[i] = k; e *= (1 - k * k); if (e <= 0) return null;
+    }
+    const top = Math.min(4000, fs / 2 - 50), M = 200, peaks = [];
+    let m1 = 0, m2 = 0;
+    for (let m = 0; m <= M; m++) {
+      const f = m * top / M, w = 2 * Math.PI * f / fs;
+      let re = 0, im = 0; for (let j = 0; j <= ord; j++) { re += a[j] * Math.cos(w * j); im -= a[j] * Math.sin(w * j); }
+      const mag = 1 / (re * re + im * im + 1e-12);
+      if (m >= 2 && m1 > m2 && m1 > mag) { const fp = (m - 1) * top / M; if (fp > 200) peaks.push(fp); }
+      m2 = m1; m1 = mag;
+    }
+    return peaks.length >= 2 ? [peaks[0], peaks[1]] : null;
+  }
+  function classify(f1, f2) {
+    let bi = -1, bd = 1e9;
+    for (let i = 0; i < 5; i++) { const x = Math.log(f1 / VF[i][0]), y = Math.log(f2 / VF[i][1]), d = x * x + .6 * y * y; if (d < bd) { bd = d; bi = i; } }
+    return bd < .45 ? bi : -1;
+  }
+  function enterS4() {
+    state = 's4'; tag.textContent = '04 ／ あいうえお';
+    progFill.style.width = '0%'; bcan.classList.remove('on');
+    got = [false,false,false,false,false]; chips.forEach(c => c.classList.remove('got'));
+    vowelsEl.hidden = false; meter.hidden = false; meterLabel.textContent = '声の大きさ';
+    if (audio.ok) show('', '声には、かたちがある。', '「あ・い・う・え・お」。\nゆっくり、ひとつずつ。\n\n同じ声なのに、\n母音が変わるだけで、かたちも変わります。', null);
+    else show('', '声には、かたちがある。', 'この画面ではマイクが使えません。\n\n下の「あいうえお」を長押しすると、\nその母音のかわりになります。', null);
+  }
+  // ---------- 毎フレーム ----------
+  const GOLD = [.93, .78, .31], BLUE = [.22, .42, .95];
+  let last = performance.now(), T = 0, ambient = 0;
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 1 / 30); last = now; T += dt;
+    sdfA += ((inS4() ? 1 : 0) - sdfA) * .05;
+    const aspect = canvas.width / canvas.height;
+
+    // 指の流れ
+    if (ptr.dx || ptr.dy) {
+      const k = .5 + .5 * Math.sin(T * .7);
+      const col = [BLUE[0] + (GOLD[0] - BLUE[0]) * k, BLUE[1] + (GOLD[1] - BLUE[1]) * k, BLUE[2] + (GOLD[2] - BLUE[2]) * k].map(v => v * .16);
+      splat(ptr.x, ptr.y, ptr.dx * 6000 * (aspect < 1 ? aspect : 1), ptr.dy * 6000, col, .22);
+      ptr.dx = ptr.dy = 0;
+    }
+
+    // 声（またはその代わりの長押し）
+    let target = 0;
+    const db = micDb();
+    if (db !== null) {
+      if (state === 's2calib') audio.calib.push(db);
+      else target = Math.min(Math.max((db - audio.floor - 8) / 24, 0), 1);
+    }
+    const holding = ptr.down && ptr.sinceDown < .03 && now - ptr.downAt > 250 && state !== 's1' && state !== 'intro' && !inS3() && !inS4() && !inS5();
+    hold += ((holding ? .85 : 0) - hold) * (holding ? .06 : .1);
+    target = Math.max(target, hold);
+    level += (target - level) * (target > level ? .5 : .08);
+    if (state === 's1' || state === 'intro') level = 0;
+
+    // 声の高さ（シーン3から）
+    voicedNow = false;
+    if (inS3()) {
+      const f = (db !== null && level > .08) ? detectPitch() : 0;
+      if (f > 0) {
+        hz = f; voicedNow = true;
+        const pn = Math.min(Math.max((Math.log2(f) - L80) / (L800 - L80), 0), 1);
+        pitchN += (pn - pitchN) * .2;
+        meterLabel.textContent = noteName(f) + '　' + Math.round(f) + ' Hz';
+      } else if (ptr.down && !audio.ok) {
+        voicedNow = true; pitchN += (ptr.y - pitchN) * .2; level = Math.max(level, .5);
+      }
+      meterFill.style.width = (pitchN * 100).toFixed(1) + '%';
+      const [gx, gy, gvx, gvy] = updBoids(dt, T, level);
+      drawBoids();
+      const k = pitchN, col = [BLUE[0] + (GOLD[0] - BLUE[0]) * k, BLUE[1] + (GOLD[1] - BLUE[1]) * k, BLUE[2] + (GOLD[2] - BLUE[2]) * k];
+      splat(gx / BW, 1 - gy / BH, gvx * 1.5, -gvy * 1.5, col.map(v => v * .012), .4);
+    } else if (inS4()) {
+      let vi = -1, f12 = null;
+      if (manualV >= 0) { vi = manualV; level = Math.max(level, .45); }
+      else if (db !== null && level > .12) { f12 = formants(); if (f12) vi = classify(f12[0], f12[1]); }
+      if (vi >= 0) for (let i = 0; i < 5; i++) wv[i] += ((vi === i ? 1 : 0) - wv[i]) * .12;
+      if (vi === curV && vi >= 0) vHold += dt; else { curV = vi; vHold = 0; }
+      if (state === 's4' && vi >= 0 && vHold > .35 && !got[vi]) { got[vi] = true; chips[vi].classList.add('got'); }
+      meterFill.style.width = (level * 100).toFixed(1) + '%';
+      if (vi >= 0) meterLabel.textContent = '母音 ' + VK[vi] + (f12 ? '　F1 ' + Math.round(f12[0]) + ' / F2 ' + Math.round(f12[1]) + ' Hz' : '');
+    } else if (inS5()) {
+      const noise = level > .06 || (!audio.ok && ptr.down);
+      if (state === 's5') { if (noise) silence = 0; else silence += dt; }
+      meterFill.style.width = (noise ? level * 100 : Math.min(silence / 7, 1) * 100).toFixed(1) + '%';
+      meterLabel.textContent = noise ? (audio.ok ? '声が聞こえています' : '指が触れています') : '沈黙 ' + silence.toFixed(1) + ' 秒';
+      rdErase = noise ? (audio.ok ? level * .12 : .04) : 0;
+      if (wasNoise && !noise) rdSeeds();
+      wasNoise = noise;
+      rdIters = noise ? 2 : 10;
+      if (audio.ok && ptr.down) rdSeed(ptr.x, ptr.y, .0006);
+    } else {
+      meterFill.style.width = (level * 100).toFixed(1) + '%';
+    }
+
+    if (level > .04 && !inS3() && !inS4() && !inS5()) {
+      splat(.5 + Math.sin(T * 1.3) * .06, .05, Math.sin(T * 2.1) * 160 * level, 650 * level, GOLD.map(v => v * .07 * level), .55);
+    }
+
+    // 待ち受け中のゆらぎ
+    if (state === 'intro' && !reduce) {
+      ambient -= dt;
+      if (ambient <= 0) {
+        ambient = .55 + Math.random() * .5;
+        const a = Math.random() * Math.PI * 2;
+        splat(.2 + Math.random() * .6, .2 + Math.random() * .6, Math.cos(a) * 220, Math.sin(a) * 220, (Math.random() < .3 ? GOLD : BLUE).map(v => v * .08), .5);
+      }
+    }
+
+    // 進み具合
+    if (state === 's1') {
+      progFill.style.width = Math.min(dist / 4 * 100, 100) + '%';
+      if (dist >= 4) {
+        state = 's1done';
+        show('さっき動いていたもの', '水じゃないのに、水みたい。', 'これは「流体シミュレーション」。\n水や煙や風の動きを、\nコンピューターの中で計算しています。\n\nでも、おもしろいのは技術の名前より、\nあなたが触ったから、\nそこに流れが生まれたこと。', 'つぎへ', ['映画、ゲーム、天気予報、車や飛行機の空気の流れなどに使われています。', '人の動きや街の風、血液の流れまで。\n「見えない流れ」を見るための技術になっていきます。']);
+        later(15000, enterS2);
+      }
+    } else if (state === 's2') {
+      energy += level * dt;
+      progFill.style.width = Math.min(energy / 5 * 100, 100) + '%';
+      if (energy >= 5) {
+        state = 's2done';
+        show('さっき生まれていたもの', '声が、粒になった。', '画面の中では、\n何万個もの小さな粒が同時に動いていました。\n名前は「GPUパーティクル」。\n\nけれど今日は、\n声に、かたちがあった。\n\nそれだけ覚えて帰ってもらえれば、十分です。', 'つぎへ', ['ライブ、ゲーム、映像作品、科学データの可視化など。', '拍手や声や動きに、その場で反応する空間。\n人の反応そのものが演出になります。']);
+        later(15000, enterS3);
+      }
+    } else if (state === 's3') {
+      if (voicedNow) { voiced += dt; pMin = Math.min(pMin, pitchN); pMax = Math.max(pMax, pitchN); }
+      const range = Math.max(0, pMax - pMin);
+      const pr = Math.min(range / .25, 1) * .7 + Math.min(voiced / 3, 1) * .3;
+      progFill.style.width = (pr * 100).toFixed(1) + '%';
+      if (pr >= 1) {
+        state = 's3done';
+        show('さっき飛んでいたもの', '誰も、リーダーじゃない。', '鳥たちは、\n「近づきすぎない」\n「向きをそろえる」\n「仲間から離れすぎない」\nそのくらいの簡単な約束だけで動いています。\n\n誰かが命令しているわけではありません。\nなのに、ちゃんと群れになる。\n\n人間も、案外そうなのかもしれません。', 'つぎへ', ['鳥や群衆のCG、ゲーム、ドローンの編隊制御など。', 'ロボット、自動運転、避難誘導。\n「みんなで動く」を設計する技術です。']);
+        later(15000, enterS4);
+      }
+    } else if (state === 's4') {
+      const c = got.filter(Boolean).length;
+      progFill.style.width = Math.min(c / 4 * 100, 100) + '%';
+      if (c >= 4) {
+        state = 's4done';
+        show('さっき変わっていたもの', '「あ」と「い」は、ちがう形をしている。', '声には、目に見えない「響きの山」があります。\nその違いを見つけて、\n画面の形を変えていました。\n\n専門的には、\nフォルマント解析とSDFレイマーチング。\n\nでも、もっと簡単に言えば、\n耳で聞いていたものを、\n目でも見てみた。\nということです。', 'つぎへ', ['音声認識、発声練習、CG、MV、広告表現など。', '声そのものが、\n画面や空間をつくるインターフェースになります。']);
+        later(15000, enterS5);
+      }
+    } else if (state === 's5') {
+      progFill.style.width = Math.min(silence / 7 * 100, 100) + '%';
+      if (silence >= 7) {
+        state = 's5done';
+        show('さっき起きていたもの', 'なにもしないと、育つもの。', '黙っているあいだ、\n画面の模様は少しずつ育っていました。\n\nこれは「反応拡散」という計算です。\n動物の模様や、\n自然のかたちにも似たしくみです。\n\n声を出すと崩れる。\n黙ると育つ。\n\nつまり、\n「しない」も、ひとつの入力でした。', 'つぎへ', ['生き物の模様、CG、素材やパターンの研究など。', '声や動きだけでなく、\n間、沈黙、ためらいまで表現の材料になるかもしれません。']);
+        later(15000, () => {
+          state = 'end'; meter.hidden = true; vowelsEl.hidden = true;
+          tag.textContent = '実験 001 ／ おしまい';
+          show('', '作品を動かしていたのは、あなたでした。', '触ったこと。\n声を出したこと。\n声の高さ。\n「あいうえお」。\nそして、黙っていたこと。\n\nぜんぶ、映像の一部になりました。\n\n表現は、\nつくった人だけでは完成しません。\n\n見る人。\n聞く人。\n触れる人。\n\nその人の反応まで含めて、\nやっと、ひとつの表現になる。', 'もう一度、参加する', null, true);
+        });
+      }
+    }
+
+    step(dt);
+    rdA += ((inS5() ? 1 : 0) - rdA) * .04;
+    if (inS5()) stepRD(state === 's5' || state === 's5done' ? rdIters : 10, state === 'end' ? Math.min(level * .12, .1) : rdErase);
+    stepParticles(dt, T, level * (inS3() || inS4() || inS5() ? .006 : .035), .12 + .3 * level, .04 + .22 * level);
+    render();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,541 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>HYOGEN BUSINESS LEARNING 60秒CM</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: 1920×1080 stage scaled to fit; player chrome below. Single dark look for the player, white stage inside. */
+:root {
+  --ink: #2b2124;        /* body text on stage */
+  --muted: #7a6a6e;      /* captions */
+  --c900: #5e0c1b;       /* deep cardinal */
+  --c700: #8e1328;       /* cardinal */
+  --c500: #c8233f;       /* scarlet accent */
+  --blush: #fdf3f4;      /* soft panel */
+  --rose: #f6d3d9;       /* highlight */
+  --line: #ead0d5;       /* card border */
+  --paper: #ffffff;
+  --safe: #a64920;      /* safety warning (from MANUAL SKILL) */
+  --safe-bg: #fff4e8;
+  --safe-ink: #8b3516;
+  --chrome: #170c0f;     /* player background */
+  --chrome-2: #24151a;
+  --chrome-fg: #f4e6e9;
+  --font: 'Noto Sans JP', 'Noto Sans CJK JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--chrome); color: var(--chrome-fg); font-family: var(--font);
+  display: flex; flex-direction: column; gap: 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px;
+  box-sizing: border-box; overflow-x: hidden;
+}
+#viewport { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; position: relative; }
+#fit { position: relative; overflow: hidden; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.45); }
+#stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; background: var(--paper); overflow: hidden; color: var(--ink); }
+
+/* ---------- player controls ---------- */
+#controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; max-width: 1200px; width: 100%; margin: 0 auto; }
+#controls button { font: 700 14px var(--font); color: var(--chrome-fg); background: var(--chrome-2); border: 1px solid #3a242b; border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+#controls button:hover { border-color: var(--c500); }
+#controls button:focus-visible, #scrub:focus-visible { outline: 2px solid var(--c500); outline-offset: 2px; }
+#play { background: var(--c700) !important; border-color: var(--c700) !important; min-width: 108px; }
+#scrub { flex: 1 1 260px; min-width: 0; accent-color: var(--c500); }
+#time { font: 500 13px var(--font); font-variant-numeric: tabular-nums; color: #c9b3b8; min-width: 92px; text-align: right; }
+#chips { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+#chips button { font-size: 12px; padding: 5px 12px; font-weight: 500; }
+#chips button.on { border-color: var(--c500); color: #fff; }
+body.export { padding: 0; background: #fff; }
+body.export #controls { display: none; }
+body.export #fit { border-radius: 0; box-shadow: none; }
+
+/* ---------- stage primitives ---------- */
+#stage *, #stage *::before, #stage *::after { box-sizing: border-box; }
+.ab { position: absolute; }
+.layer { position: absolute; inset: 0; }
+.dots { position: absolute; inset: 0; background-image: radial-gradient(#f3dde2 1.6px, transparent 1.8px); background-size: 36px 36px; opacity: .7; }
+.ring { position: absolute; border-radius: 50%; border: 2px solid #f6e1e5; }
+.kick { font-size: 22px; letter-spacing: .3em; font-weight: 700; color: var(--c500); }
+.h1 { font-size: 66px; font-weight: 900; line-height: 1.38; color: var(--ink); letter-spacing: .01em; }
+.h1 em { font-style: normal; color: var(--c700); background: linear-gradient(transparent 66%, var(--rose) 66%); }
+.h2 { font-size: 44px; font-weight: 900; line-height: 1.4; }
+.sub { font-size: 24px; color: var(--muted); font-weight: 500; }
+.chip { display: inline-block; font-size: 20px; font-weight: 700; padding: 6px 18px; border-radius: 999px; background: var(--c700); color: #fff; }
+.chip.light { background: #fff; color: var(--c700); border: 2px solid var(--c500); }
+.card { background: #fff; border: 2px solid var(--line); border-top: 6px solid var(--c700); border-radius: 18px; padding: 22px 26px; }
+.bubble { background: #f6eff0; border-radius: 8px 28px 28px 28px; padding: 18px 26px; font-size: 28px; font-weight: 500; line-height: 1.55; color: var(--ink); }
+.q { background: var(--c700); color: #fff; border-radius: 8px 28px 28px 28px; padding: 14px 26px; font-size: 30px; font-weight: 900; display: inline-block; }
+.a { background: #f6eff0; border-radius: 28px 8px 28px 28px; padding: 14px 24px; font-size: 24px; line-height: 1.55; color: var(--ink); }
+.who { font-size: 16px; font-weight: 700; color: var(--muted); margin-bottom: 6px; letter-spacing: .05em; }
+.badge { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--c500); color: #fff; font-size: 22px; font-weight: 900; flex: none; }
+.badge.sm { width: 32px; height: 32px; font-size: 18px; }
+.note { font-size: 18px; color: var(--muted); }
+
+/* overlays */
+#brandmark { left: 80px; top: 52px; font-size: 18px; letter-spacing: .28em; font-weight: 700; color: var(--c700); }
+#demo { right: 80px; top: 44px; font-size: 17px; font-weight: 700; letter-spacing: .12em; color: #fff; background: var(--c500); padding: 8px 20px; border-radius: 999px; }
+#nav { left: 80px; bottom: 44px; display: flex; gap: 34px; }
+#nav div { font-size: 18px; font-weight: 700; color: #c7b4b8; padding-bottom: 8px; border-bottom: 4px solid transparent; letter-spacing: .06em; }
+#nav div b { font-weight: 900; margin-right: 8px; }
+#nav div.on { color: var(--c700); border-bottom-color: var(--c500); }
+
+/* scene 1 */
+.who-tag { font-size: 20px; font-weight: 900; color: var(--c700); margin-bottom: 8px; }
+.paper { width: 380px; height: 300px; background: #f2eeee; border: 2px solid #d8cfd1; border-radius: 6px; padding: 26px 30px; }
+.paper .ttl { font-size: 22px; font-weight: 900; color: #6d6265; }
+.paper .yr { font-size: 16px; color: #9a8f92; margin-bottom: 18px; }
+.paper i { display: block; height: 12px; background: #dcd3d5; border-radius: 6px; margin: 16px 0; }
+.stamp { font-size: 30px; font-weight: 900; color: var(--c500); border: 4px solid var(--c500); border-radius: 12px; padding: 8px 22px; background: #fff; }
+
+/* scene 2 */
+.mail { width: 960px; height: 600px; background: #fff; border: 2px solid #dccbcf; border-radius: 20px; overflow: hidden; box-shadow: 0 18px 48px rgba(142,19,40,.10); }
+.mail .bar { background: #f5eff1; border-bottom: 2px solid #ece0e3; padding: 18px 32px; font-size: 20px; color: #5a4a4e; line-height: 1.7; }
+.mail .bar .dots3 { display: flex; gap: 10px; margin-bottom: 10px; }
+.mail .bar .dots3 i { width: 14px; height: 14px; border-radius: 50%; background: #e2cfd4; }
+.mail .body { padding: 26px 36px; font-size: 27px; line-height: 1.5; }
+.mail .ln { position: relative; height: 48px; white-space: nowrap; }
+.mail .ln .hl { position: absolute; left: -8px; right: -8px; top: 4px; bottom: 4px; background: var(--rose); border-radius: 8px; z-index: 0; }
+.mail .ln span { position: relative; z-index: 1; }
+.panel-h { font-size: 24px; font-weight: 900; color: var(--c700); letter-spacing: .08em; }
+.ext { display: flex; gap: 18px; align-items: center; background: #fff; border: 2px solid var(--line); border-left: 8px solid var(--c700); border-radius: 14px; padding: 16px 22px; }
+.ext .k { font-size: 18px; font-weight: 900; color: var(--c500); letter-spacing: .1em; width: 104px; flex: none; }
+.ext .v { font-size: 25px; font-weight: 700; }
+.unknown { border: 3px dashed #c9b3b8; border-radius: 16px; padding: 18px 24px; background: #faf7f7; }
+.unknown .k { font-size: 18px; font-weight: 900; color: var(--muted); letter-spacing: .1em; }
+.unknown .v { font-size: 25px; font-weight: 700; color: #5a4a4e; }
+.honest { background: linear-gradient(120deg, var(--c700), #b21a35); color: #fff; border-radius: 18px; padding: 22px 30px; font-size: 30px; font-weight: 900; line-height: 1.5; }
+
+/* scene 3 */
+.sheet { width: 600px; background: var(--blush); border-radius: 22px; padding: 28px 30px; }
+.row { display: flex; gap: 16px; align-items: flex-start; background: #fff; border-radius: 14px; padding: 16px 18px; border: 2px solid var(--line); }
+.row .k { font-size: 17px; font-weight: 900; color: var(--c500); letter-spacing: .1em; }
+.row .v { font-size: 24px; font-weight: 700; line-height: 1.45; }
+.row.pending { border-style: dashed; background: #faf7f7; }
+.row.pending .k { color: var(--muted); }
+.status { display: inline-block; font-size: 15px; font-weight: 900; color: #5a4a4e; border: 2px solid #b9aeb0; border-radius: 999px; padding: 2px 12px; margin-left: 8px; vertical-align: 3px; background: #fff; }
+
+/* scene 4 */
+.manual { width: 1100px; height: 700px; background: #fff; border: 3px solid var(--c700); border-radius: 18px; overflow: hidden; box-shadow: 0 20px 50px rgba(142,19,40,.12); }
+.manual .hd { background: var(--c700); color: #fff; height: 64px; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; font-size: 22px; font-weight: 700; }
+.manual .hd small { font-size: 16px; letter-spacing: .2em; color: #ffd5dc; }
+.step { width: 172px; height: 104px; border-radius: 14px; background: #f6e3e6; display: flex; flex-direction: column; justify-content: center; padding: 0 16px; }
+.step .n { font-size: 14px; font-weight: 900; letter-spacing: .18em; color: var(--c500); }
+.step .t { font-size: 21px; font-weight: 900; line-height: 1.35; }
+.step.key { background: var(--c700); color: #fff; } .step.key .n { color: #ffd5dc; }
+.arr { color: var(--c500); font-size: 22px; }
+.box { border: 3px solid var(--c700); border-radius: 12px; background: #fff; text-align: center; font-size: 22px; font-weight: 900; color: var(--c700); padding: 12px; line-height: 1.4; }
+.dia { background: var(--c700); color: #fff; text-align: center; font-size: 24px; font-weight: 900; padding: 18px; clip-path: polygon(7% 0, 93% 0, 100% 50%, 93% 100%, 7% 100%, 0 50%); }
+.yes { background: #f6e3e6; border-radius: 12px; text-align: center; padding: 12px; font-size: 22px; font-weight: 900; }
+.no { background: var(--c500); color: #fff; border-radius: 12px; text-align: center; padding: 12px; font-size: 22px; font-weight: 900; line-height: 1.35; }
+.yes small, .no small { display: block; font-size: 15px; letter-spacing: .2em; opacity: .8; }
+.warn { border: 3px solid var(--safe); border-radius: 14px; padding: 16px 20px; background: var(--safe-bg); font-size: 21px; line-height: 1.55; }
+.warn .t { font-weight: 900; color: var(--safe-ink); font-size: 19px; letter-spacing: .1em; margin-bottom: 4px; }
+.warn .own { font-size: 16px; color: var(--safe-ink); margin-top: 6px; font-weight: 700; }
+.warn b { color: var(--safe-ink); }
+.src { font-size: 16px; color: var(--muted); margin-top: 10px; }
+.rec { background: #fdf8f8; border: 2px solid var(--line); border-radius: 12px; padding: 10px 16px; font-size: 18px; line-height: 1.5; }
+.rec b { color: var(--c700); }
+.manual .hd .docid { display: flex; align-items: center; gap: 12px; font-size: 16px; letter-spacing: .06em; color: #ffd5dc; font-weight: 700; }
+.vw { position: relative; display: inline-block; }
+.ver { font-size: 15px; font-weight: 900; background: #fff; color: var(--c700); border-radius: 999px; padding: 3px 12px; white-space: nowrap; letter-spacing: .04em; }
+.ver.ok { position: absolute; right: 0; top: 0; background: #ffd5dc; }
+.stc { display: inline-block; font-size: 20px; font-weight: 900; border-radius: 999px; padding: 4px 16px; white-space: nowrap; border: 2px solid #b9aeb0; color: #5a4a4e; background: #fff; }
+.stc.ok { position: absolute; left: 0; top: 0; border-color: var(--c700); background: var(--c700); color: #fff; }
+.quiz { width: 500px; background: #fff; border: 2px solid var(--line); border-left: 10px solid var(--c700); border-radius: 18px; padding: 26px 28px; }
+.quiz .tg { display: inline-block; background: var(--c700); color: #fff; font-size: 16px; font-weight: 700; padding: 3px 14px; border-radius: 999px; letter-spacing: .1em; }
+.quiz .qt { font-size: 25px; font-weight: 900; color: var(--c700); margin: 12px 0 14px; }
+.quiz .op { position: relative; font-size: 21px; padding: 10px 16px; margin-bottom: 8px; background: #fbf1f2; border-radius: 8px; }
+.quiz .ok { position: absolute; inset: 0; border: 3px solid var(--c500); border-radius: 8px; background: rgba(200,35,63,.08); }
+.quiz .mark { position: absolute; right: 14px; top: 50%; margin-top: -16px; font-size: 22px; font-weight: 900; color: var(--c500); }
+.mini { width: 330px; height: 300px; background: #fff; border: 2px solid var(--line); border-radius: 14px; overflow: hidden; }
+.mini .mh { background: var(--c700); color: #fff; font-size: 16px; font-weight: 700; padding: 10px 16px; }
+.mini .mb { padding: 16px; }
+.mini .mb i { display: block; height: 10px; background: #f0e2e5; border-radius: 5px; margin: 12px 0; }
+.mini .mb .blk { display: flex; gap: 8px; margin: 12px 0; } .mini .mb .blk span { flex: 1; height: 54px; border-radius: 8px; background: #f6e3e6; }
+.mini .mb .blk span.d { background: var(--c700); }
+.appr { display: flex; align-items: center; gap: 22px; }
+.ap { width: 300px; height: 110px; border-radius: 18px; border: 3px solid var(--line); background: #fff; display: flex; align-items: center; gap: 16px; padding: 0 22px; }
+.ap .ck { width: 46px; height: 46px; border-radius: 50%; background: var(--c700); color: #fff; font-size: 26px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex: none; }
+.ap .tx { font-size: 26px; font-weight: 900; line-height: 1.3; }
+.ap .tx small { display: block; font-size: 15px; color: var(--muted); font-weight: 500; }
+.ap.fin { background: var(--c700); border-color: var(--c700); color: #fff; } .ap.fin .ck { background: #fff; color: var(--c700); } .ap.fin small { color: #ffd5dc; }
+
+/* scene 5 */
+#s5 { background: linear-gradient(158deg, #5e0c1b 0%, #8e1328 52%, #c8233f 100%); color: #fff; }
+#s5 .dz { position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.11) 2px, transparent 2.3px); background-size: 40px 40px; }
+#s5 .rg { position: absolute; border-radius: 50%; border: 2px solid rgba(255,213,220,.25); }
+.pill { display: inline-block; border: 2px solid rgba(255,255,255,.6); border-radius: 999px; padding: 8px 26px; font-size: 20px; letter-spacing: .26em; font-weight: 700; background: rgba(255,255,255,.08); color: #fff; }
+.hero { font-size: 104px; font-weight: 900; line-height: 1.32; color: #fff; }
+.hero u { text-decoration: none; border-bottom: 14px solid rgba(255,213,220,.5); }
+.lab { font-size: 30px; font-weight: 700; color: #fbe3e7; letter-spacing: .08em; }
+@media (prefers-reduced-motion: reduce) { #controls button { transition: none; } }
+</style>
+
+<div id="viewport"><div id="fit"><div id="stage">
+
+  <!-- ===================== SCENE 1 課題 (0–10s) ===================== -->
+  <section class="layer" id="s1">
+    <div class="dots"></div>
+    <div class="ring" style="width:900px;height:900px;right:-260px;top:-180px"></div>
+    <div class="ring" style="width:620px;height:620px;right:-120px;top:-40px"></div>
+    <div class="ab" id="s1h" style="left:140px;top:150px">
+      <div class="h1" id="s1h1">教えたはずなのに、</div>
+      <div class="h1" id="s1h2"><em>また同じ質問。</em></div>
+    </div>
+    <div class="ab" id="s1grp" style="left:0;top:0;width:1920px;height:1080px">
+      <div class="ab" id="s1b1" style="left:900px;top:170px;width:720px"><div class="who-tag">工場長</div><div class="bubble">「まず点検してから、指示書を見て」</div></div>
+      <div class="ab" id="s1b2" style="left:1010px;top:330px;width:720px"><div class="who-tag">先輩 A</div><div class="bubble">「指示書が先。点検はあとでいいよ」</div></div>
+      <div class="ab" id="s1b3" style="left:1120px;top:490px;width:640px"><div class="who-tag">先輩 B</div><div class="bubble">「番号？ 見れば分かるって」</div></div>
+      <div class="ab stamp" id="s1st" style="left:930px;top:660px">教える人ごとに、手順がちがう</div>
+      <div class="ab paper" id="s1paper" style="left:160px;top:520px">
+        <div class="ttl">作業前チェックシート</div><div class="yr">2019年版</div><i></i><i style="width:80%"></i><i style="width:90%"></i><i style="width:60%"></i>
+      </div>
+      <div class="ab note" id="s1pl" style="left:170px;top:842px;font-size:22px;font-weight:700;color:#7a6a6e">資料は、古い紙1枚だけ</div>
+      <div class="ab card" id="s1vet" style="left:600px;top:760px;width:440px">
+        <div style="font-size:18px;font-weight:900;color:#c8233f;letter-spacing:.1em">ベテラン社員　勤続28年</div>
+        <div style="font-size:28px;font-weight:900;margin-top:4px">コツは、全部頭の中</div>
+        <div id="s1ret" style="font-size:20px;color:#7a6a6e;margin-top:4px">来年、退職予定</div>
+      </div>
+    </div>
+    <div class="ab" id="s1q" style="left:0;top:380px;width:1920px;text-align:center">
+      <div class="h1" style="font-size:76px">その仕事、<em>担当者の頭の中</em>に<br>しかありませんか。</div>
+    </div>
+  </section>
+
+  <!-- ===================== SCENE 2 依頼 (10–22s) ===================== -->
+  <section class="layer" id="s2">
+    <div class="dots"></div>
+    <div class="ab" id="s2h" style="left:140px;top:130px"><div class="h1" style="font-size:56px">はじまりは、<em>箇条書きのメール1通</em>。</div></div>
+    <div class="ab mail" id="s2mail" style="left:140px;top:280px">
+      <div class="bar"><div class="dots3"><i></i><i></i><i></i></div>差出人：架空製造株式会社　教育担当（従業員35名）<br>件名：新人向けマニュアル作成のご相談</div>
+      <div class="body">
+        <div class="ln"><span class="ty" data-t="11.0">HYOGEN LAB 408 さま</span></div>
+        <div class="ln"><span class="ty" data-t="11.7">新人教育のことでご相談です。</span></div>
+        <div class="ln"><div class="hl" id="hl1"></div><span class="ty" data-t="12.5">・新人が入るたびに、同じことを教えている</span></div>
+        <div class="ln"><div class="hl" id="hl2"></div><span class="ty" data-t="13.5">・作業前の確認が、人によってバラバラ</span></div>
+        <div class="ln"><div class="hl" id="hl3"></div><span class="ty" data-t="14.4">・資料は、古いチェックシートが1枚だけ</span></div>
+        <div class="ln"><div class="hl" id="hl4"></div><span class="ty" data-t="15.3">・来春、新人が3名入る予定</span></div>
+        <div class="ln"><span class="ty" data-t="16.1">何から始めればいいか、分かりません。</span></div>
+      </div>
+    </div>
+    <div class="ab" style="left:1160px;top:290px;width:620px;display:flex;flex-direction:column;gap:16px">
+      <div class="panel-h" id="s2ph">メールから分かること</div>
+      <div class="ext" id="s2e1"><div class="k">困りごと</div><div class="v">手順が人によって違う</div></div>
+      <div class="ext" id="s2e2"><div class="k">手がかり</div><div class="v">チェックシート1枚</div></div>
+      <div class="ext" id="s2e3"><div class="k">期限</div><div class="v">来春、新人3名の入社まで</div></div>
+      <div class="unknown" id="s2u"><div class="k">まだ分からないこと</div><div class="v">現場で、実際に何をしているのか</div></div>
+    </div>
+    <div class="ab note" id="s2nda" style="left:140px;top:904px">※ お預かりする資料は、秘密保持契約のもとで機密として扱います。</div>
+    <div class="ab honest" id="s2hon" style="left:1160px;top:766px;width:620px">メールだけでは、手順は分かりません。<br>だから、聞きに行きます。</div>
+  </section>
+
+  <!-- ===================== SCENE 3 ヒアリング (22–38s) ===================== -->
+  <section class="layer" id="s3">
+    <div class="dots"></div>
+    <div class="ab" id="s3h" style="left:140px;top:128px">
+      <div class="h1" style="font-size:56px">ヒアリングで、<em>仕事を言葉にする</em>。</div>
+      <div class="sub" style="margin-top:2px">現場の担当者に約45分（想定）</div>
+    </div>
+    <div class="ab" style="left:140px;top:300px;width:960px">
+      <div class="ab" id="s3q1" style="left:0;top:0"><div class="who">聞き手</div><div class="q">誰が担当する？</div></div>
+      <div class="ab" id="s3a1" style="left:120px;top:96px;width:840px"><div class="a"><span class="badge sm" id="s3b1" style="margin-right:12px;vertical-align:-6px">1</span>組立ラインに入る新人です。最初の1か月が、いちばん迷います。</div></div>
+      <div class="ab" id="s3q2" style="left:0;top:220px"><div class="q">どこで判断する？</div></div>
+      <div class="ab" id="s3a2" style="left:120px;top:294px;width:840px"><div class="a"><span class="badge sm" id="s3b2" style="margin-right:12px;vertical-align:-6px">2</span>作業指示書と現物の、製品番号を照らし合わせるところです。たまに違うことがあって。</div></div>
+      <div class="ab" id="s3q3" style="left:0;top:456px"><div class="q">ミスが起きたら？</div></div>
+      <div class="ab" id="s3a3" style="left:120px;top:530px;width:840px"><div class="a"><span class="badge sm" id="s3b3" style="margin-right:12px;vertical-align:-6px">3</span>前に新人が自分で判断して進め、不良が出ました。本当は止めて、班長に報告です。</div></div>
+    </div>
+    <div class="ab sheet" id="s3sheet" style="left:1180px;top:300px">
+      <div class="panel-h" style="margin-bottom:16px">整理された業務情報</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="row" id="s3r1"><span class="badge">1</span><div><div class="k">対象</div><div class="v">入社1か月以内の新人<br>（組立ライン）</div></div></div>
+        <div class="row" id="s3r2"><span class="badge">2</span><div><div class="k">判断する所</div><div class="v">製品番号の照らし合わせ</div></div></div>
+        <div class="row" id="s3r3"><span class="badge">3</span><div><div class="k">ルール</div><div class="v">番号が違う → 止める<br>→ 班長に報告</div></div></div>
+        <div class="row pending" id="s3r4"><span class="badge" style="background:#b9aeb0">?</span><div><div class="k">確認事項<span class="status">要確認</span></div><div class="v" style="font-size:21px">班長がいないときの報告先<br>→ 確認事項一覧でお客様にうかがう</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SCENE 4 制作 (38–52s) ===================== -->
+  <section class="layer" id="s4">
+    <div class="dots"></div>
+    <div class="ab" id="s4h" style="left:140px;top:128px"><div class="h1" style="font-size:56px">聞いた言葉が、<em>迷わない手順</em>になる。</div></div>
+    <div class="ab" id="s4page" style="left:140px;top:236px;transform-origin:0 0">
+      <div class="manual">
+        <div class="hd"><span>SECTION 02　作業開始前の確認</span><span class="docid">DEMO-MFG-001<span class="vw"><span class="ver" id="verD">v0.1　ドラフト／運用未承認</span><span class="ver ok" id="verA">v1.0　承認済み</span></span></span></div>
+        <div style="position:relative;height:636px">
+          <div class="ab" id="s4tg" style="left:30px;top:24px;display:flex;align-items:center;gap:12px"><span class="badge sm">1</span><span class="chip light">対象：入社1か月以内の新人</span></div>
+          <div class="ab" style="left:30px;top:96px;display:flex;align-items:center;gap:8px">
+            <div class="step" id="st1"><div class="n">STEP 1</div><div class="t">保護具を<br>つける</div></div><div class="arr" id="ar1">▶</div>
+            <div class="step" id="st2"><div class="n">STEP 2</div><div class="t">作業台を<br>点検する</div></div><div class="arr" id="ar2">▶</div>
+            <div class="step" id="st3"><div class="n">STEP 3</div><div class="t">指示書を<br>受け取る</div></div><div class="arr" id="ar3">▶</div>
+            <div class="step key" id="st4"><div class="n">STEP 4</div><div class="t">製品番号を<br>照合する</div></div><div class="arr" id="ar4">▶</div>
+            <div class="step" id="st5"><div class="n">STEP 5</div><div class="t">シートに<br>記入する</div></div>
+          </div>
+          <div class="ab" style="left:30px;top:236px;width:560px">
+            <div class="box" id="s4box">作業指示書と現物の<br>製品番号を照らし合わせる</div>
+            <div id="s4d1" style="text-align:center;color:#c8233f;font-size:20px;margin:6px 0">▼</div>
+            <div style="position:relative" id="s4diaw"><div class="dia">製品番号は同じ？</div><span class="badge sm ab" id="s4b2" style="right:-10px;top:-12px">2</span></div>
+            <div id="s4d2" style="text-align:center;color:#c8233f;font-size:20px;margin:6px 0">▼</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div class="yes" id="s4yes"><small>YES</small>次の作業へ進む</div>
+              <div style="position:relative" id="s4now"><div class="no"><small>NO</small>作業を止め、班長に報告</div><span class="badge sm ab" id="s4b3" style="right:-10px;top:-12px;background:#5e0c1b">3</span></div>
+            </div>
+            <div class="src" id="s4src">根拠：ヒアリング記録（SCENE 2・3）</div>
+          </div>
+          <div class="ab warn" id="s4warn" style="left:630px;top:300px;width:430px"><div class="t">⚠ 注意事項</div>製品番号が違うときは、<b>自分の判断で作業を続けない。</b>現物と指示書を班長に見せ、確認を受けます。<div class="own">確認責任者：現場責任者［要確認］</div></div>
+          <div class="ab rec" id="s4rec" style="left:630px;top:540px;width:430px"><b>記録：</b>作業前チェックシート<br>保管先・保存期間［要確認］</div>
+        </div>
+      </div>
+    </div>
+    <div class="ab quiz" id="s4quiz" style="left:1290px;top:300px">
+      <span class="tg">確認テスト</span>
+      <div class="qt">Q. 製品番号が違っていたら？</div>
+      <div class="op">A. 近い番号なら進める</div>
+      <div class="op">B. 指示書を書き直す</div>
+      <div class="op"><div class="ok" id="s4ok"></div><span class="mark" id="s4mk">正解</span>C. 止めて班長に報告する</div>
+      <div class="op">D. 作業後にまとめて報告</div>
+    </div>
+    <div class="ab mini" id="m1" style="left:660px;top:236px"><div class="mh">編集できるWord（DOCX）</div><div class="mb"><i></i><i style="width:70%"></i><div class="blk"><span></span><span></span><span></span></div><i style="width:85%"></i></div></div>
+    <div class="ab mini" id="m2" style="left:1020px;top:236px"><div class="mh">理解度チェック</div><div class="mb"><div class="blk"><span class="d"></span><span></span></div><i></i><i style="width:60%"></i><i style="width:80%"></i></div></div>
+    <div class="ab mini" id="m3" style="left:1380px;top:236px"><div class="mh">確認事項一覧</div><div class="mb"><i style="width:50%"></i><i></i><i></i><i style="width:75%"></i><i style="width:40%"></i></div></div>
+    <div class="ab" id="s4lbl" style="left:140px;top:560px;font-size:26px;font-weight:900;color:#8e1328">納品物：業務マニュアルPDF（約20ページ）・編集できるWord・理解度チェック・確認事項一覧<span style="font-size:20px;color:#7a6a6e;font-weight:500">（想定）</span></div>
+    <div class="ab appr" style="left:140px;top:660px">
+      <div class="ap" id="ap1"><div class="ck" id="ck1">✓</div><div class="tx">試作<small>図解・手順・テスト</small></div></div>
+      <div class="arr" id="apa1" style="font-size:28px">▶</div>
+      <div class="ap" id="ap2"><div class="ck" id="ck2">✓</div><div class="tx">現場で確認<small>担当者と一緒に検証</small></div></div>
+      <div class="arr" id="apa2" style="font-size:28px">▶</div>
+      <div class="ap" id="ap3"><div class="ck" id="ck3">✓</div><div class="tx">責任者が承認<small>安全・手順を最終確認</small></div></div>
+      <div class="arr" id="apa3" style="font-size:28px">▶</div>
+      <div class="ap fin" id="ap4"><div class="ck" id="ck4">✓</div><div class="tx">完成<small>承認済みの運用版</small></div></div>
+    </div>
+    <div class="ab" id="s4stat" style="left:140px;top:796px;font-size:20px;font-weight:700;color:#5a4a4e;display:flex;align-items:center;gap:12px">文書の状態<span class="vw"><span class="stc" id="stD">ドラフト／運用未承認</span><span class="stc ok" id="stA">運用版 v1.0（承認済み）</span></span></div>
+    <div class="ab note" id="s4note" style="left:140px;top:856px">※ 安全や作業手順にかかわる内容は、御社の現場責任者に最終確認していただきます。</div>
+  </section>
+
+  <!-- ===================== SCENE 5 ブランド (52–60s) ===================== -->
+  <section class="layer" id="s5">
+    <div class="dz"></div>
+    <div class="rg" style="width:1100px;height:1100px;right:-360px;top:-300px"></div>
+    <div class="rg" style="width:760px;height:760px;right:-190px;top:-130px"></div>
+    <div class="ab" style="left:160px;top:170px">
+      <div class="hero" id="s5l1">御社の仕事を、</div>
+      <div class="hero" id="s5l2"><u>誰もが学べる</u>教科書に。</div>
+    </div>
+    <div class="ab" id="s5name" style="left:160px;top:640px"><div class="pill">HYOGEN BUSINESS LEARNING</div></div>
+    <div class="ab lab" id="s5lab" style="left:164px;top:724px">表現科学研究所｜HYOGEN LAB 408</div>
+    <div class="ab" id="s5cta" style="left:164px;top:800px;font-size:26px;color:#fff;font-weight:500">まずは無料ヒアリングから　<b style="font-weight:900">www.hyogen-lab.jp</b></div>
+    <div class="ab" id="s5fn" style="left:164px;bottom:52px;font-size:17px;color:#f4cdd4">※ 映像内の企業・会話・マニュアルは、営業用の架空デモです。　ナレーション：VOICEVOX:青山龍星</div>
+  </section>
+
+  <!-- ===================== overlays ===================== -->
+  <div class="ab" id="brandmark">HYOGEN BUSINESS LEARNING</div>
+  <div class="ab" id="demo">DEMO｜架空の製造会社のケース</div>
+  <div class="ab" id="nav">
+    <div data-from="0" data-to="10"><b>01</b>課題</div>
+    <div data-from="10" data-to="22"><b>02</b>依頼</div>
+    <div data-from="22" data-to="38"><b>03</b>ヒアリング</div>
+    <div data-from="38" data-to="60"><b>04</b>制作・確認</div>
+  </div>
+</div></div></div>
+
+<div id="controls">
+  <button id="play" type="button">▶ 再生</button>
+  <button id="restart" type="button">⟲ 最初から</button>
+  <input id="scrub" type="range" min="0" max="60" step="0.01" value="0" aria-label="再生位置">
+  <span id="time">0:00.0 / 1:00</span>
+  <div id="chips"></div>
+</div>
+
+<script>
+/* =========================================================
+   Timeline engine — everything is a pure function of time t,
+   so playback, scrubbing and frame-by-frame MP4 export match.
+   ========================================================= */
+const DURATION = 60;
+const $ = s => document.querySelector(s);
+const EASE = {
+  out: p => 1 - Math.pow(1 - p, 3),
+  inout: p => p < .5 ? 4*p*p*p : 1 - Math.pow(-2*p + 2, 3)/2,
+  back: p => { const c = 1.5; return 1 + (c+1)*Math.pow(p-1,3) + c*Math.pow(p-1,2); },
+  lin: p => p
+};
+const TWEENS = new Map();      // element -> [tween]
+const TYPERS = [];             // typing text
+
+function tw(sel, t, to, d = .7, e = 'out', from = null) {
+  const el = typeof sel === 'string' ? $(sel) : sel;
+  if (!el) { console.warn('missing', sel); return; }
+  if (!TWEENS.has(el)) TWEENS.set(el, []);
+  TWEENS.get(el).push({ t, d, e, to, from });
+}
+// presets
+const inUp   = (s, t, d = .7, dy = 28) => tw(s, t, { o: 1, y: 0 }, d, 'out', { o: 0, y: dy });
+const inLeft = (s, t, d = .7, dx = -40) => tw(s, t, { o: 1, x: 0 }, d, 'out', { o: 0, x: dx });
+const pop    = (s, t, d = .55) => tw(s, t, { o: 1, s: 1 }, d, 'back', { o: 0, s: .82 });
+const out    = (s, t, d = .45) => tw(s, t, { o: 0 }, d, 'inout');
+const dim    = (s, t, o = .15, d = .6) => tw(s, t, { o }, d, 'inout');
+const wipe   = (s, t, d = .5) => tw(s, t, { c: 0, o: 1 }, d, 'inout', { c: 100, o: 1 });
+const fly    = (s, t, dx, dy, d = .9) => tw(s, t, { o: 1, x: 0, y: 0, s: 1 }, d, 'inout', { o: 0, x: dx, y: dy, s: .9 });
+const layer  = (s, a, b) => { tw(s, a, { o: 1 }, a === 0 ? .01 : .45, 'inout', { o: 0 }); tw(s, b - .45, { o: 0 }, .45, 'inout'); };
+
+/* =========================================================
+   SCENES — edit each scene's timings here.
+   ========================================================= */
+const SCENES = [
+  { id: 's1', label: '01 課題', start: 0, end: 10, build() {
+      inUp('#s1h1', .5); inUp('#s1h2', 1.2);
+      inLeft('#s1b1', 2.1, .6, 60); inLeft('#s1b2', 2.8, .6, 60); inLeft('#s1b3', 3.5, .6, 60);
+      pop('#s1st', 4.4);
+      tw('#s1paper', 5.1, { o: 1, y: 0, r: -4 }, .8, 'out', { o: 0, y: 40, r: 6 });
+      inUp('#s1pl', 5.6, .5, 12);
+      inUp('#s1vet', 6.1);
+      inUp('#s1ret', 6.9, .5, 10);
+      dim('#s1vet', 7.3, .35, .8);
+      out('#s1h', 8.0); dim('#s1grp', 8.0, .1, .7);
+      inUp('#s1q', 8.3, .8, 30);
+  }},
+  { id: 's2', label: '02 依頼', start: 10, end: 22, build() {
+      inUp('#s2h', 10.3);
+      tw('#s2mail', 10.5, { o: 1, y: 0, s: 1 }, .8, 'out', { o: 0, y: 40, s: .97 });
+      document.querySelectorAll('#s2 .ty').forEach(el => TYPERS.push({ el, t: +el.dataset.t, text: el.textContent, cps: 34 }));
+      inUp('#s2ph', 16.7, .5, 10);
+      [['#hl1', '#s2e1', 17.0, -210], ['#hl2', '#s2e2', 17.7, -150], ['#hl4', '#s2e3', 18.4, -60]]
+        .forEach(([hl, ex, t, dy]) => { wipe(hl, t - .3, .45); fly(ex, t, -420, dy); });
+      wipe('#hl3', 17.7 - .3 + .2, .45);           // チェックシート line feeds 手がかり too
+      inUp('#s2u', 19.2, .6, 16);
+      inUp('#s2hon', 19.9, .7, 20);
+      inUp('#s2nda', 16.4, .5, 8);
+  }},
+  { id: 's3', label: '03 ヒアリング', start: 22, end: 38, build() {
+      inUp('#s3h', 22.3);
+      inUp('#s3sheet', 22.6, .7, 20);
+      ['#s3r1', '#s3r2', '#s3r3', '#s3r4'].forEach(r => tw(r, 0, { o: 0 }, .01));
+      const QA = [['#s3q1', '#s3a1', '#s3b1', '#s3r1', 23.2], ['#s3q2', '#s3a2', '#s3b2', '#s3r2', 27.4], ['#s3q3', '#s3a3', '#s3b3', '#s3r3', 31.6]];
+      QA.forEach(([q, a, b, r, t]) => {
+        pop(q, t, .5);
+        inUp(a, t + 1.0, .6, 18);
+        tw(b, 0, { o: 0, s: .5 }, .01);
+        tw(b, t + 2.6, { o: 1, s: 1 }, .45, 'back');
+        tw(r, t + 2.9, { o: 1, x: 0, y: 0, s: 1 }, .9, 'inout', { o: 0, x: -560, y: 0, s: .92 });
+      });
+      tw('#s3r4', 35.6, { o: 1, y: 0 }, .7, 'out', { o: 0, y: 24 });
+  }},
+  { id: 's4', label: '04 制作・確認', start: 38, end: 52, build() {
+      inUp('#s4h', 38.3);
+      tw('#s4page', 38.6, { o: 1, y: 0 }, .8, 'out', { o: 0, y: 40 });
+      pop('#s4tg', 39.3);
+      ['#st1', '#st2', '#st3', '#st4', '#st5'].forEach((s, i) => pop(s, 39.7 + i * .3, .45));
+      ['#ar1', '#ar2', '#ar3', '#ar4'].forEach((s, i) => inLeft(s, 39.9 + i * .3, .3, -10));
+      inUp('#s4box', 41.3, .5, 14); inUp('#s4d1', 41.7, .3, 6);
+      pop('#s4diaw', 41.9); pop('#s4b2', 42.3, .4);
+      inUp('#s4d2', 42.6, .3, 6);
+      inUp('#s4yes', 42.8, .5, 12); inUp('#s4now', 43.1, .5, 12); pop('#s4b3', 43.5, .4);
+      inLeft('#s4warn', 43.9, .6, 30);
+      inLeft('#s4quiz', 44.3, .7, 50);
+      wipe('#s4ok', 45.1, .4); pop('#s4mk', 45.3, .4);
+      // assemble into the full prototype
+      out('#s4quiz', 45.9, .4);
+      tw('#s4page', 46.1, { s: .42, y: 0 }, .9, 'inout');
+      ['#m1', '#m2', '#m3'].forEach((m, i) => tw(m, 46.6 + i * .22, { o: 1, x: 0, r: 0 }, .7, 'out', { o: 0, x: -120, r: -3 }));
+      inUp('#s4lbl', 47.3, .5, 12);
+      // site check & approval — the build is not done until the client signs off
+      ['#ap1', '#apa1', '#ap2', '#apa2', '#ap3', '#apa3', '#ap4'].forEach(s => { tw(s, 0, { o: 0 }, .01); tw(s, 47.3, { o: .28 }, .4); });
+      ['#ck1', '#ck2', '#ck3', '#ck4'].forEach(s => tw(s, 0, { o: 0, s: .4 }, .01));
+      [['#ap1', '#ck1', 47.8, null], ['#ap2', '#ck2', 48.7, '#apa1'], ['#ap3', '#ck3', 49.6, '#apa2'], ['#ap4', '#ck4', 50.5, '#apa3']]
+        .forEach(([ap, ck, t, ar]) => { if (ar) tw(ar, t - .2, { o: 1 }, .3); tw(ap, t, { o: 1 }, .35); tw(ck, t + .15, { o: 1, s: 1 }, .45, 'back'); });
+      inUp('#s4note', 48.3, .5, 8);
+      inUp('#s4src', 43.5, .4, 6); inUp('#s4rec', 44.7, .5, 10);
+      tw('#verA', 0, { o: 0 }, .01); out('#verD', 49.8, .3); pop('#verA', 49.9, .4);
+      inUp('#s4stat', 47.9, .5, 8);
+      tw('#stA', 0, { o: 0 }, .01); out('#stD', 49.8, .3); pop('#stA', 49.9, .45);
+  }},
+  { id: 's5', label: '05 ブランド', start: 52, end: 60.5, build() {
+      tw('#s5', 51.6, { o: 1 }, .6, 'inout', { o: 0 });
+      inUp('#s5l1', 52.5, .9, 36); inUp('#s5l2', 53.3, .9, 36);
+      inUp('#s5name', 54.7, .7, 16);
+      inUp('#s5lab', 55.4, .7, 12);
+      inUp('#s5cta', 56.3, .7, 12);
+      inUp('#s5fn', 56.6, .6, 8);
+  }},
+];
+
+function buildAll() {
+  for (const sc of SCENES) { if (sc.id !== 's5') layer('#' + sc.id, sc.start, sc.end); sc.build(); }
+  tw('#brandmark', 0, { o: 1 }, .01); out('#brandmark', 51.4, .5);
+  tw('#demo', 0, { o: 0 }, .01); tw('#demo', 10.3, { o: 1, y: 0 }, .5, 'out', { o: 0, y: -10 }); out('#demo', 51.4, .5);
+  tw('#nav', 0, { o: 1 }, .01); out('#nav', 51.4, .5);
+  for (const list of TWEENS.values()) list.sort((a, b) => a.t - b.t);
+}
+
+const NAV = [...document.querySelectorAll('#nav div')];
+function render(t) {
+  for (const [el, list] of TWEENS) {
+    let cur = { o: 1, x: 0, y: 0, s: 1, r: 0, c: 0 };
+    for (let i = 0; i < list.length; i++) {
+      const w = list[i]; const st = { ...cur, ...(w.from || {}) };
+      if (t < w.t) { if (i === 0) cur = st; break; }
+      const p = EASE[w.e](Math.min(1, w.d <= 0 ? 1 : (t - w.t) / w.d));
+      cur = { ...st }; for (const k in w.to) cur[k] = st[k] + (w.to[k] - st[k]) * p;
+    }
+    el.style.opacity = cur.o.toFixed(3);
+    el.style.transform = `translate(${cur.x.toFixed(1)}px,${cur.y.toFixed(1)}px) scale(${cur.s.toFixed(4)}) rotate(${cur.r.toFixed(2)}deg)`;
+    el.style.clipPath = cur.c > .05 ? `inset(0 ${cur.c.toFixed(1)}% 0 0)` : 'none';
+    el.style.visibility = cur.o < .002 ? 'hidden' : 'visible';
+  }
+  for (const ty of TYPERS) {
+    const n = Math.max(0, Math.min(ty.text.length, Math.floor((t - ty.t) * ty.cps)));
+    ty.el.textContent = ty.text.slice(0, n);
+  }
+  NAV.forEach(d => d.classList.toggle('on', t >= +d.dataset.from && t < +d.dataset.to));
+}
+
+/* ---------- player ---------- */
+let now = 0, playing = false, last = 0;
+const scrub = $('#scrub'), timeEl = $('#time'), playBtn = $('#play');
+const fmt = s => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
+function seek(t) {
+  now = Math.max(0, Math.min(DURATION, t));
+  render(now);
+  scrub.value = now; timeEl.textContent = `${fmt(now)} / 1:00`;
+  chipEls.forEach((c, i) => c.classList.toggle('on', now >= SCENES[i].start && now < SCENES[i].end));
+}
+function setPlaying(p) { playing = p; playBtn.textContent = p ? '❚❚ 一時停止' : '▶ 再生'; last = performance.now(); if (p) requestAnimationFrame(loop); }
+function loop(ts) {
+  if (!playing) return;
+  now += (ts - last) / 1000; last = ts;
+  if (now >= DURATION) { seek(DURATION); setPlaying(false); return; }
+  seek(now); requestAnimationFrame(loop);
+}
+playBtn.onclick = () => { if (!playing && now >= DURATION) seek(0); setPlaying(!playing); };
+$('#restart').onclick = () => { seek(0); setPlaying(true); };
+scrub.oninput = () => { setPlaying(false); seek(+scrub.value); };
+document.addEventListener('keydown', e => { if (e.code === 'Space' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') { e.preventDefault(); playBtn.click(); } });
+const chipEls = SCENES.map(sc => {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = sc.label;
+  b.onclick = () => { seek(sc.start + .01); };
+  $('#chips').appendChild(b); return b;
+});
+
+/* ---------- fit 16:9 stage ---------- */
+const exportMode = location.hash === '#export';
+if (exportMode) document.body.classList.add('export');
+function fit() {
+  const vp = $('#viewport'), f = $('#fit');
+  const sc = exportMode ? 1 : Math.min(vp.clientWidth / 1920, vp.clientHeight / 1080);
+  f.style.width = 1920 * sc + 'px'; f.style.height = 1080 * sc + 'px';
+  $('#stage').style.transform = `scale(${sc})`;
+}
+window.addEventListener('resize', fit);
+
+buildAll(); fit();
+window.__seek = t => { render(t); };            // used by the MP4 exporter
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (exportMode) render(0);
+else if (reduce) seek(57);
+else { seek(0); (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setPlaying(true)); }
+</script>
+
+</body></html>

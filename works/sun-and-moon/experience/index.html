@@ -1,0 +1,1182 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta charset="utf-8">
+<title>SUN &amp; MOON 体験版</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Shippori+Mincho:wght@400;600;800&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap">
+<style>
+/* Layout: 全面のWebGL宇宙の上に、場面ごとの層（表紙・カード選択・蝕・作品）を重ねる。
+   単一のダークな世界観（夜空）で統一するため、テーマ切替は持たない。 */
+:root {
+  --badge: 72px;          /* ホスティング側が右下に出すバッジの逃げ */
+  --void: #04060f;          /* 宇宙の地 */
+  --ink: #ede3cc;           /* 原画の文字色に合わせた生成りの白 */
+  --ink-dim: #a9a593;
+  --gold: #e3b65e;          /* 太陽・金箔 */
+  --gold-deep: #9c7434;
+  --moon: #b8c7e8;          /* 月の青白 */
+  --glass: rgba(6, 10, 26, .66);
+  --glass-strong: rgba(5, 8, 20, .86);
+  --line: rgba(227, 182, 94, .26);
+  --line-moon: rgba(184, 199, 232, .26);
+  --f-display: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  --f-latin: "Cormorant Garamond", "Shippori Mincho", Georgia, serif;
+  --f-ui: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--void); color: var(--ink);
+  font-family: var(--f-ui); font-size: 15px; line-height: 1.8;
+  overflow: hidden; -webkit-font-smoothing: antialiased;
+  background-image: radial-gradient(60% 50% at 30% 40%, rgba(40,70,160,.28), transparent 70%), radial-gradient(40% 40% at 72% 62%, rgba(150,110,40,.14), transparent 70%);
+}
+#stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+.layer { position: fixed; inset: 0; overflow-y: auto; overflow-x: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: calc(env(safe-area-inset-top, 0px) + 64px) calc(env(safe-area-inset-bottom, 0px) + 24px);
+  transition: opacity .7s ease; }
+.layer.fade { opacity: 0; pointer-events: none; }
+
+.latin { font-family: var(--f-latin); letter-spacing: .32em; text-transform: uppercase; }
+.btn { appearance: none; border: 1px solid var(--line); background: rgba(10, 14, 32, .55); border-radius: 999px;
+  padding: .7em 1.6em; cursor: pointer; letter-spacing: .08em; transition: background .25s, border-color .25s, color .25s, transform .25s; backdrop-filter: blur(6px); }
+.btn:hover { border-color: var(--gold); background: rgba(227,182,94,.12); }
+.btn.primary { border-color: var(--gold); color: #1a1205; background: linear-gradient(180deg, #f0cd80, #c9963f); font-weight: 500; }
+.btn.primary:hover { background: linear-gradient(180deg, #f7d892, #d6a24a); }
+.btn:disabled { opacity: .35; cursor: default; transform: none; }
+.btn.ghost { border-color: transparent; background: transparent; }
+
+/* ---------- 表紙 ---------- */
+/* 表紙：カード表紙と同じ構図（中央に半分ずつの太陽と月、その下に題字、金の額縁） */
+#intro { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; padding-block: calc(env(safe-area-inset-top, 0px) + 24px) calc(env(safe-area-inset-bottom, 0px) + max(5vh, var(--badge))); }
+.intro-box { display: grid; gap: clamp(8px, 1.6vh, 16px); justify-items: center; max-width: 40rem; }
+h1.logo { margin: 0; font-family: var(--f-latin); font-weight: 500; font-size: clamp(44px, min(8.6vw, 10vh), 104px); line-height: 1; letter-spacing: .1em; margin-right: -.1em; white-space: nowrap; }
+h1.logo .s { background: linear-gradient(180deg, #fff1c4 0%, #f2c867 45%, #b98a34 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 18px rgba(227,182,94,.35)); }
+h1.logo .m { background: linear-gradient(180deg, #ffffff 0%, #d5def0 50%, #8f9fc2 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 18px rgba(184,199,232,.3)); }
+h1.logo .amp { color: #e9e2d2; font-size: .78em; margin: 0 .22em; }
+.tagline { font-family: var(--f-display); font-size: clamp(17px, min(3.3vw, 3.4vh), 30px); letter-spacing: .16em; margin: 0; color: #f4efe3; word-break: keep-all; }
+.lab { font-family: var(--f-display); font-size: clamp(15px, min(2.4vw, 2.6vh), 22px); letter-spacing: .55em; margin-right: -.55em; color: #efe8d8; margin-top: clamp(4px, 1.2vh, 14px); }
+.lab .latin { display: block; font-size: clamp(10px, min(1.5vw, 1.7vh), 14px); letter-spacing: .3em; margin-right: -.3em; margin-top: 4px; color: #e6dcc4; }
+.intro-act { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: clamp(6px, 1.6vh, 18px); }
+.howto { color: var(--ink-dim); font-size: 13px; margin: 0; max-width: 30em; word-break: auto-phrase; }
+/* 金の額縁（角は内側にえぐれた円弧） */
+.frame { position: fixed; z-index: 1; pointer-events: none; transition: opacity .8s;
+  top: calc(env(safe-area-inset-top, 0px) + 14px); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  left: max(14px, env(safe-area-inset-left, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); }
+.frame.off { opacity: 0; }
+.frame i { position: absolute; background: linear-gradient(90deg, rgba(227,182,94,.55), rgba(240,205,128,.9), rgba(227,182,94,.55)); }
+.frame .t, .frame .b { left: 26px; right: 26px; height: 1px; } .frame .t { top: 0; } .frame .b { bottom: 0; }
+.frame .l, .frame .r { top: 26px; bottom: 26px; width: 1px; background: linear-gradient(180deg, rgba(227,182,94,.55), rgba(240,205,128,.9), rgba(227,182,94,.55)); } .frame .l { left: 0; } .frame .r { right: 0; }
+.frame svg { position: absolute; width: 27px; height: 27px; overflow: visible; }
+.frame svg path { fill: none; stroke: rgba(240,205,128,.9); stroke-width: 1; }
+.frame .c1 { top: 0; left: 0; } .frame .c2 { top: 0; right: 0; transform: scaleX(-1); }
+.frame .c3 { bottom: 0; left: 0; transform: scaleY(-1); } .frame .c4 { bottom: 0; right: 0; transform: scale(-1, -1); }
+
+/* ---------- カード選択 ---------- */
+#select .wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 22px; padding-bottom: calc(120px + var(--badge)); }
+.sel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.sel-head h2 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 20px; letter-spacing: .14em; }
+.sel-head p { margin: 0; color: var(--ink-dim); font-size: 13px; }
+.deck { display: grid; gap: 10px; }
+.deck-label { display: flex; align-items: baseline; gap: 14px; }
+.deck-label .latin { font-size: 15px; }
+.deck-label .jp { font-family: var(--f-display); font-size: 13px; color: var(--ink-dim); letter-spacing: .14em; }
+.deck.sun .deck-label .latin { color: var(--gold); }
+.deck.moon .deck-label .latin { color: var(--moon); }
+.cards { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.card { position: relative; aspect-ratio: 758 / 1015; max-width: 100%; border-radius: 10px; border: 0; padding: 0; cursor: pointer;
+  background: #0a0f22 center / cover no-repeat; box-shadow: 0 6px 18px rgba(0,0,0,.45);
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s, filter .35s; overflow: hidden; }
+.card:hover { transform: translateY(-4px); }
+.card::after { content: ""; position: absolute; inset: 0; border-radius: 10px; border: 1px solid rgba(255,255,255,.08); transition: border-color .3s, box-shadow .3s; }
+.deck.has-pick .card:not(.on) { filter: saturate(.55) brightness(.6); }
+.card.on { transform: translateY(-8px) scale(1.03); filter: none; }
+.deck.sun .card.on::after { border: 2px solid var(--gold); box-shadow: 0 0 26px rgba(227,182,94,.65), inset 0 0 18px rgba(227,182,94,.35); }
+.deck.moon .card.on::after { border: 2px solid var(--moon); box-shadow: 0 0 26px rgba(184,199,232,.6), inset 0 0 18px rgba(184,199,232,.3); }
+.card .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+.tray { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px calc(env(safe-area-inset-bottom, 0px) + var(--badge));
+  background: linear-gradient(180deg, transparent, var(--glass-strong) 35%); }
+.tray-in { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: space-between; }
+.slots { display: flex; gap: 10px; align-items: center; min-width: 0; flex-wrap: wrap; }
+.slot { display: flex; align-items: center; gap: 8px; border: 1px dashed var(--line); border-radius: 999px; padding: .35em 1em; font-family: var(--f-display); font-size: 14px; min-width: 0; }
+.slot.moon { border-color: var(--line-moon); }
+.slot b { font-family: var(--f-latin); font-weight: 600; letter-spacing: .2em; font-size: 12px; }
+.slot.sun b { color: var(--gold); } .slot.moon b { color: var(--moon); }
+.slot.filled { border-style: solid; background: rgba(255,255,255,.04); }
+.x { color: var(--ink-dim); font-family: var(--f-latin); }
+.tray-act { display: flex; gap: 10px; flex-direction: row-reverse; }
+#btn-eclipse { letter-spacing: .3em; font-family: var(--f-latin); font-weight: 600; }
+
+/* ---------- 蝕 ---------- */
+#eclipse-cap { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 9vh); text-align: center; pointer-events: none;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); transition: opacity .8s; }
+#eclipse-cap .pair { font-family: var(--f-display); letter-spacing: .2em; font-size: 15px; color: var(--ink-dim); }
+#eclipse-cap .word { font-family: var(--f-latin); font-size: clamp(28px, 5vw, 46px); letter-spacing: .6em; margin-right: -.6em; color: var(--ink); opacity: 0; transition: opacity 1.2s, letter-spacing 2.4s; }
+#eclipse-cap.full .word { opacity: 1; letter-spacing: .9em; }
+#skip { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); top: calc(env(safe-area-inset-top, 0px) + 62px); font-size: 12px; z-index: 6; }
+/* サウンドの切り替え */
+#snd { position: fixed; z-index: 8; top: calc(env(safe-area-inset-top, 0px) + 12px); right: max(16px, env(safe-area-inset-right, 0px));
+  display: inline-flex; align-items: center; gap: 6px; padding: .45em 1em; font-size: 13px; }
+#snd svg { width: 18px; height: 18px; }
+#snd .off { display: none; } #snd[aria-pressed="false"] .on { display: none; } #snd[aria-pressed="false"] .off { display: inline; }
+#snd[aria-pressed="false"] { color: var(--ink-dim); }
+
+/* ---------- 作品 ---------- */
+#work { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 620px); }
+#work .panel { grid-column: 2; display: grid; gap: 26px; align-content: start; padding-block: 28px calc(40px + var(--badge)); }
+.w-meta { display: flex; align-items: center; gap: 14px; }
+.w-thumbs { display: flex; gap: 6px; }
+.w-thumbs img { width: 46px; aspect-ratio: 758/1015; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
+.w-pair { font-family: var(--f-display); font-size: 14px; letter-spacing: .12em; line-height: 1.6; min-width: 0; }
+.w-pair .latin { display: block; font-size: 11px; letter-spacing: .26em; color: var(--ink-dim); }
+.w-pair .sun { color: var(--gold); } .w-pair .moon { color: var(--moon); }
+.w-sound { margin: -10px 0 0; font-size: 12.5px; line-height: 1.7; color: var(--ink-dim); letter-spacing: .04em; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.w-sound b { font-family: var(--f-latin); font-weight: 600; letter-spacing: .24em; font-size: 11px; color: var(--gold); }
+.w-sound .s { color: #f0d8a0; } .w-sound .m { color: var(--moon); }
+.w-title { word-break: auto-phrase; margin: 0; font-family: var(--f-display); font-weight: 800; font-size: clamp(26px, 3.4vw, 38px); line-height: 1.45; letter-spacing: .06em; text-wrap: balance; text-shadow: 0 2px 24px rgba(0,0,0,.6); }
+.sheet { background: var(--glass); border: 1px solid rgba(255,255,255,.07); border-radius: 18px; padding: 26px 28px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); display: grid; gap: 26px; }
+.w-essay { font-family: var(--f-display); font-size: 16.5px; line-height: 2.15; letter-spacing: .04em; max-width: 34em; }
+.w-essay p { margin: 0 0 1.05em; } .w-essay p:last-child { margin: 0; }
+.blk { display: grid; gap: 6px; padding-top: 18px; border-top: 1px solid var(--line); }
+.blk h3 { margin: 0; display: flex; gap: 12px; align-items: baseline; font-weight: 500; font-size: 12px; color: var(--ink-dim); letter-spacing: .2em; }
+.blk h3 .latin { font-size: 11px; color: var(--gold); letter-spacing: .3em; }
+.blk.q h3 .latin { color: var(--moon); }
+.blk p { margin: 0; font-size: 15.5px; }
+.blk.phrase p { font-family: var(--f-display); font-size: 21px; letter-spacing: .08em; color: #f6e7bf; }
+.blk.q p { font-family: var(--f-display); font-size: 17px; }
+.reveal { opacity: 0; transform: translateY(10px); transition: opacity 1.1s ease, transform 1.1s ease; }
+.reveal.in { opacity: 1; transform: none; }
+.note { display: grid; gap: 8px; }
+.note label { font-size: 12px; letter-spacing: .2em; color: var(--ink-dim); }
+.note textarea { width: 100%; box-sizing: border-box; min-height: 96px; resize: vertical; background: rgba(0,0,0,.28); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font: inherit; line-height: 1.7; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.status { font-size: 13px; color: var(--gold); min-height: 1.4em; }
+
+/* ---------- 体験版 ---------- */
+.card.locked { cursor: pointer; filter: saturate(.35) brightness(.5); }
+.card.locked:hover { transform: translateY(-2px); filter: saturate(.45) brightness(.62); }
+.card .lock { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 6px; color: #f3dfae; font-family: var(--f-display); font-size: 12px; letter-spacing: .2em; text-shadow: 0 1px 6px rgba(0,0,0,.8); }
+.card .lock svg { width: 26px; height: 26px; filter: drop-shadow(0 1px 4px rgba(0,0,0,.7)); }
+.deck.has-pick .card.locked:not(.on) { filter: saturate(.3) brightness(.42); }
+.trial-tag { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: .2em .9em; font-size: 12px; letter-spacing: .2em; color: var(--gold); background: rgba(10,14,32,.5); }
+.trial-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; background: rgba(10,14,32,.55); backdrop-filter: blur(6px); }
+.trial-bar p { margin: 0; font-size: 13.5px; color: var(--ink); min-width: 0; }
+.trial-bar b { color: var(--gold); font-weight: 500; }
+.buy-cta { display: grid; gap: 10px; padding: 18px; border-radius: 14px; border: 1px solid var(--line); background: linear-gradient(160deg, rgba(227,182,94,.12), rgba(184,199,232,.06)); }
+.buy-cta p { margin: 0; font-size: 14.5px; }
+.buy-cta .big { font-family: var(--f-display); font-size: 18px; letter-spacing: .06em; }
+a.btn { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+.buy-cards { display: flex; gap: 8px; justify-content: center; }
+.modal-box .buy-cards img { width: 84px; aspect-ratio: 758/1015; object-fit: cover; border-radius: 6px; filter: saturate(.5) brightness(.75); }
+.buy-points { margin: 0; padding-left: 1.2em; font-size: 14px; display: grid; gap: 4px; }
+
+/* ---------- 記録・画像 ---------- */
+.topbar { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 12px); left: max(16px, env(safe-area-inset-left, 0px)); z-index: 7; display: flex; gap: 8px; }
+.topbar .btn { padding: .45em 1.1em; font-size: 13px; }
+.modal { position: fixed; inset: 0; z-index: 20; background: rgba(2,3,9,.78); backdrop-filter: blur(6px); display: grid; place-items: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: calc(env(safe-area-inset-top, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 16px); }
+.modal-box { width: min(560px, 100%); max-height: 100%; overflow: auto; background: var(--glass-strong); border: 1px solid var(--line); border-radius: 18px; padding: 22px; display: grid; gap: 14px; box-sizing: border-box; }
+.modal-box h2 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 19px; letter-spacing: .12em; }
+.modal-box img { width: 100%; border-radius: 10px; display: block; }
+.hint { font-size: 13px; color: var(--ink-dim); margin: 0; }
+.jlist { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.jlist button { width: 100%; text-align: left; display: grid; grid-template-columns: auto minmax(0,1fr); gap: 12px; align-items: center; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 10px; cursor: pointer; }
+.jlist button:hover { border-color: var(--line); }
+.jlist .t { font-family: var(--f-display); font-size: 15px; display: block; }
+.jlist .d { font-size: 12px; color: var(--ink-dim); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.empty { color: var(--ink-dim); font-size: 14px; }
+
+@media (max-width: 900px) {
+  .cards { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 30%; overflow-x: auto; scroll-snap-type: x mandatory; padding: 10px 2px 14px; scrollbar-width: thin; }
+  .card { scroll-snap-align: start; }
+  #work { grid-template-columns: minmax(0, 1fr); }
+  #work .panel { grid-column: 1; padding-top: 46vh; }
+}
+@media (max-width: 520px) {
+  .cards { grid-auto-columns: 40%; }
+  .sheet { padding: 20px 18px; }
+  .w-essay { font-size: 15.5px; }
+  .tray-act { width: 100%; } .tray-act .btn { flex: 1; }
+  #select .wrap { padding-bottom: calc(200px + var(--badge)); }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; } }
+</style>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+
+<div class="frame" id="frame" aria-hidden="true"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i>
+  <svg class="c1" viewBox="0 0 27 27"><path d="M26.5 0.5 A26 26 0 0 1 0.5 26.5"/></svg><svg class="c2" viewBox="0 0 27 27"><path d="M26.5 0.5 A26 26 0 0 1 0.5 26.5"/></svg>
+  <svg class="c3" viewBox="0 0 27 27"><path d="M26.5 0.5 A26 26 0 0 1 0.5 26.5"/></svg><svg class="c4" viewBox="0 0 27 27"><path d="M26.5 0.5 A26 26 0 0 1 0.5 26.5"/></svg></div>
+
+<div class="topbar" id="topbar" hidden>
+  <button class="btn" id="btn-journal" type="button">わたしの記録 <span id="jcount"></span></button>
+</div>
+
+<!-- 表紙 -->
+<section class="layer" id="intro" aria-label="SUN & MOON">
+  <div class="intro-box">
+    <h1 class="logo"><span class="s">SUN</span><span class="amp">&amp;</span><span class="m">MOON</span></h1>
+    <p class="tagline">見えている私、まだ見えていない私。</p>
+    <div class="lab">表現科学研究所<span class="latin">Expression Science Lab.</span></div>
+    <div class="intro-act">
+      <button class="btn primary" id="btn-start" type="button">カードをひらく</button>
+      <button class="btn" id="btn-journal2" type="button">わたしの記録</button>
+    </div>
+    <p class="howto" data-trial hidden><span class="trial-tag">体験版</span>　太陽2枚・月2枚の4通りをお試しいただけます。</p>
+    <p class="howto">太陽のカードを1枚、月のカードを1枚。好きな順番で選ぶと、2枚が重なって、あなただけの一篇がひらきます。</p>
+  </div>
+</section>
+
+<!-- カード選択 -->
+<section class="layer fade" id="select" aria-label="カードを選ぶ" hidden>
+  <div class="wrap">
+    <div class="sel-head">
+      <h2>カードを選ぶ</h2>
+      <p>SUNから1枚、MOONから1枚。もう一度押すと選び直せます。</p>
+    </div>
+    <div class="trial-bar" data-trial hidden>
+      <p><span class="trial-tag">体験版</span>　鍵のないカード（太陽2枚・月2枚）で<b>4通り</b>を体験できます。製品版では24枚・<b>144通り</b>すべてがひらきます。</p>
+      <button class="btn" type="button" data-buy>製品版について</button>
+    </div>
+    <div class="deck sun" id="deck-sun">
+      <div class="deck-label"><span class="latin">Sun</span><span class="jp">見えている私</span></div>
+      <div class="cards" role="group" aria-label="SUNのカード"></div>
+    </div>
+    <div class="deck moon" id="deck-moon">
+      <div class="deck-label"><span class="latin">Moon</span><span class="jp">まだ見えていない私</span></div>
+      <div class="cards" role="group" aria-label="MOONのカード"></div>
+    </div>
+  </div>
+  <div class="tray">
+    <div class="tray-in">
+      <div class="slots" aria-live="polite">
+        <span class="slot sun" id="slot-sun"><b>SUN</b><span>未選択</span></span>
+        <span class="x">×</span>
+        <span class="slot moon" id="slot-moon"><b>MOON</b><span>未選択</span></span>
+      </div>
+      <div class="tray-act">
+        <button class="btn" id="btn-random" type="button">おまかせで引く</button>
+        <button class="btn primary" id="btn-eclipse" type="button" disabled>ECLIPSE</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 蝕の字幕 -->
+<div id="eclipse-cap" hidden><div class="pair" id="cap-pair"></div><div class="word">ECLIPSE</div></div>
+<button class="btn ghost" id="skip" type="button" hidden>スキップ</button>
+<button class="btn" id="snd" type="button" aria-pressed="true" aria-label="サウンド">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><g class="on"><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18 6.5a7.8 7.8 0 0 1 0 11"/></g><g class="off"><path d="M16 9.5l5 5M21 9.5l-5 5"/></g></svg>
+  <span class="on">音あり</span><span class="off">音なし</span>
+</button>
+
+<!-- 作品 -->
+<section class="layer fade" id="work" aria-label="作品" hidden>
+  <div class="panel">
+    <div class="w-meta reveal" id="r-meta">
+      <div class="w-thumbs"><img id="w-sun-img" alt=""><img id="w-moon-img" alt=""></div>
+      <div class="w-pair" id="w-pair"></div>
+    </div>
+    <h2 class="w-title reveal" id="w-title"></h2>
+    <p class="w-sound reveal" id="w-sound" hidden></p>
+    <div class="sheet">
+      <div class="w-essay reveal" id="w-essay"></div>
+      <div class="blk reveal" id="r-action"><h3><span class="latin">Today</span>今日の小さな提案</h3><p id="w-action"></p></div>
+      <div class="blk phrase reveal" id="r-phrase"><h3><span class="latin">Phrase</span>今日の口癖</h3><p id="w-phrase"></p></div>
+      <div class="blk q reveal" id="r-q"><h3><span class="latin">Question</span>自分への問い</h3><p id="w-q"></p></div>
+      <div class="buy-cta reveal" id="r-buy" data-trial hidden>
+        <p class="big">ほかの組み合わせも、ひらいてみませんか。</p>
+        <p>製品版では、太陽12枚・月12枚の24枚がすべて使え、144通りの一篇を読むことができます。</p>
+        <div class="actions"><button class="btn primary" type="button" data-buy>製品版について</button></div>
+      </div>
+      <div class="note reveal" id="r-note">
+        <label for="note">感想・気づいたこと</label>
+        <textarea id="note" placeholder="読んで浮かんだことを、ひと言でも。"></textarea>
+        <div class="actions">
+          <button class="btn primary" id="btn-save" type="button">記録に残す</button>
+          <button class="btn" id="btn-image" type="button">画像にする</button>
+          <button class="btn" id="btn-copy" type="button">文章をコピー</button>
+          <button class="btn" id="btn-again" type="button">もう一度選ぶ</button>
+        </div>
+        <div class="status" id="status" role="status"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 画像 -->
+<div class="modal" id="m-image" hidden>
+  <div class="modal-box">
+    <h2>画像にしました</h2>
+    <img id="img-out" alt="この組み合わせの作品を1枚にまとめた画像">
+    <p class="hint">画像を長押し（パソコンでは右クリック）すると保存できます。</p>
+    <button class="btn" type="button" data-close>閉じる</button>
+  </div>
+</div>
+
+<!-- 記録 -->
+<div class="modal" id="m-buy" hidden>
+  <div class="modal-box" role="dialog" aria-labelledby="buy-h">
+    <h2 id="buy-h">このカードは製品版でひらきます</h2>
+    <div class="buy-cards" id="buy-cards"></div>
+    <p id="buy-lead" class="hint"></p>
+    <ul class="buy-points">
+      <li>太陽12枚・月12枚、24枚すべてのカード</li>
+      <li>144通りの組み合わせ、それぞれ書き下ろしの一篇</li>
+      <li>今日の小さな提案・口癖・自分への問いつき</li>
+    </ul>
+    <div class="actions">
+      <a class="btn primary" id="buy-link" href="#" target="_blank" rel="noopener">製品版を購入する</a>
+      <button class="btn" type="button" data-close>体験版のカードで続ける</button>
+    </div>
+    <p class="hint" id="buy-note" hidden>購入ページは準備中です。</p>
+  </div>
+</div>
+
+<div class="modal" id="m-journal" hidden>
+  <div class="modal-box">
+    <h2>わたしの記録</h2>
+    <p class="hint">「記録に残す」を押した組み合わせと感想が、このブラウザに残ります。</p>
+    <ul class="jlist" id="jlist"></ul>
+    <button class="btn" type="button" data-close>閉じる</button>
+  </div>
+</div>
+
+<script src="edition.js"></script>
+<script src="sound.js"></script>
+<script src="core.js"></script>
+<script src="works.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+
+<!-- ============ 画面とデータ（WebGLが使えなくても動く） ============ -->
+<script>
+(function () {
+  'use strict';
+  var C = window.SMCore, WORKS = window.SM_WORKS;
+  var IDX = C.buildIndex(WORKS);
+  /* 版の設定（edition.js）。体験版では使えるカードを限定する */
+  var ED = window.SM_EDITION || { trial: false };
+  var TRIAL = !!ED.trial;
+  function unlocked(type, id) { return !TRIAL || (ED[type] || []).indexOf(id) >= 0; }
+  var problems = TRIAL ? [] : C.validate(WORKS);
+  if (TRIAL) (ED.sun || []).forEach(function (s) { (ED.moon || []).forEach(function (m) { if (!IDX.get(C.key(s, m))) problems.push('missing ' + C.key(s, m)); }); });
+  if (problems.length) console.error('SUN&MOON data problems', problems);
+  if (TRIAL) document.querySelectorAll('[data-trial]').forEach(function (el) { el.hidden = false; });
+  var $ = function (s) { return document.querySelector(s); };
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var state = { picks: { sun: null, moon: null }, order: [], work: null, timers: [] };
+  window.SM = state;
+
+  /* ---- 保存（このブラウザだけ） ---- */
+  var JKEY = 'sunmoon.journal.v1';
+  function jLoad() { try { return JSON.parse(localStorage.getItem(JKEY) || '{}') || {}; } catch (e) { return {}; } }
+  function jSave(o) { try { localStorage.setItem(JKEY, JSON.stringify(o)); return true; } catch (e) { return false; } }
+  function jCount() { var n = Object.keys(jLoad()).length; $('#jcount').textContent = n ? '(' + n + ')' : ''; }
+
+  /* ---- 層の切り替え ---- */
+  function show(id) {
+    ['#intro', '#select', '#work'].forEach(function (s) {
+      var el = $(s);
+      if (s === id) { el.hidden = false; requestAnimationFrame(function () { el.classList.remove('fade'); }); }
+      else { el.classList.add('fade'); setTimeout(function () { if (el.classList.contains('fade')) el.hidden = true; }, 700); }
+    });
+  }
+  function scene(mode, opts) { if (window.SMScene) window.SMScene.setMode(mode, opts || {}); snd('mode', mode); }
+  /* サウンド（sound.js が無くても動くように） */
+  function snd(m) { var S = window.SMSound; if (S && typeof S[m] === 'function') { try { S[m].apply(S, [].slice.call(arguments, 1)); } catch (e) {} } }
+
+  /* ---- カード ---- */
+  function cardImg(type, id) { return 'cards/' + type + id + '.webp'; }
+  function buildDeck(type) {
+    var box = $('#deck-' + type + ' .cards'), meta = type === 'sun' ? C.SUN : C.MOON;
+    C.IDS.forEach(function (id) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'card'; b.id = 'card-' + type + id;
+      b.dataset.type = type; b.dataset.id = id;
+      b.style.backgroundImage = 'url(' + cardImg(type, id) + ')';
+      b.setAttribute('aria-pressed', 'false');
+      var lock = !unlocked(type, id);
+      b.innerHTML = '<span class="sr">' + type.toUpperCase() + ' ' + id + ' ' + meta[id][0] + (lock ? '（製品版）' : '') + '</span>' +
+        (lock ? '<span class="lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>製品版</span>' : '');
+      if (lock) b.classList.add('locked');
+      b.addEventListener('click', function () { if (lock) { snd('locked'); openBuy(type, id); } else pick(type, id); });
+      box.appendChild(b);
+    });
+  }
+  function pick(type, id) {
+    var cur = state.picks[type];
+    state.picks[type] = cur === id ? null : id;
+    state.order = state.order.filter(function (t) { return t !== type; });
+    if (state.picks[type]) state.order.push(type);
+    renderPicks();
+    snd('pick', type, id, !!state.picks[type]);
+  }
+  function renderPicks() {
+    ['sun', 'moon'].forEach(function (type) {
+      var id = state.picks[type], meta = type === 'sun' ? C.SUN : C.MOON;
+      $('#deck-' + type).classList.toggle('has-pick', !!id);
+      document.querySelectorAll('#deck-' + type + ' .card').forEach(function (b) {
+        var on = b.dataset.id === id; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      var slot = $('#slot-' + type);
+      slot.classList.toggle('filled', !!id);
+      slot.lastElementChild.textContent = id ? id + ' ' + meta[id][0] : '未選択';
+    });
+    $('#btn-eclipse').disabled = !(state.picks.sun && state.picks.moon);
+    scene('select', { sun: state.picks.sun, moon: state.picks.moon });
+    snd('picks', state.picks.sun, state.picks.moon);
+  }
+  function current() {
+    return C.resolve(IDX, state.order.map(function (t) { return { type: t, id: state.picks[t] }; }));
+  }
+
+  /* ---- 蝕 → 作品 ---- */
+  function clearTimers() { state.timers.forEach(clearTimeout); state.timers = []; }
+  function later(fn, ms) { state.timers.push(setTimeout(fn, ms)); }
+  function startEclipse(work) {
+    clearTimers();
+    state.work = work;
+    fillWork(work);
+    show('#none');
+    $('#topbar').hidden = true;
+    var cap = $('#eclipse-cap');
+    $('#cap-pair').textContent = 'SUN ' + work.sunId + '  ' + C.SUN[work.sunId][0] + '　×　MOON ' + work.moonId + '  ' + C.MOON[work.moonId][0];
+    cap.hidden = false; cap.style.opacity = 1; cap.classList.remove('full');
+    $('#skip').hidden = false;
+    var dur = reduce ? 1200 : 7600;
+    scene('eclipse', { sun: work.sunId, moon: work.moonId, duration: dur / 1000 });
+    snd('eclipse', dur / 1000);
+    later(function () { cap.classList.add('full'); }, dur * 0.78);
+    later(finishEclipse, dur);
+  }
+  function finishEclipse() {
+    clearTimers();
+    $('#skip').hidden = true;
+    var cap = $('#eclipse-cap'); cap.style.opacity = 0; later(function () { cap.hidden = true; }, 800);
+    scene('work', { sun: state.work.sunId, moon: state.work.moonId });
+    $('#topbar').hidden = false;
+    show('#work');
+    $('#work').scrollTop = 0;
+    revealSequence();
+    try { history.replaceState(null, '', '#' + state.work.id); } catch (e) {}
+  }
+  var SEQ = ['#r-meta', '#w-title', '#w-sound', '#w-essay', '#r-action', '#r-phrase', '#r-q', '#r-buy', '#r-note'];
+  var GAP = [300, 1100, 1700, 2300, 4200, 5200, 6200, 7000, 7300];
+  function revealSequence() {
+    SEQ.forEach(function (s) { $(s).classList.remove('in'); });
+    SEQ.forEach(function (s, i) { later(function () { $(s).classList.add('in'); if (!reduce && !$(s).hidden) snd('reveal', i); }, reduce ? 0 : GAP[i]); });
+  }
+  function revealAll() { SEQ.forEach(function (s) { $(s).classList.add('in'); }); }
+  function fillWork(w) {
+    $('#w-sun-img').src = cardImg('sun', w.sunId); $('#w-sun-img').alt = 'SUN ' + w.sunId + ' ' + C.SUN[w.sunId][0];
+    $('#w-moon-img').src = cardImg('moon', w.moonId); $('#w-moon-img').alt = 'MOON ' + w.moonId + ' ' + C.MOON[w.moonId][0];
+    $('#w-pair').innerHTML = '<span class="latin">' + w.id + '</span><span class="sun">' + C.SUN[w.sunId][0] + '</span> × <span class="moon">' + C.MOON[w.moonId][0] + '</span>';
+    $('#w-title').textContent = w.title;
+    /* この組み合わせの「音の世界」 */
+    var ws = $('#w-sound'), D = window.SMSound && window.SMSound.describe ? window.SMSound.describe(w.sunId, w.moonId) : null;
+    if (D) {
+      ws.innerHTML = '<b>SOUND</b><span><span class="s"></span> × <span class="m"></span>　<span class="k"></span></span>';
+      ws.querySelector('.s').textContent = '〈' + C.SUN[w.sunId][0] + '〉' + D.sun;
+      ws.querySelector('.m').textContent = '〈' + C.MOON[w.moonId][0] + '〉' + D.moon;
+      ws.querySelector('.k').textContent = 'キー ' + D.key + '・テンポ ' + D.bpm;
+      ws.hidden = false;
+    } else ws.hidden = true;
+    var es = $('#w-essay'); es.innerHTML = '';
+    w.essay.split(/\n\n+/).forEach(function (p) { var el = document.createElement('p'); el.textContent = p; es.appendChild(el); });
+    $('#w-action').textContent = w.smallAction;
+    $('#w-phrase').textContent = w.todaysPhrase;
+    $('#w-q').textContent = w.reflectionQuestion;
+    var j = jLoad()[w.id];
+    $('#note').value = j ? j.note || '' : '';
+    $('#status').textContent = j ? '記録済み（' + new Date(j.savedAt).toLocaleDateString('ja-JP') + '）' : '';
+  }
+  function asText(w) {
+    return [w.title, '', w.essay, '', '今日の小さな提案：' + w.smallAction, '今日の口癖：' + w.todaysPhrase, '自分への問い：' + w.reflectionQuestion,
+      '', 'SUN ' + w.sunId + ' ' + C.SUN[w.sunId][0] + ' × MOON ' + w.moonId + ' ' + C.MOON[w.moonId][0] + '（' + w.id + '）', 'SUN & MOON｜表現科学研究所'].join('\n');
+  }
+
+  /* ---- 画像書き出し ---- */
+  function wrapLines(ctx, text, maxW) {
+    var out = [], line = '';
+    var noStart = '、。，．・：；？！」』）〕】ゃゅょっぁぃぅぇぉャュョッァィゥェォー…';
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i], t = line + ch;
+      if (ctx.measureText(t).width > maxW && line) {
+        if (noStart.indexOf(ch) >= 0) { line = t; continue; }
+        out.push(line); line = ch;
+      } else line = t;
+    }
+    if (line) out.push(line);
+    return out;
+  }
+  function loadImg(src) { return new Promise(function (res, rej) { var i = new Image(); i.onload = function () { res(i); }; i.onerror = rej; i.src = src; }); }
+  async function makeImage(w) {
+    try { await document.fonts.ready; } catch (e) {}
+    var W = 1080, PAD = 90, TW = W - PAD * 2;
+    var M = '"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif';
+    var meas = document.createElement('canvas').getContext('2d');
+    var blocks = [];
+    meas.font = '800 54px ' + M; blocks.push({ font: '800 54px ' + M, lh: 84, lines: wrapLines(meas, w.title, TW), color: '#ede3cc', gap: 36 });
+    meas.font = '400 30px ' + M;
+    w.essay.split(/\n\n+/).forEach(function (p, i, a) { blocks.push({ font: '400 30px ' + M, lh: 56, lines: wrapLines(meas, p, TW), color: '#d9d1bc', gap: i === a.length - 1 ? 44 : 22 }); });
+    [['TODAY　今日の小さな提案', w.smallAction, '400 28px ', '#ede3cc'], ['PHRASE　今日の口癖', w.todaysPhrase, '600 36px ', '#f6e7bf'], ['QUESTION　自分への問い', w.reflectionQuestion, '400 30px ', '#ede3cc']].forEach(function (b) {
+      blocks.push({ font: '500 20px "Zen Kaku Gothic New",sans-serif', lh: 34, lines: [b[0]], color: '#c9a35a', gap: 6, label: true });
+      meas.font = b[2] + M; blocks.push({ font: b[2] + M, lh: b[2].indexOf('36') >= 0 ? 60 : 52, lines: wrapLines(meas, b[1], TW), color: b[3], gap: 30 });
+    });
+    var top = 640, H = top;
+    blocks.forEach(function (b) { H += b.lines.length * b.lh + b.gap; });
+    H += 150;
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var x = cv.getContext('2d');
+    var bg = x.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#060a1c'); bg.addColorStop(1, '#03050c');
+    x.fillStyle = bg; x.fillRect(0, 0, W, H);
+    var snap = window.SMScene && window.SMScene.snapshot();
+    if (snap) {
+      var img = await loadImg(snap);
+      var s = Math.max(W / img.width, 600 / img.height) * 1.55;
+      var fx = window.SMScene.focus();
+      var sx = fx.x * img.width - (W / s) / 2, sy = fx.y * img.height - (600 / s) / 2;
+      x.drawImage(img, Math.max(0, Math.min(img.width - W / s, sx)), Math.max(0, Math.min(img.height - 600 / s, sy)), W / s, 600 / s, 0, 0, W, 600);
+      var f = x.createLinearGradient(0, 380, 0, 620); f.addColorStop(0, 'rgba(4,6,15,0)'); f.addColorStop(1, '#050816');
+      x.fillStyle = f; x.fillRect(0, 380, W, 260);
+    }
+    try {
+      var a = await loadImg(cardImg('sun', w.sunId)), b2 = await loadImg(cardImg('moon', w.moonId));
+      var cw = 120, ch = cw * 1015 / 758;
+      x.save(); x.shadowColor = 'rgba(0,0,0,.6)'; x.shadowBlur = 20;
+      x.drawImage(a, PAD, 520 - ch + 40, cw, ch); x.drawImage(b2, PAD + cw + 14, 520 - ch + 40, cw, ch); x.restore();
+    } catch (e) {}
+    x.font = '500 22px "Zen Kaku Gothic New",sans-serif'; x.fillStyle = '#a9a593'; x.textBaseline = 'alphabetic';
+    x.fillText(w.id + '　SUN ' + w.sunId + ' ' + C.SUN[w.sunId][0] + ' × MOON ' + w.moonId + ' ' + C.MOON[w.moonId][0], PAD + 270, 555);
+    var y = top;
+    blocks.forEach(function (b) {
+      x.font = b.font; x.fillStyle = b.color;
+      b.lines.forEach(function (l) { y += b.lh; x.fillText(l, PAD, y - b.lh * 0.28); });
+      y += b.gap;
+    });
+    x.strokeStyle = 'rgba(227,182,94,.4)'; x.beginPath(); x.moveTo(PAD, H - 96); x.lineTo(W - PAD, H - 96); x.stroke();
+    x.font = '600 26px "Cormorant Garamond",serif'; x.fillStyle = '#e3b65e'; x.fillText('SUN & MOON', PAD, H - 50);
+    x.font = '400 20px ' + M; x.fillStyle = '#a9a593'; x.textAlign = 'right'; x.fillText('表現科学研究所  EXPRESSION SCIENCE LAB.', W - PAD, H - 52);
+    return new Promise(function (res) { cv.toBlob(function (bl) { res(URL.createObjectURL(bl)); }, 'image/png'); });
+  }
+
+  /* ---- 記録一覧 ---- */
+  function openJournal() {
+    var j = jLoad(), ul = $('#jlist'); ul.innerHTML = '';
+    var ids = Object.keys(j).sort(function (a, b) { return (j[b].savedAt || 0) - (j[a].savedAt || 0); });
+    if (!ids.length) ul.innerHTML = '<li class="empty">まだ記録はありません。作品を読んだあとに「記録に残す」を押すと、ここに並びます。</li>';
+    ids.forEach(function (id) {
+      var w = C.byId(WORKS, id); if (!w) return;
+      var li = document.createElement('li'), b = document.createElement('button'); b.type = 'button';
+      b.innerHTML = '<span class="w-thumbs"><img alt="" src="' + cardImg('sun', w.sunId) + '"><img alt="" src="' + cardImg('moon', w.moonId) + '"></span><span><span class="t"></span><span class="d"></span></span>';
+      b.querySelector('.t').textContent = w.title;
+      b.querySelector('.d').textContent = new Date(j[id].savedAt).toLocaleDateString('ja-JP') + '　' + (j[id].note || C.SUN[w.sunId][0] + ' × ' + C.MOON[w.moonId][0]);
+      b.addEventListener('click', function () { closeModals(); openWork(w, true); });
+      li.appendChild(b); ul.appendChild(li);
+    });
+    $('#m-journal').hidden = false;
+  }
+  function closeModals() { document.querySelectorAll('.modal').forEach(function (m) { m.hidden = true; }); }
+  function openWork(w, instant) {
+    leaveIntro();
+    state.picks = { sun: w.sunId, moon: w.moonId }; state.order = ['sun', 'moon']; renderPicks();
+    if (instant) { state.work = w; fillWork(w); clearTimers(); scene('work', { sun: w.sunId, moon: w.moonId, instant: true }); show('#work'); revealAll(); try { history.replaceState(null, '', '#' + w.id); } catch (e) {} }
+    else startEclipse(w);
+  }
+
+  /* ---- 結線 ---- */
+  buildDeck('sun'); buildDeck('moon'); jCount();
+  function leaveIntro() { $('#frame').classList.add('off'); $('#topbar').hidden = false; }
+  $('#btn-start').addEventListener('click', function () { snd('start'); leaveIntro(); show('#select'); scene('select', {}); });
+  $('#btn-journal2').addEventListener('click', openJournal);
+  $('#btn-eclipse').addEventListener('click', function () { var w = current(); if (w) startEclipse(w); });
+  $('#btn-random').addEventListener('click', function () {
+    var poolS = C.IDS.filter(function (i) { return unlocked('sun', i); }), poolM = C.IDS.filter(function (i) { return unlocked('moon', i); });
+    state.picks = { sun: poolS[Math.floor(Math.random() * poolS.length)], moon: poolM[Math.floor(Math.random() * poolM.length)] };
+    state.order = ['sun', 'moon']; renderPicks();
+    ['sun', 'moon'].forEach(function (t) { var el = $('#card-' + t + state.picks[t]); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest', inline: 'center' }); });
+  });
+  $('#skip').addEventListener('click', function () { snd('skip'); if (window.SMScene) window.SMScene.skip(); finishEclipse(); revealAll(); });
+  $('#btn-again').addEventListener('click', function () {
+    snd('tap');
+    clearTimers(); state.picks = { sun: null, moon: null }; state.order = []; renderPicks();
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    show('#select'); $('#select').scrollTop = 0;
+  });
+  $('#btn-save').addEventListener('click', function () {
+    snd('ok');
+    var w = state.work; if (!w) return;
+    var j = jLoad(); j[w.id] = { note: $('#note').value.trim(), savedAt: Date.now() };
+    $('#status').textContent = jSave(j) ? '記録しました。左上の「わたしの記録」から読み返せます。' : 'このブラウザでは記録を残せません（プライベートモードなど）。「画像にする」で保存してください。';
+    jCount();
+  });
+  $('#btn-copy').addEventListener('click', function () {
+    var t = asText(state.work);
+    var done = function () { $('#status').textContent = '文章をコピーしました。'; };
+    var fail = function () { $('#status').textContent = 'コピーできませんでした。画像にして保存してください。'; };
+    try { navigator.clipboard.writeText(t).then(done, fail); } catch (e) { fail(); }
+  });
+  $('#btn-image').addEventListener('click', async function () {
+    var btn = this; btn.disabled = true; $('#status').textContent = '画像をつくっています…';
+    try { var url = await makeImage(state.work); $('#img-out').src = url; $('#m-image').hidden = false; $('#status').textContent = ''; }
+    catch (e) { console.error(e); $('#status').textContent = '画像をつくれませんでした。もう一度お試しください。'; }
+    btn.disabled = false;
+  });
+  $('#btn-journal').addEventListener('click', openJournal);
+  /* サウンド：最初の操作で鳴らし始める／右上のボタンで切り替え */
+  var sndBtn = $('#snd');
+  function sndLabel() { var on = !!(window.SMSound && window.SMSound.enabled); sndBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+  if (!window.SMSound) sndBtn.hidden = true; else sndLabel();
+  sndBtn.addEventListener('click', function () { var S = window.SMSound; if (!S) return; S.setEnabled(!S.enabled); if (S.enabled) S.start(); sndLabel(); });
+  document.addEventListener('pointerdown', function first() { snd('start'); document.removeEventListener('pointerdown', first, true); }, true);
+  /* 購入の案内 */
+  function openBuy(type, id) {
+    if (!type) snd('soft');
+    var box = $('#buy-cards'); box.innerHTML = '';
+    if (type) {
+      var im = document.createElement('img'); im.src = cardImg(type, id); im.alt = ''; box.appendChild(im);
+      var meta = type === 'sun' ? C.SUN : C.MOON;
+      $('#buy-lead').textContent = type.toUpperCase() + ' ' + id + '「' + meta[id][0] + '」は、製品版でお使いいただけます。';
+      $('#buy-h').textContent = 'このカードは製品版でひらきます';
+    } else {
+      $('#buy-lead').textContent = '体験版では太陽2枚・月2枚（4通り）までお試しいただけます。';
+      $('#buy-h').textContent = 'SUN & MOON 製品版';
+    }
+    var url = ED.buyUrl || '';
+    var a = $('#buy-link');
+    if (url) { a.href = url; a.hidden = false; $('#buy-note').hidden = true; }
+    else { a.hidden = true; $('#buy-note').hidden = false; }
+    $('#m-buy').hidden = false;
+  }
+  document.querySelectorAll('[data-buy]').forEach(function (b) { b.addEventListener('click', function () { openBuy(null); }); });
+  document.querySelectorAll('[data-close]').forEach(function (b) { b.addEventListener('click', closeModals); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModals(); });
+
+  /* #E001 のようなリンクで直接その作品をひらく */
+  var m = /^#(E\d{3})$/.exec(location.hash || '');
+  if (m && TRIAL && !C.byId(WORKS, m[1])) { setTimeout(function () { openBuy(null); }, 300); }
+  if (m) { var w0 = C.byId(WORKS, m[1]); if (w0) { leaveIntro(); $('#intro').hidden = true; $('#intro').classList.add('fade'); later(function () { openWork(w0, false); }, 400); } }
+
+  window.SMApp = { pick: pick, current: current, openWork: openWork, startEclipse: startEclipse, revealAll: revealAll };
+})();
+</script>
+
+<!-- ============ 宇宙・太陽・月（three.js + ブルーム） ============ -->
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const canvas = document.getElementById('stage');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
+} catch (e) { console.warn('WebGL unavailable', e); }
+if (renderer) boot();
+
+function boot() {
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const mobile = Math.min(innerWidth, innerHeight) < 600;
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.5 : 1.75));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.setClearColor(0x04060f, 1);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+camera.position.set(0, 0, 10);
+
+/* ---------- GLSL 共通：シンプレックスノイズ / fbm / ボロノイ（モザイクの目地） ---------- */
+const NOISE = `
+vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
+vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
+vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}
+vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
+float snoise(vec3 v){
+  const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);
+  vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);
+  vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g; vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);
+  vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy;
+  i=mod289(i);
+  vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));
+  float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx;
+  vec4 j=p-49.0*floor(p*ns.z*ns.z); vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);
+  vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);
+  vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);
+  vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));
+  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+  vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);
+  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
+  p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;
+  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;
+  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
+}
+float fbm(vec3 p){ float a=0.5,s=0.0; for(int i=0;i<5;i++){ s+=a*snoise(p); p*=2.03; a*=0.5; } return s; }
+float fbm3(vec3 p){ float a=0.5,s=0.0; for(int i=0;i<3;i++){ s+=a*snoise(p); p*=2.07; a*=0.5; } return s; }
+vec3 hash3(vec3 p){ p=vec3(dot(p,vec3(127.1,311.7,74.7)),dot(p,vec3(269.5,183.3,246.1)),dot(p,vec3(113.5,271.9,124.6))); return fract(sin(p)*43758.5453123); }
+/* x: 最近点距離, y: 2番目, z: セルの乱数 */
+vec3 voro(vec3 x){
+  vec3 n=floor(x), f=fract(x); float f1=8.0, f2=8.0; float id=0.0;
+  for(int k=-1;k<=1;k++) for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){
+    vec3 g=vec3(float(i),float(j),float(k)); vec3 o=hash3(n+g); vec3 r=g+o-f; float d=dot(r,r);
+    if(d<f1){ f2=f1; f1=d; id=o.x; } else if(d<f2){ f2=d; }
+  }
+  return vec3(sqrt(f1),sqrt(f2),id);
+}`;
+
+/* ---------- 星雲（全画面・領域ゆがみfbm） ---------- */
+const nebula = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+  depthWrite: false, depthTest: false,
+  uniforms: { uTime: { value: 0 }, uAspect: { value: 1 }, uDim: { value: 1 }, uSun: { value: new THREE.Vector2(-.4, .1) }, uWarm: { value: 1 } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.9999,1.0); }`,
+  fragmentShader: NOISE + `
+    uniform float uTime,uAspect,uDim,uWarm; uniform vec2 uSun; varying vec2 vUv;
+    void main(){
+      vec2 p=(vUv-0.5)*vec2(uAspect,1.0)*2.0;
+      float t=uTime*0.012;
+      vec3 q=vec3(p*1.1,t);
+      vec3 w=vec3(fbm3(q*0.9+vec3(1.7,9.2,t)), fbm3(q*0.9+vec3(8.3,2.8,-t)), 0.0);
+      float n=fbm(q+w*1.5+vec3(0.0,0.0,t*0.5));
+      float d=smoothstep(-0.25,0.85,n);
+      vec3 col=vec3(0.010,0.016,0.045);
+      col+=vec3(0.035,0.085,0.30)*d*d*1.35;
+      col+=vec3(0.10,0.26,0.62)*pow(d,4.0)*0.55;
+      float vein=pow(1.0-abs(fbm3(q*2.4+w*2.0)),7.0);
+      col+=vec3(0.95,0.68,0.28)*vein*0.16*smoothstep(0.2,0.8,d);
+      col+=vec3(0.55,0.30,0.08)*exp(-length(p-uSun)*1.4)*0.20*uWarm;
+      float vg=smoothstep(1.9,0.4,length(p*vec2(0.8,1.0)));
+      gl_FragColor=vec4(col*uDim*(0.55+0.45*vg),1.0);
+    }`
+}));
+nebula.frustumCulled = false; nebula.renderOrder = -100; scene.add(nebula);
+
+/* ---------- 星（瞬き・光芒つき） ---------- */
+function makeStars(n, zMin, zMax, spread, sizeMin, sizeMax, goldRatio) {
+  const pos = new Float32Array(n * 3), col = new Float32Array(n * 3), sz = new Float32Array(n), ph = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const z = zMin + Math.random() * (zMax - zMin), k = (10 - z) / 10;
+    pos.set([(Math.random() * 2 - 1) * spread * k, (Math.random() * 2 - 1) * spread * 0.62 * k, z], i * 3);
+    const b = 0.35 + 1.4 * Math.pow(Math.random(), 7);
+    const gold = Math.random() < goldRatio;
+    col.set(gold ? [b * 1.25, b * 0.95, b * 0.55] : [b * 0.72, b * 0.84, b * 1.2], i * 3);
+    sz[i] = sizeMin + (sizeMax - sizeMin) * Math.pow(Math.random(), 4);
+    ph[i] = Math.random() * 6.283;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  g.setAttribute('aSize', new THREE.BufferAttribute(sz, 1));
+  g.setAttribute('aPhase', new THREE.BufferAttribute(ph, 1));
+  const m = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uTime: { value: 0 }, uPR: { value: 1 }, uDim: { value: 1 } },
+    vertexShader: `attribute float aSize; attribute float aPhase; attribute vec3 color; uniform float uTime,uPR; varying vec3 vC; varying float vTw; varying float vBig;
+      void main(){ vec4 mv=modelViewMatrix*vec4(position,1.0); gl_Position=projectionMatrix*mv;
+        vTw=0.55+0.45*sin(uTime*(0.6+fract(aPhase*3.1)*1.8)+aPhase); vC=color; vBig=step(3.2,aSize);
+        gl_PointSize=aSize*uPR*(0.85+0.3*vTw); }`,
+    fragmentShader: `varying vec3 vC; varying float vTw; varying float vBig; uniform float uDim;
+      void main(){ vec2 c=gl_PointCoord-0.5; float d=length(c);
+        float core=exp(-d*d*70.0); float halo=exp(-d*7.0)*0.35;
+        float spike=vBig*(exp(-abs(c.x)*55.0)*exp(-abs(c.y)*5.0)+exp(-abs(c.y)*55.0)*exp(-abs(c.x)*5.0))*0.8;
+        float a=(core+halo+spike)*vTw*uDim; if(a<0.003) discard; gl_FragColor=vec4(vC*a,1.0); }`
+  });
+  const pts = new THREE.Points(g, m); pts.frustumCulled = false; return pts;
+}
+const starsFar = makeStars(mobile ? 1400 : 2600, -40, -18, 38, 1.2, 3.4, 0.16);
+const starsNear = makeStars(mobile ? 160 : 260, -16, -6, 16, 2.2, 7.5, 0.3);
+scene.add(starsFar, starsNear);
+
+/* ---------- 金の粒（原画の金箔モザイクの気配） ---------- */
+const DUST = mobile ? 500 : 900;
+const dust = (() => {
+  const pos = new Float32Array(DUST * 3), ph = new Float32Array(DUST), sz = new Float32Array(DUST);
+  for (let i = 0; i < DUST; i++) { pos.set([(Math.random() * 2 - 1) * 9, (Math.random() * 2 - 1) * 5.5, -3 + Math.random() * 5], i * 3); ph[i] = Math.random() * 100; sz[i] = 1 + Math.random() * 2.6; }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('aPhase', new THREE.BufferAttribute(ph, 1)); g.setAttribute('aSize', new THREE.BufferAttribute(sz, 1));
+  const m = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uTime: { value: 0 }, uPR: { value: 1 }, uDim: { value: 1 }, uSwirl: { value: 0 }, uCenter: { value: new THREE.Vector3() } },
+    vertexShader: `attribute float aPhase; attribute float aSize; uniform float uTime,uPR,uSwirl; uniform vec3 uCenter; varying float vA; varying float vGold;
+      void main(){ vec3 p=position; float t=uTime*0.05+aPhase;
+        p.x+=sin(t*0.7)*0.35; p.y+=cos(t*0.53)*0.3+sin(uTime*0.02+aPhase)*0.2;
+        vec2 r=p.xy-uCenter.xy; float ang=uSwirl*(1.6/(0.6+length(r))); float cs=cos(ang),sn=sin(ang);
+        p.xy=uCenter.xy+vec2(r.x*cs-r.y*sn, r.x*sn+r.y*cs);
+        vec4 mv=modelViewMatrix*vec4(p,1.0); gl_Position=projectionMatrix*mv;
+        vA=0.35+0.65*pow(0.5+0.5*sin(uTime*1.3+aPhase*7.0),3.0); vGold=fract(aPhase*0.37);
+        gl_PointSize=aSize*uPR*(6.0/max(1.0,-mv.z))*2.2; }`,
+    fragmentShader: `varying float vA; varying float vGold; uniform float uDim;
+      void main(){ vec2 c=gl_PointCoord-0.5; float d=max(abs(c.x),abs(c.y)); float a=smoothstep(0.5,0.15,d)*vA*uDim;
+        vec3 col=mix(vec3(1.0,0.78,0.38),vec3(0.62,0.74,1.0),step(0.78,vGold)); gl_FragColor=vec4(col*a*0.55,1.0); }` });
+  const p = new THREE.Points(g, m); p.frustumCulled = false; return p;
+})();
+scene.add(dust);
+
+/* ---------- 金の同心円の玉（原画の「円」を宇宙に浮かべる） ---------- */
+const ORBS = 14;
+const orbs = (() => {
+  const pos = new Float32Array(ORBS * 3), sz = new Float32Array(ORBS), ph = new Float32Array(ORBS);
+  for (let i = 0; i < ORBS; i++) { pos.set([(Math.random() * 2 - 1) * 13, (Math.random() * 2 - 1) * 7, -9 - Math.random() * 6], i * 3); sz[i] = 18 + Math.random() * 46; ph[i] = Math.random() * 10; }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('aSize', new THREE.BufferAttribute(sz, 1)); g.setAttribute('aPhase', new THREE.BufferAttribute(ph, 1));
+  const m = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uTime: { value: 0 }, uPR: { value: 1 }, uDim: { value: 1 } },
+    vertexShader: `attribute float aSize; attribute float aPhase; uniform float uTime,uPR; varying float vP;
+      void main(){ vec3 p=position; p.y+=sin(uTime*0.08+aPhase)*0.4; vec4 mv=modelViewMatrix*vec4(p,1.0); gl_Position=projectionMatrix*mv; vP=aPhase; gl_PointSize=aSize*uPR; }`,
+    fragmentShader: `varying float vP; uniform float uTime,uDim;
+      void main(){ vec2 c=gl_PointCoord-0.5; float d=length(c)*2.0; if(d>1.0) discard;
+        float rings=0.5+0.5*cos(d*38.0-uTime*0.4+vP); float disc=smoothstep(1.0,0.86,d);
+        float edge=smoothstep(0.82,0.9,d)*smoothstep(1.0,0.92,d);
+        float a=(disc*(0.18+0.22*rings)+edge*0.9)*uDim*0.55; vec3 col=mix(vec3(0.95,0.68,0.3),vec3(1.0,0.9,0.65),rings);
+        gl_FragColor=vec4(col*a,1.0); }` });
+  const p = new THREE.Points(g, m); p.frustumCulled = false; return p;
+})();
+scene.add(orbs);
+
+/* ---------- 太陽 ---------- */
+/* 表紙用：画面上の縦の線で、太陽は左半分・月は右半分だけを見せる */
+const splitU = { uSplit: { value: 1 }, uSeamX: { value: 0 }, uSeamR: { value: 100 } };
+const sunU = {
+  uTime: { value: 0 }, uA: { value: new THREE.Color(1.0, 0.36, 0.05) }, uB: { value: new THREE.Color(1.0, 0.72, 0.24) },
+  uI: { value: 1.25 }, uDim: { value: 1 }, uSide: { value: 1 }, ...splitU
+};
+const sun = new THREE.Mesh(new THREE.SphereGeometry(1, 128, 96), new THREE.ShaderMaterial({
+  uniforms: sunU,
+  vertexShader: `varying vec3 vObj; varying vec3 vN; varying vec3 vV;
+    void main(){ vObj=position; vec4 mv=modelViewMatrix*vec4(position,1.0); vN=normalize(normalMatrix*normal); vV=normalize(-mv.xyz); gl_Position=projectionMatrix*mv; }`,
+  fragmentShader: NOISE + `
+    uniform float uTime,uI,uDim,uSide,uSplit,uSeamX,uSeamR; uniform vec3 uA,uB; varying vec3 vObj; varying vec3 vN; varying vec3 vV;
+    void main(){
+      if((gl_FragCoord.x-uSeamX)*uSide > (1.0-uSplit)*uSeamR*2.6) discard;
+      vec3 p=normalize(vObj); float t=uTime*0.05;
+      vec3 v=voro(p*15.0+vec3(0.0,t*0.4,0.0));
+      vec3 pc=p*2.2+vec3(t,0.0,-t);
+      float flow=fbm(pc+fbm3(pc*1.5+t)*0.8);
+      float h=clamp(0.55+0.42*flow+0.10*(v.z-0.5),0.0,1.0);
+      vec3 col=mix(uA,uB,smoothstep(0.25,0.62,h));
+      col=mix(col,vec3(1.0,0.96,0.82),smoothstep(0.66,0.98,h));
+      float grout=mix(0.62,1.0,smoothstep(0.0,0.07,v.y-v.x));
+      float mu=max(dot(normalize(vN),normalize(vV)),0.0);
+      col*=pow(mu,0.38)*grout*(0.92+0.16*v.z);
+      col+=uB*pow(1.0-mu,2.5)*0.55;
+      gl_FragColor=vec4(col*uI*uDim,1.0);
+    }`
+}));
+scene.add(sun);
+
+/* コロナ（ストリーマーが流れる光環） */
+const corU = { uTime: { value: 0 }, uC: { value: 0.35 }, uB: sunU.uB, uDim: { value: 1 }, uEcl: { value: 0 }, uHalf: splitU.uSplit };
+const CORONA_SPAN = 4.2; // 太陽半径の何倍まで描くか
+const corona = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: corU,
+  vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader: NOISE + `
+    uniform float uTime,uC,uDim,uEcl,uHalf; uniform vec3 uB; varying vec2 vUv;
+    void main(){
+      vec2 q=(vUv-0.5)*2.0*${CORONA_SPAN.toFixed(1)}; float r=length(q); float a=atan(q.y,q.x);
+      if(r<0.98){ discard; }
+      float fall=exp(-(r-1.0)*mix(2.6,1.35,uEcl));
+      float s1=0.5+0.5*snoise(vec3(cos(a)*2.2,sin(a)*2.2,uTime*0.04));
+      float s2=0.5+0.5*snoise(vec3(cos(a)*7.0,sin(a)*7.0,r*0.35-uTime*0.09));
+      float stream=pow(s1,2.0)*0.9+pow(s2,3.0)*1.4;
+      float inner=exp(-(r-1.0)*12.0);
+      float edge=smoothstep(${CORONA_SPAN.toFixed(1)},${(CORONA_SPAN*0.6).toFixed(2)},r);
+      float k=(fall*(0.3+stream*smoothstep(1.0,1.25,r))*uC*0.55+inner*(0.35+uEcl*0.75))*edge;
+      float rays=pow(0.5+0.5*snoise(vec3(a*22.0,0.0,uTime*0.05)),6.0)*exp(-(r-1.0)*0.9)*uHalf*0.9;
+      k=(k+rays*edge)*mix(1.0,smoothstep(0.05,-0.25,q.x),uHalf);
+      vec3 col=mix(uB,vec3(1.0,0.97,0.9),0.35+0.5*uEcl);
+      gl_FragColor=vec4(col*k*uDim,1.0);
+    }`
+}));
+scene.add(corona);
+
+/* ---------- 月 ---------- */
+const moonU = {
+  uTime: { value: 0 }, uL: { value: new THREE.Vector3(-1, 0.2, 0.4).normalize() }, uTint: { value: new THREE.Color(0.86, 0.9, 1.0) },
+  uBack: { value: 0 }, uRim: { value: sunU.uB.value }, uDim: { value: 1 }, uSide: { value: -1 }, ...splitU
+};
+const moon = new THREE.Mesh(new THREE.SphereGeometry(1, 128, 96), new THREE.ShaderMaterial({
+  uniforms: moonU,
+  vertexShader: `varying vec3 vObj; varying vec3 vNW; varying vec3 vN; varying vec3 vV;
+    void main(){ vObj=position; vNW=normalize(mat3(modelMatrix)*normal); vec4 mv=modelViewMatrix*vec4(position,1.0); vN=normalize(normalMatrix*normal); vV=normalize(-mv.xyz); gl_Position=projectionMatrix*mv; }`,
+  fragmentShader: NOISE + `
+    uniform float uTime,uBack,uDim,uSide,uSplit,uSeamX,uSeamR; uniform vec3 uL,uTint,uRim; varying vec3 vObj; varying vec3 vNW; varying vec3 vN; varying vec3 vV;
+    void main(){
+      if((gl_FragCoord.x-uSeamX)*uSide > (1.0-uSplit)*uSeamR*2.6) discard;
+      vec3 p=normalize(vObj);
+      float maria=smoothstep(0.05,0.55,fbm(p*1.5+vec3(3.1,1.2,0.4)))*(1.0+0.25*uSplit);
+      vec3 c1=voro(p*5.5); float crater=smoothstep(0.32,0.12,c1.x)*step(0.55,c1.z);
+      float rim=smoothstep(0.30,0.36,c1.x)*smoothstep(0.42,0.36,c1.x)*step(0.55,c1.z);
+      vec3 tile=voro(p*17.0);
+      vec3 alb=mix(vec3(0.86,0.89,0.96),vec3(0.30,0.40,0.66),maria*0.8);
+      alb*=1.0-crater*0.28; alb+=rim*0.14;
+      alb*=(0.9+0.2*tile.z)*mix(0.7,1.0,smoothstep(0.0,0.06,tile.y-tile.x));
+      alb*=uTint;
+      float ndl=dot(normalize(vNW),normalize(uL));
+      float diff=smoothstep(-0.12,0.75,ndl)*(1.0-uBack*0.92);
+      float mu=max(dot(normalize(vN),normalize(vV)),0.0);
+      vec3 col=alb*(diff*1.15+0.06*(1.0-uBack*0.6));
+      col+=vec3(0.08,0.12,0.28)*(1.0-diff)*mix(0.6,0.16,uBack);
+      col+=vec3(0.45,0.6,1.0)*pow(1.0-mu,3.0)*0.55*(1.0-uBack);
+      col+=uRim*pow(1.0-mu,5.0)*uBack*2.4;
+      col*=1.0-0.38*uSplit;
+      gl_FragColor=vec4(col*uDim,1.0);
+    }`
+}));
+scene.add(moon);
+
+/* 表紙用：月側の青い光と、太陽と月の継ぎ目に走る光 */
+const haloU = { uTime: { value: 0 }, uOn: splitU.uSplit };
+const moonHalo = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: haloU,
+  vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader: NOISE + `uniform float uTime,uOn; varying vec2 vUv;
+    void main(){ vec2 q=(vUv-0.5)*2.0*3.0; float r=length(q); if(r<0.99) discard; float a=atan(q.y,q.x);
+      float g=exp(-(r-1.0)*6.0)*0.55+exp(-(r-1.0)*1.6)*0.16;
+      float rays=pow(0.5+0.5*snoise(vec3(a*26.0,1.7,uTime*0.04)),7.0)*exp(-(r-1.0)*1.1)*0.7;
+      float k=(g+rays)*smoothstep(-0.05,0.25,q.x)*smoothstep(3.0,2.0,r)*uOn;
+      gl_FragColor=vec4(vec3(0.5,0.66,1.0)*k,1.0); }`
+}));
+scene.add(moonHalo);
+const seam = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending, uniforms: { uOn: splitU.uSplit, uTime: { value: 0 } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader: `uniform float uOn,uTime; varying vec2 vUv;
+    void main(){ vec2 q=(vUv-0.5)*2.0*1.6; float d=length(q);
+      float line=exp(-abs(q.x)*160.0)*smoothstep(1.02,0.4,abs(q.y))*0.9;
+      float star=exp(-d*d*260.0)*2.2+exp(-d*9.0)*0.35;
+      float spk=(exp(-abs(q.y)*140.0)*exp(-abs(q.x)*6.0)+exp(-abs(q.x)*140.0)*exp(-abs(q.y)*4.0))*0.9;
+      float tw=0.85+0.15*sin(uTime*1.7);
+      vec3 col=mix(vec3(1.0,0.78,0.4),vec3(1.0,0.97,0.9),smoothstep(0.3,0.0,d));
+      gl_FragColor=vec4(col*(line+(star+spk)*tw)*uOn,1.0); }`
+}));
+seam.renderOrder = 11; scene.add(seam);
+
+/* ---------- 円の完成（金の弧）とダイヤモンドリング ---------- */
+const ringU = { uArc: { value: 0 }, uFlash: { value: 0 }, uTime: { value: 0 }, uB: sunU.uB, uOn: { value: 0 } };
+const RING_SPAN = 1.6;
+const ring = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending, uniforms: ringU,
+  vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader: `uniform float uArc,uFlash,uTime,uOn; uniform vec3 uB; varying vec2 vUv;
+    void main(){
+      vec2 q=(vUv-0.5)*2.0*${RING_SPAN.toFixed(1)}; float r=length(q);
+      float ang=fract(atan(q.x,q.y)/6.28318);
+      float R=1.13, w=0.012;
+      float band=exp(-pow((r-R)/w,2.0));
+      float shown=step(ang,uArc)*uOn;
+      float head=exp(-pow((ang-uArc)*40.0,2.0))*step(0.001,uArc)*(1.0-step(0.999,uArc));
+      float tick=0.5+0.5*cos(ang*6.28318*48.0);
+      vec3 gold=mix(uB,vec3(1.0,0.93,0.75),0.5);
+      vec3 col=gold*band*shown*(1.1+0.35*tick)+vec3(1.0,0.95,0.85)*exp(-pow((r-R)/0.05,2.0))*head*3.0*uOn;
+      vec2 fp=q-vec2(0.0,R); float fd=length(fp);
+      float flare=uFlash*(exp(-fd*fd*90.0)*2.4+exp(-fd*3.5)*0.35+(exp(-abs(fp.x)*70.0)*exp(-abs(fp.y)*2.2)+exp(-abs(fp.y)*70.0)*exp(-abs(fp.x)*1.2))*1.4);
+      col+=vec3(1.0,0.97,0.9)*flare;
+      gl_FragColor=vec4(col,1.0);
+    }`
+}));
+ring.renderOrder = 10; scene.add(ring);
+
+/* ---------- ポストプロセス：ブルーム＋色調（彩度・周辺減光・色収差・粒子） ---------- */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.55, 0.42, 0.8);
+composer.addPass(bloom);
+const grade = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, uSat: { value: 1.12 }, uVig: { value: 0.62 }, uTime: { value: 0 }, uCA: { value: 0.0022 }, uGrain: { value: 0.03 } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float uSat,uVig,uTime,uCA,uGrain; varying vec2 vUv;
+    float h(vec2 p){ return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453); }
+    void main(){ vec2 d=vUv-0.5; float e=dot(d,d);
+      vec3 c=vec3(texture2D(tDiffuse,vUv+d*uCA*e*8.0).r, texture2D(tDiffuse,vUv).g, texture2D(tDiffuse,vUv-d*uCA*e*8.0).b);
+      float l=dot(c,vec3(0.2126,0.7152,0.0722)); c=mix(vec3(l),c,uSat);
+      c*=1.0-uVig*smoothstep(0.18,0.75,length(d*vec2(1.0,1.15)));
+      c+=(h(vUv*vec2(1733.0,977.0)+uTime)-0.5)*uGrain;
+      gl_FragColor=vec4(max(c,0.0),1.0); }`
+});
+composer.addPass(grade);
+composer.addPass(new OutputPass());
+
+/* ---------- カードごとの色 ---------- */
+const SUN_PAL = {
+  '03': [[1.0, 0.36, 0.22], [1.0, 0.66, 0.42]], '07': [[0.98, 0.16, 0.04], [1.0, 0.55, 0.16]],
+  '09': [[1.0, 0.45, 0.08], [1.0, 0.8, 0.36]], '12': [[0.96, 0.22, 0.26], [1.0, 0.6, 0.32]], '08': [[0.98, 0.44, 0.1], [1.0, 0.78, 0.4]]
+};
+const MOON_TINT = { '03': [0.9, 0.86, 1.02], '07': [0.98, 0.9, 0.96], '12': [0.88, 0.8, 1.04], '06': [0.82, 0.9, 1.04], '08': [0.92, 0.92, 1.0] };
+const DEF_A = [1.0, 0.36, 0.05], DEF_B = [1.0, 0.72, 0.24], DEF_T = [0.86, 0.9, 1.0];
+const pal = { a: new THREE.Color(...DEF_A), b: new THREE.Color(...DEF_B), t: new THREE.Color(...DEF_T) };
+
+/* ---------- 構図と状態 ---------- */
+const S = { mode: 'intro', sunId: null, moonId: null, t0: 0, dur: 7.6, ecl: 0,
+  sun: { x: 0, y: 0, r: 1 }, moon: { x: 2, y: 0, z: 0.6, r: 0.8 }, dim: 1, corona: 0.35, back: 0, arc: 0, flash: 0, ringOn: 0, swirl: 0, split: 1 };
+let VH = 3.15, VW = 3.15;
+const clock = new THREE.Clock();
+const _v2 = new THREE.Vector2(), _v3 = new THREE.Vector3(), _v3b = new THREE.Vector3();
+const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const clamp01 = x => Math.max(0, Math.min(1, x));
+function eclCenter() {
+  const land = VW > VH;
+  if (S.mode === 'work') return land ? { x: -VW * 0.5, y: 0.05 * VH, r: Math.min(VH * 0.4, VW * 0.3) } : { x: 0, y: VH * 0.56, r: VW * 0.36 };
+  return { x: 0, y: land ? 0.1 * VH : 0.16 * VH, r: Math.min(VH * 0.4, VW * 0.5) };
+}
+function targets() {
+  const land = VW > VH;
+  if (S.mode === 'intro') {
+    /* 題字より上の空きにちょうど収まる大きさ・位置を、実際の画面から測る */
+    let c = land ? { x: 0, y: VH * 0.4, r: Math.min(VH * 0.38, VW * 0.42) } : { x: 0, y: VH * 0.34, r: Math.min(VW * 0.64, VH * 0.36) };
+    const logo = document.querySelector('#intro .logo');
+    if (logo && innerHeight > 0) {
+      const top = logo.getBoundingClientRect().top, H = innerHeight, W = innerWidth;
+      const room = top - 34 - 18;                                     /* 額縁の上〜題字の上 */
+      if (room > 60) {
+        const rpx = Math.min(room / 2 * 0.9, W * (land ? 0.2 : 0.37));
+        const cy = 34 + room / 2;
+        c = { x: 0, y: (0.5 - cy / H) * 2 * VH, r: rpx / H * 2 * VH };
+      }
+    }
+    return { sun: c, moon: { x: c.x, y: c.y, z: 0.6, r: c.r }, dim: 1 };
+  }
+  if (S.mode === 'select') return land
+    ? { sun: { x: -VW * 1.02, y: VH * 1.08, r: VH * 0.42 }, moon: { x: VW * 1.0, y: -VH * 1.0, z: 0.6, r: VH * 0.3 }, dim: 0.62 }
+    : { sun: { x: -VW * 1.0, y: VH * 1.2, r: VW * 0.5 }, moon: { x: VW * 1.0, y: -VH * 1.05, z: 0.6, r: VW * 0.36 }, dim: 0.62 };
+  const c = eclCenter();
+  return { sun: { x: c.x, y: c.y, r: c.r }, moon: { x: c.x, y: c.y, z: 0.6, r: c.r * 1.015 }, dim: 1, c };
+}
+function applyPalette(sId, mId, k) {
+  const A = (SUN_PAL[sId] || [DEF_A, DEF_B]);
+  pal.a.lerp(new THREE.Color(...A[0]), k); pal.b.lerp(new THREE.Color(...A[1]), k); pal.t.lerp(new THREE.Color(...(MOON_TINT[mId] || DEF_T)), k);
+  sunU.uA.value.copy(pal.a); sunU.uB.value.copy(pal.b); moonU.uTint.value.copy(pal.t);
+}
+const damp = (cur, tgt, k, dt) => cur + (tgt - cur) * (1 - Math.exp(-k * dt));
+
+function setMode(mode, o) {
+  const prev = S.mode;
+  S.mode = mode;
+  if (o.sun !== undefined) S.sunId = o.sun;
+  if (o.moon !== undefined) S.moonId = o.moon;
+  if (mode === 'eclipse') {
+    S.t0 = clock.getElapsedTime(); S.dur = o.duration || 7.6; S.arc = 0; S.flash = 0; S.ringOn = 0; S.ecl = 0;
+  }
+  if (mode === 'work' && (o.instant || prev !== 'eclipse')) { skipEclipse(); }
+}
+function skipEclipse() { S.ecl = 1; S.arc = 1; S.ringOn = 1; S.back = 1; S.corona = 1.25; S.flash = 0; const T = targets(); Object.assign(S.sun, T.sun); Object.assign(S.moon, T.moon); }
+
+let px = 0, py = 0;
+addEventListener('pointermove', e => { px = e.clientX / innerWidth - 0.5; py = e.clientY / innerHeight - 0.5; }, { passive: true });
+
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false); composer.setSize(w, h);
+  bloom.resolution.set(w / 2, h / 2);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  VH = Math.tan(THREE.MathUtils.degToRad(17.5)) * 10; VW = VH * camera.aspect;
+  nebula.material.uniforms.uAspect.value = camera.aspect;
+  const pr = renderer.getPixelRatio();
+  [starsFar, starsNear, dust, orbs].forEach(o => o.material.uniforms.uPR.value = pr);
+}
+addEventListener('resize', resize); resize();
+
+function frame() {
+  const dt = Math.min(clock.getDelta(), 0.12), time = clock.getElapsedTime();
+  const T = targets();
+  if (S.mode === 'eclipse') {
+    const e = clamp01((time - S.t0) / S.dur); S.ecl = e;
+    const c = T.c;
+    const kin = reduce ? 1 : clamp01(e / 0.16);
+    S.sun.x = damp(S.sun.x, c.x, 4, dt); S.sun.y = damp(S.sun.y, c.y, 4, dt); S.sun.r = damp(S.sun.r, c.r, 4, dt);
+    const slide = reduce ? 1 : ease(clamp01((e - 0.12) / 0.46));
+    const ox = (1 - slide) * c.r * 2.7, oy = (1 - slide) * c.r * 0.42;
+    const mt = { x: c.x + ox, y: c.y + oy, r: T.moon.r };
+    const kk = kin < 1 ? 3.5 : 14;
+    S.moon.x = damp(S.moon.x, mt.x, kk, dt); S.moon.y = damp(S.moon.y, mt.y, kk, dt); S.moon.r = damp(S.moon.r, mt.r, kk, dt);
+    const cover = clamp01(1 - Math.hypot(S.moon.x - S.sun.x, S.moon.y - S.sun.y) / (S.sun.r * 2));
+    S.back = Math.pow(cover, 1.5);
+    S.corona = 0.35 + 0.95 * Math.pow(cover, 3);
+    S.ringOn = e > 0.5 ? 1 : 0;
+    S.arc = reduce ? 1 : ease(clamp01((e - 0.52) / 0.3));
+    const fl = (e - 0.82) / 0.035;
+    S.flash = e > 0.82 ? Math.max(0, Math.exp(-Math.max(0, (e - 0.835)) * 22) * clamp01(fl)) : 0;
+    S.swirl = damp(S.swirl, 0.25 * cover, 2, dt);
+    applyPalette(S.sunId, S.moonId, 1 - Math.exp(-3 * dt));
+  } else {
+    const k = 2.6;
+    S.sun.x = damp(S.sun.x, T.sun.x, k, dt); S.sun.y = damp(S.sun.y, T.sun.y, k, dt); S.sun.r = damp(S.sun.r, T.sun.r, k, dt);
+    S.moon.x = damp(S.moon.x, T.moon.x, k, dt); S.moon.y = damp(S.moon.y, T.moon.y, k, dt); S.moon.r = damp(S.moon.r, T.moon.r, k, dt);
+    if (S.mode === 'work') { S.back = damp(S.back, 1, 3, dt); S.corona = damp(S.corona, 1.15 + 0.12 * Math.sin(time * 0.6), 2, dt); S.flash = damp(S.flash, 0, 4, dt); S.ringOn = 1; S.arc = 1; S.swirl = damp(S.swirl, 0.18, 1, dt); }
+    else { S.back = damp(S.back, 0, 2, dt); S.corona = damp(S.corona, 0.35, 2, dt); S.ringOn = damp(S.ringOn, 0, 3, dt); if (S.ringOn < 0.02) { S.ringOn = 0; S.arc = 0; } S.swirl = damp(S.swirl, 0, 1, dt); }
+    applyPalette(S.mode === 'intro' ? null : S.sunId, S.mode === 'intro' ? null : S.moonId, 1 - Math.exp(-2 * dt));
+  }
+  if (S.mode === 'work') { S.moon.x = S.sun.x; S.moon.y = S.sun.y; S.moon.r = S.sun.r * 1.015; }
+  S.split = damp(S.split, S.mode === 'intro' ? 1 : 0, S.mode === 'intro' ? 2 : 3.2, dt); if (S.split < 0.003) S.split = 0;
+  S.dim = damp(S.dim, T.dim, 2, dt);
+
+  sun.position.set(S.sun.x, S.sun.y, 0); sun.scale.setScalar(S.sun.r); sun.rotation.y = time * 0.03;
+  corona.position.set(S.sun.x, S.sun.y, -0.02); corona.scale.setScalar(S.sun.r * CORONA_SPAN);
+  /* 奥行きの違う月と円を、カメラから太陽への視線上に置く（画面上でぴたりと重なる） */
+  const cam = camera.position;
+  const onRay = (x, y, z, out) => { const k = (cam.z - z) / cam.z; out.set(cam.x + (x - cam.x) * k, cam.y + (y - cam.y) * k, z); return k; };
+  const km = onRay(S.moon.x, S.moon.y, S.moon.z, moon.position); moon.scale.setScalar(S.moon.r * km); moon.rotation.y = 0.4 + time * 0.01;
+  const kr = onRay(S.sun.x, S.sun.y, 0.7, ring.position); ring.scale.setScalar(S.sun.r * kr * RING_SPAN);
+  const L = new THREE.Vector3(S.sun.x - moon.position.x, S.sun.y - moon.position.y, -S.moon.z).normalize();
+  if (S.back < 0.05) L.add(new THREE.Vector3(0, 0, 0.35)).normalize();
+  L.lerp(new THREE.Vector3(-0.25, 0.3, 1).normalize(), S.split).normalize();
+  /* 継ぎ目の位置（画面ピクセル）と半径 */
+  { const buf = renderer.getDrawingBufferSize(_v2); const c0 = _v3.set(S.sun.x, S.sun.y, 0).project(camera); const e0 = _v3b.set(S.sun.x + S.sun.r, S.sun.y, 0).project(camera);
+    splitU.uSeamX.value = (c0.x + 1) / 2 * buf.x; splitU.uSeamR.value = Math.abs(e0.x - c0.x) / 2 * buf.x; }
+  splitU.uSplit.value = S.split;
+  const kh = onRay(S.moon.x, S.moon.y, S.moon.z - 0.05, moonHalo.position); moonHalo.scale.setScalar(S.moon.r * kh * 3.0); moonHalo.visible = S.split > 0.01;
+  const ks = onRay(S.sun.x, S.sun.y, 0.75, seam.position); seam.scale.setScalar(S.sun.r * ks * 1.6); seam.visible = S.split > 0.01;
+  haloU.uTime.value = time; seam.material.uniforms.uTime.value = time;
+  moonU.uL.value.copy(L);
+
+  sunU.uTime.value = time; sunU.uDim.value = S.dim; sunU.uI.value = 1.2 - 0.42 * S.split;
+  corU.uTime.value = time; corU.uC.value = S.corona; corU.uDim.value = S.dim; corU.uEcl.value = S.back;
+  moonU.uBack.value = S.back; moonU.uDim.value = S.dim; moonU.uTime.value = time;
+  ringU.uArc.value = S.arc; ringU.uFlash.value = S.flash; ringU.uOn.value = S.ringOn; ringU.uTime.value = time;
+  const nu = nebula.material.uniforms; nu.uTime.value = time; nu.uDim.value = (0.85 + 0.15 * S.dim - 0.25 * S.back * (S.mode === 'eclipse' ? 1 : 0.4)) * (1 - 0.6 * S.split);
+  nu.uSun.value.set(S.sun.x / VH, S.sun.y / VH);
+  [starsFar, starsNear, orbs].forEach(o => { o.material.uniforms.uTime.value = time; o.material.uniforms.uDim.value = (1 - 0.3 * S.back * (S.mode === 'eclipse' ? 1 : 0)) * (o === orbs ? 1 - 0.85 * S.split : 1); });
+  dust.material.uniforms.uDim.value = 1 - 0.6 * S.split;
+  dust.material.uniforms.uTime.value = time; dust.material.uniforms.uSwirl.value = S.swirl; dust.material.uniforms.uCenter.value.set(S.sun.x, S.sun.y, 0);
+  bloom.strength = 0.55 + S.flash * 1.2;
+  grade.uniforms.uTime.value = time % 10;
+
+  camera.position.x = damp(camera.position.x, px * 0.35, 1.5, dt);
+  camera.position.y = damp(camera.position.y, -py * 0.25, 1.5, dt);
+  camera.lookAt(camera.position.x * 0.6, camera.position.y * 0.6, 0);
+  composer.render();
+  requestAnimationFrame(frame);
+}
+/* 初期配置 */
+{ const T = targets(); Object.assign(S.sun, T.sun); Object.assign(S.moon, T.moon); }
+requestAnimationFrame(frame);
+document.body.style.backgroundImage = 'none';
+
+window.SMScene = {
+  setMode,
+  skip() { if (S.mode === 'eclipse') { S.mode = 'work'; skipEclipse(); } },
+  snapshot() { try { return canvas.toDataURL('image/jpeg', 0.92); } catch (e) { return null; } },
+  focus() { const v = new THREE.Vector3(S.sun.x, S.sun.y, 0).project(camera); return { x: (v.x + 1) / 2, y: (1 - v.y) / 2 }; },
+  state: S
+};
+}
+</script>
+
+</body></html>

@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>名もなき家事診断 ひとり版｜表現科学研究所</title>
+<meta name="description" content="家の仕事を312項目に分け、あなたが担っている量をスコアと16タイプで示す無料診断。入力も結果も端末の外に出ません。開発：表現科学研究所">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   やわらかい白＋やさしい赤／縦書きの紙面
+   ================================================================ */
+:root{
+  --haku:#FCFAF8; --kami:#F7F3F1; --awa:#FBEFEF;
+  --waku:#EFD9D9; --kei:#EDE7E2; --kei-2:#F5F1ED;
+  --sumi:#35302C; --sumi-2:#726B63; --sumi-3:#A49D94;
+  --shu:#D4484C; --shu-fuka:#B2383C; --shu-usu:#FBEFEF;
+  --ai:#5F87A0; --midori:#7FA477; --cha:#B6926A; --hai:#ADA8A0;
+  --min:"Noto Serif JP","Noto Serif CJK JP","Hiragino Mincho ProN","ヒラギノ明朝 ProN","Yu Mincho","YuMincho",serif;
+  --go:"Noto Sans JP","Noto Sans CJK JP","Hiragino Sans","ヒラギノ角ゴシック","Yu Gothic","YuGothic","Meiryo",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --haku:#1D1A19; --kami:#262322; --awa:#2E2122;
+  --waku:#4E3A3B; --kei:#3B3633; --kei-2:#2F2B29;
+  --sumi:#F2EEE9; --sumi-2:#C0BAB2; --sumi-3:#8E8880;
+  --shu:#E8767A; --shu-fuka:#E8767A; --shu-usu:#332325;
+  --ai:#8FB0C4; --midori:#9CBA93; --cha:#CBA87E; --hai:#918C85;
+}}
+:root[data-theme="dark"]{
+  --haku:#1D1A19; --kami:#262322; --awa:#2E2122;
+  --waku:#4E3A3B; --kei:#3B3633; --kei-2:#2F2B29;
+  --sumi:#F2EEE9; --sumi-2:#C0BAB2; --sumi-3:#8E8880;
+  --shu:#E8767A; --shu-fuka:#E8767A; --shu-usu:#332325;
+  --ai:#8FB0C4; --midori:#9CBA93; --cha:#CBA87E; --hai:#918C85;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--haku);color:var(--sumi);font-family:var(--go);
+  font-size:15.5px;line-height:1.95;letter-spacing:.03em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:0 20px calc(72px + env(safe-area-inset-bottom))}
+.num,.big,.vl,.g1,.g2,.typecode,.tnum,.pcnum{font-variant-numeric:tabular-nums}
+b,strong{font-weight:700}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--shu);outline-offset:3px}
+[hidden]{display:none!important}
+small{font-size:.86em}
+p{margin:0 0 1.05em}p:last-child{margin-bottom:0}
+
+.brand{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 0 12px}
+.brand .mark{font-family:var(--min);font-size:13px;font-weight:600;letter-spacing:.14em;text-decoration:none;color:var(--sumi);display:flex;align-items:center;gap:7px}
+.brand .mark i{width:9px;height:9px;background:var(--shu);border-radius:50%;display:inline-block}
+.brand .ver{font-size:10.5px;color:var(--sumi-3);letter-spacing:.08em}
+
+section.step{display:none;padding:12px 0 0}
+section.step.on{display:block}
+
+/* ───── 紙面 ───── */
+.sheet{border:1px solid var(--waku);border-radius:12px;padding:22px 18px 26px;margin:4px 0 0;background:var(--haku)}
+@media(max-width:360px){.wrap{padding-left:14px;padding-right:14px}.sheet{padding:18px 13px 22px}}
+.ad-head{margin:0 0 18px}
+.ad-tag{font-family:var(--min);font-size:12.5px;letter-spacing:.1em;color:var(--shu);margin:0 0 5px;font-weight:600}
+.ad-lab{font-family:var(--min);font-size:15px;font-weight:600;letter-spacing:.16em;margin:0;display:flex;align-items:center;gap:8px}
+.ad-lab i{width:11px;height:11px;background:var(--shu);border-radius:50%;display:inline-block;flex-shrink:0}
+.illust{margin:0;line-height:0;border-radius:8px;overflow:hidden}
+.illust svg{width:100%;height:auto;display:block}
+.strip{margin:5px 0 0;line-height:0;border-radius:8px;overflow:hidden}
+.strip svg{width:100%;height:auto;display:block}
+
+.tate-wrap{margin:26px 0 0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.tate-wrap::-webkit-scrollbar{display:none}
+.tate{writing-mode:vertical-rl;height:clamp(306px,40vh,344px);margin-left:auto;font-family:var(--min);font-feature-settings:"vert" 1;text-orientation:mixed}
+.tate h1{font-size:clamp(25px,7.2vw,38px);line-height:1.62;letter-spacing:.1em;color:var(--shu);font-weight:600;margin:0;margin-block-end:.85em}
+.tate .lead{font-size:clamp(12px,3.3vw,14.5px);line-height:2.0;letter-spacing:.09em;color:var(--sumi);margin:0;margin-block-end:.9em}
+.tate .sign{font-size:clamp(10.5px,2.9vw,12.5px);line-height:2.0;letter-spacing:.12em;color:var(--sumi-3);margin:0}
+.tate .lead b{font-weight:600;color:var(--shu-fuka)}
+
+.lockup{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;margin:26px 0 0;padding-top:20px;border-top:1px solid var(--kei)}
+.lockup .mk{width:52px;flex-shrink:0;line-height:0}
+.lockup .mk svg{width:100%;height:auto;display:block}
+.lockup .lk-g{display:flex;flex-direction:column;gap:3px}
+.lockup .lk-t{font-family:var(--min);font-size:clamp(19px,5.4vw,26px);font-weight:600;letter-spacing:.07em;line-height:1.4;color:var(--sumi)}
+.lockup .lk-sub{font-family:var(--go);font-size:11.5px;color:var(--sumi-2);letter-spacing:.03em;line-height:1.5}
+.lockup .lk-s{font-size:9.5px;letter-spacing:.22em;color:var(--shu);line-height:1.7;margin-left:auto;text-align:right;flex-shrink:0}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 0}
+.facts{list-style:none;padding:0;margin:22px 0 0;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--kei)}
+.facts li{padding:13px 10px 2px;font-size:11px;line-height:1.75;color:var(--sumi-2);border-right:1px solid var(--kei-2)}
+.facts li:last-child{border-right:0}
+.facts li b{display:block;font-family:var(--min);font-size:13px;font-weight:600;color:var(--sumi);letter-spacing:.04em;margin-bottom:3px}
+@media(max-width:400px){.facts li{font-size:10.5px;padding:11px 7px 2px}.facts li b{font-size:12px}}
+.resume{background:var(--awa);border-radius:10px;padding:16px 18px;margin:22px 0 0}
+.resume .t{font-family:var(--min);font-weight:600;font-size:15px;margin:0 0 2px}
+.resume p{margin:0 0 12px;font-size:13px;color:var(--sumi-2)}
+.resume .acts{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ───── 見出し ───── */
+h2.sec{font-family:var(--min);font-weight:600;font-size:25px;letter-spacing:.06em;line-height:1.5;margin:0 0 12px}
+h2.sec .n{display:block;font-family:var(--go);font-size:10.5px;color:var(--shu);letter-spacing:.2em;font-weight:500;margin-bottom:8px}
+.sec-note{color:var(--sumi-2);font-size:14.5px;line-height:2.05;margin:0 0 26px}
+.sec-note b{color:var(--sumi);font-weight:700}
+h2.h2{font-family:var(--min);font-weight:600;font-size:20px;letter-spacing:.08em;margin:48px 0 16px;padding-top:14px;border-top:1.5px solid var(--shu)}
+h3.grp{font-family:var(--min);font-weight:600;font-size:18px;letter-spacing:.06em;margin:46px 0 12px;padding-bottom:10px;border-bottom:1px solid var(--kei);display:flex;align-items:baseline;gap:10px;scroll-margin-top:12px}
+h3.grp .a{font-family:var(--go);font-size:10px;color:var(--shu);letter-spacing:.18em;flex-shrink:0}
+
+.cards3{display:grid;gap:10px}
+.cards3 .c{background:#FFF;border:1px solid var(--kei);border-radius:12px;padding:20px 20px 22px}
+.cards3 h3{font-family:var(--min);font-weight:600;font-size:17px;letter-spacing:.04em;margin:10px 0 9px;line-height:1.6}
+.cards3 p{margin:0;font-size:13.5px;line-height:1.95;color:var(--sumi-2)}
+.mini{display:flex;gap:14px;align-items:flex-end}
+.mini .g{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;width:96px}
+.mini .g i{display:block;padding-bottom:100%;background:var(--kei-2);border-radius:1px}
+.mini .g i.me{background:var(--shu)}.mini .g i.pt{background:var(--ai)}
+.mini .lb{font-size:10.5px;color:var(--sumi-3);line-height:1.4;margin-top:5px;display:block}
+.mini .d{display:flex;flex-direction:column}
+.axes4{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 12px;font-size:12px;color:var(--sumi-2)}
+.axes4 span{border-bottom:1px dotted var(--kei);padding:3px 0}
+.axes4 b{color:var(--sumi);font-weight:600}
+
+ol.flow{list-style:none;padding:0;margin:0;counter-reset:f;display:grid;gap:8px}
+ol.flow li{background:var(--kami);border-radius:10px;padding:14px 18px;font-size:13.5px;line-height:1.85;color:var(--sumi-2);display:grid;grid-template-columns:20px 1fr;gap:2px 13px}
+ol.flow li::before{counter-increment:f;content:counter(f);color:var(--shu);font-family:var(--min);font-size:14px;font-weight:600;grid-row:1;line-height:1.6}
+ol.flow li b{color:var(--sumi);font-family:var(--min);font-weight:600;font-size:15px;letter-spacing:.04em;grid-column:2;display:block}
+ol.flow li>b+span{grid-column:2}
+
+details.doc{border-bottom:1px solid var(--kei)}
+details.doc>summary{cursor:pointer;list-style:none;padding:15px 2px;font-family:var(--min);font-weight:600;font-size:15px;letter-spacing:.04em;display:flex;justify-content:space-between;align-items:center;gap:10px}
+details.doc>summary::-webkit-details-marker{display:none}
+details.doc>summary::after{content:"＋";color:var(--shu);font-family:var(--go);font-weight:400;flex-shrink:0;font-size:13px}
+details.doc[open]>summary::after{content:"−"}
+details.doc>.db{padding:0 2px 20px;font-size:13.5px;line-height:2.05;color:var(--sumi-2)}
+details.doc>.db p{margin:0 0 1em}
+details.doc>.db ul{padding-left:1.3em;margin:10px 0 0}
+details.doc>.db li{margin:6px 0}
+dl.types{margin:12px 0 0;display:grid;grid-template-columns:auto 1fr;gap:8px 14px}
+dl.types dt{font-family:var(--min);font-weight:600;color:var(--sumi);white-space:nowrap;padding-left:10px;border-left:3px solid var(--kei)}
+dl.types dt.t-info{border-color:var(--ai)}dl.types dt.t-judge{border-color:var(--shu)}dl.types dt.t-body{border-color:var(--midori)}dl.types dt.t-emo{border-color:var(--cha)}
+dl.types dd{margin:0}
+table.conf{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0 0}
+table.conf th,table.conf td{border-bottom:1px solid var(--kei);padding:9px 8px;text-align:left;vertical-align:top;line-height:1.8}
+table.conf th{font-weight:500;white-space:nowrap;color:var(--sumi-2);font-size:12.5px}
+.conf .lv{display:inline-block;font-size:11px;background:var(--kami);border-radius:99px;padding:2px 9px;margin-right:6px;white-space:nowrap}
+
+/* ───── ステップ ───── */
+.rail{display:grid;grid-template-columns:repeat(4,1fr);margin:16px 0 0;background:var(--kami);border-radius:99px;padding:4px}
+.rail button{border:0;background:transparent;font-size:12px;letter-spacing:.04em;color:var(--sumi-3);padding:9px 4px;cursor:pointer;line-height:1.5;display:flex;flex-direction:column;align-items:center;gap:1px;border-radius:99px}
+.rail button .n{font-family:var(--min);font-size:11px;letter-spacing:.1em}
+.rail button[aria-current="true"]{background:var(--shu);color:#fff;font-weight:700}
+.rail button:disabled{opacity:.4;cursor:not-allowed}
+.rail button.done:not([aria-current="true"]){color:var(--sumi)}
+
+.field{margin:0 0 30px}
+.field>label{display:block;font-family:var(--min);font-size:16px;font-weight:600;letter-spacing:.04em;margin-bottom:6px}
+.hint{font-size:13px;color:var(--sumi-3);line-height:1.9;margin:0 0 13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--kei);background:#FFF;color:var(--sumi-2);font-size:14.5px;padding:10px 18px;cursor:pointer;min-height:46px;border-radius:99px}
+.chip[aria-pressed="true"]{background:var(--shu);border-color:var(--shu);color:#fff;font-weight:700}
+.chips.quick .chip{padding:6px 14px;min-height:36px;font-size:13px}
+.inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+input[type=number]{font-family:var(--min);font-size:22px;width:148px;padding:10px 14px;border:1px solid var(--kei);background:#FFF;color:var(--sumi);border-radius:10px}
+.unit{font-size:12.5px;color:var(--sumi-3)}
+
+.btn{font-family:var(--go);font-size:15.5px;font-weight:700;letter-spacing:.08em;background:var(--kami);color:var(--sumi);border:1px solid var(--kei);padding:14px 28px;cursor:pointer;border-radius:99px;min-height:50px}
+.btn.primary{background:var(--shu);border-color:var(--shu);color:#fff}
+.btn.big{font-size:17px;padding:16px 38px;min-height:56px}
+.btn.ghost{background:transparent;color:var(--sumi-2);border-color:var(--kei);font-weight:400}
+.btn.sm{font-size:13px;padding:9px 16px;min-height:38px;font-weight:400}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btnrow{display:flex;gap:12px;flex-wrap:wrap;margin:42px 0 0;padding-top:22px;border-top:1px solid var(--kei);align-items:center}
+.btnrow .note{font-size:12.5px;color:var(--sumi-3);flex-basis:100%;line-height:1.8}
+
+.toolbar{position:sticky;top:0;z-index:20;background:var(--haku);padding:11px 0 9px;margin:0 0 12px;border-bottom:1px solid var(--kei)}
+.bar{height:5px;background:var(--kei-2);margin-bottom:9px;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--shu);width:0;transition:width .3s;border-radius:99px}
+.toolbar .line{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.count{font-size:12.5px;color:var(--sumi-2)}
+.count b{font-family:var(--min);font-size:18px;color:var(--sumi)}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.tools button{border:1px solid var(--kei);background:#FFF;color:var(--sumi-2);font-size:12.5px;padding:7px 13px;cursor:pointer;border-radius:99px;min-height:34px}
+.tools button.on{background:var(--shu);color:#fff;border-color:var(--shu)}
+
+.legend-ans{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px;margin:10px 0 0;align-items:center}
+.legend-ans b{display:inline-block;min-width:46px;text-align:center;color:#fff;font-weight:500;font-size:12px;padding:3px 8px;border-radius:99px}
+.legend-ans .me{background:var(--shu)}.legend-ans .half{background:var(--cha)}.legend-ans .pt{background:var(--ai)}.legend-ans .ext{background:var(--midori)}.legend-ans .na{background:var(--hai)}
+
+details.cat{background:#FFF;border:1px solid var(--kei);border-radius:12px;margin:0 0 10px;overflow:hidden}
+details.cat>summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:var(--min);font-weight:600;font-size:17px;letter-spacing:.06em}
+details.cat>summary::-webkit-details-marker{display:none}
+details.cat>summary::after{content:"＋";font-family:var(--go);color:var(--shu);font-size:13px;font-weight:400;margin-left:auto}
+details.cat[open]>summary::after{content:"−"}
+details.cat[open]>summary{border-bottom:1px solid var(--kei)}
+summary .st{font-family:var(--go);font-size:12px;font-weight:400;color:var(--sumi-3);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+summary .st.done{color:var(--midori);font-weight:500}
+.catbody{padding:6px 16px 14px}
+.sub{padding:16px 0 14px;border-bottom:1px solid var(--kei-2)}
+.sub:last-child{border-bottom:0}
+.subhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin:0 0 9px}
+.subhead .sn{font-family:var(--min);font-size:15px;font-weight:600;letter-spacing:.03em}
+.subhead .sn small{font-family:var(--go);font-weight:400;color:var(--sumi-3);margin-left:7px;font-size:11.5px}
+.mix{font-size:11.5px;color:var(--sumi-3);font-variant-numeric:tabular-nums}
+.mix.mixed{color:var(--sumi-2)}
+
+.seg{display:flex;width:100%;gap:5px}
+.seg button{flex:1;border:1px solid var(--kei);background:#FFF;color:var(--sumi-3);font-size:12.5px;min-height:42px;cursor:pointer;line-height:1.2;padding:0 2px;border-radius:8px}
+.seg button[aria-pressed="true"]{color:#fff;border-color:transparent;font-weight:700}
+.seg button.me[aria-pressed="true"]{background:var(--shu)}
+.seg button.half[aria-pressed="true"]{background:var(--cha)}
+.seg button.pt[aria-pressed="true"]{background:var(--ai)}
+.seg button.ext[aria-pressed="true"]{background:var(--midori)}
+.seg button.na[aria-pressed="true"]{background:var(--hai)}
+.seg.bulk button{min-height:44px;font-size:13.5px}
+
+details.rows{margin:10px 0 0}
+details.rows>summary{list-style:none;cursor:pointer;font-size:12.5px;color:var(--sumi-2);padding:7px 0;display:inline-flex;align-items:center;gap:6px}
+details.rows>summary::-webkit-details-marker{display:none}
+details.rows>summary::before{content:"▸";color:var(--shu);font-size:11px}
+details.rows[open]>summary::before{content:"▾"}
+.row{display:flex;flex-wrap:wrap;gap:7px 12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--kei-2);scroll-margin-top:110px}
+.row:last-child{border-bottom:0}
+.row .nm{flex:1 1 240px;font-size:14px;line-height:1.65;min-width:0}
+.row .seg{flex:1 1 100%}
+.row .seg button{min-height:36px;font-size:12px}
+@media(min-width:600px){.row .seg{flex:0 0 auto;width:auto}.row .seg button{flex:0 0 52px}}
+.row.hl{background:var(--awa);border-radius:10px;padding-left:10px;padding-right:10px}
+.tag{display:inline-block;font-style:normal;font-size:10px;letter-spacing:.04em;color:var(--sumi-3);background:var(--kami);border-radius:99px;padding:2px 8px;margin-left:6px;vertical-align:1px;white-space:nowrap;line-height:1.6}
+.tag.t-info{color:var(--ai)}.tag.t-judge{color:var(--shu)}.tag.t-body{color:var(--midori)}.tag.t-emo{color:var(--cha)}
+body.showrows details.rows{display:block}
+body.showrows details.rows>summary{display:none}
+body.showrows details.rows>.rw{display:block}
+
+/* ───── 結果 ───── */
+.summary{border:1px solid var(--waku);border-radius:14px;overflow:hidden;margin:18px 0 0;background:#FFF}
+.summary .top{display:grid;grid-template-columns:1fr 1fr}
+@media(max-width:560px){.summary .top{grid-template-columns:1fr}}
+.summary .top>div{padding:22px 22px 20px}
+.summary .top>div+div{border-left:1px solid var(--kei)}
+@media(max-width:560px){.summary .top>div+div{border-left:0;border-top:1px solid var(--kei)}}
+.lb{display:block;font-size:12px;letter-spacing:.04em;color:var(--sumi-3);margin-bottom:2px}
+.summary .big{font-family:var(--min);font-weight:600;font-size:clamp(50px,14vw,74px);line-height:1;margin:8px 0 0;color:var(--shu)}
+.summary .big small{font-family:var(--go);font-size:14px;font-weight:400;color:var(--sumi-2);margin-left:6px;letter-spacing:.04em}
+.summary .band{font-family:var(--min);font-size:16px;margin-top:10px;font-weight:600;letter-spacing:.04em}
+.summary .desc{font-size:13px;color:var(--sumi-2);line-height:1.95;margin:10px 0 0}
+.summary .typecode{font-family:var(--min);font-size:clamp(28px,8vw,42px);letter-spacing:.16em;line-height:1.1;margin:8px 0 0;color:var(--shu)}
+.summary .typename{font-family:var(--min);font-weight:600;font-size:clamp(18px,5vw,24px);letter-spacing:.06em;margin:3px 0 7px}
+.summary .three{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--kei)}
+.summary .three>div{padding:15px 14px;border-right:1px solid var(--kei)}
+.summary .three>div:last-child{border-right:0}
+.summary .three b{font-family:var(--min);font-size:25px;font-weight:600;line-height:1.2}
+.summary .three b small{font-family:var(--go);font-size:11.5px;font-weight:400;color:var(--sumi-2);margin-left:2px}
+.summary .first{padding:17px 22px;border-top:1px solid var(--kei);font-size:14.5px;line-height:1.9}
+.summary .first .lb{margin-bottom:4px}
+.summary .first .lv{display:inline-block;font-size:11.5px;background:var(--kami);border-radius:99px;padding:3px 10px;margin-left:8px;color:var(--sumi-2);white-space:nowrap}
+.summary .prev{padding:15px 22px;border-top:1px solid var(--kei);font-size:13px;color:var(--sumi-2);line-height:1.85}
+.summary .prev b{color:var(--sumi)}
+.summary .acts{display:flex;gap:8px;flex-wrap:wrap;padding:16px 22px 20px;border-top:1px solid var(--kei)}
+.up{color:var(--shu)}.dn{color:var(--midori)}
+.jump{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 0}
+.jump a{font-size:12px;color:var(--sumi-2);background:var(--kami);padding:6px 12px;text-decoration:none;border-radius:99px;white-space:nowrap}
+.warn{background:var(--kami);border-radius:10px;padding:15px 18px;font-size:13px;color:var(--sumi-2);margin:16px 0 0;line-height:1.9}
+
+.kpi{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0}
+.kpi>div{flex:1 1 150px;background:var(--kami);border-radius:10px;padding:17px 19px}
+.kpi .vl{font-family:var(--min);font-size:30px;font-weight:600;line-height:1.2;margin-top:5px;color:var(--sumi)}
+.kpi .vl small{font-family:var(--go);font-size:12.5px;font-weight:400;color:var(--sumi-2);margin-left:3px}
+.kpi .sb{font-size:12px;color:var(--sumi-3);line-height:1.75;margin-top:6px}
+
+.hyakumasu{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;max-width:420px;margin:14px 0 10px}
+.hyakumasu i{padding-bottom:100%;background:var(--kei-2);display:block;border-radius:1px;opacity:0;transform:scale(.55);animation:pop .32s forwards}
+@keyframes pop{to{opacity:1;transform:scale(1)}}
+.hyakumasu i.me{background:var(--shu)}.hyakumasu i.pt{background:var(--ai)}.hyakumasu i.ext{background:var(--midori)}
+@media (prefers-reduced-motion:reduce){.hyakumasu i{animation:none;opacity:1;transform:none}}
+.legend{display:flex;flex-wrap:wrap;gap:7px 16px;font-size:12px;color:var(--sumi-2);margin-top:8px}
+.legend span{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.legend em{width:10px;height:10px;display:inline-block;font-style:normal;border-radius:2px}
+.legend .me{background:var(--shu)}.legend .pt{background:var(--ai)}
+.legend .ext{background:var(--midori)}.legend .none{background:var(--kei-2)}
+.twoup{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:8px 0 0}
+@media(max-width:640px){.twoup{grid-template-columns:1fr;gap:20px}}
+.masu-t{font-size:13.5px;font-weight:700;letter-spacing:.02em}
+.masu-t span{font-size:11.5px;color:var(--sumi-3);font-weight:400;margin-left:6px}
+
+.panel{background:var(--kami);border-radius:10px;padding:20px 22px;margin:18px 0}
+.panel.mark{background:var(--awa)}
+.panel h5{margin:0 0 9px;font-family:var(--min);font-size:17px;font-weight:600;letter-spacing:.04em;line-height:1.65}
+.panel p{margin:0;font-size:14.5px;line-height:2.05;color:var(--sumi-2)}
+.panel p+p{margin-top:1em}
+.panel b{color:var(--sumi)}
+
+.gap{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;padding:16px 0;border-bottom:1px solid var(--kei-2)}
+.gap:last-of-type{border-bottom:0}
+.gap .glb{font-size:13px;color:var(--sumi-2);grid-column:1/-1;margin-bottom:-8px;font-weight:700}
+.gap .g1,.gap .g2{font-family:var(--min);font-size:26px;font-weight:600}
+.gap .g1{color:var(--sumi-3)}
+.gap .g2{color:var(--shu);text-align:right}
+.gap .ar{font-size:11.5px;color:var(--sumi-3);text-align:center}
+.gap small{display:block;font-family:var(--go);font-size:10.5px;font-weight:400;letter-spacing:.04em;color:var(--sumi-3)}
+
+table.mx{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+table.mx th,table.mx td{border-bottom:1px solid var(--kei);padding:9px 8px;text-align:center;font-variant-numeric:tabular-nums}
+table.mx th{font-weight:400;font-size:11.5px;color:var(--sumi-3);border-bottom:1px solid var(--shu)}
+table.mx td.h{text-align:left;font-family:var(--min);font-weight:600;font-size:13px}
+table.mx td b{font-family:var(--min);font-size:15px;font-weight:600}
+table.mx td small{display:block;font-size:10px;color:var(--sumi-3)}
+
+ol.rank{list-style:none;counter-reset:r;padding:0;margin:14px 0}
+ol.rank li{counter-increment:r;display:flex;gap:14px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--kei-2)}
+ol.rank li::before{content:counter(r,decimal-leading-zero);font-family:var(--min);font-size:11.5px;color:var(--shu);padding-top:5px;min-width:20px;letter-spacing:.06em}
+ol.rank .bd{flex:1;min-width:0}
+ol.rank .t{font-size:14.5px;line-height:1.7}
+ol.rank .d{font-size:12px;color:var(--sumi-3);margin-top:3px;font-variant-numeric:tabular-nums}
+ol.rank .lv{font-size:11px;background:var(--kami);border-radius:99px;padding:4px 10px;white-space:nowrap;color:var(--sumi-2);margin-top:4px}
+
+.slider{margin:22px 0}
+.slider label{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:7px;gap:10px}
+.slider label b{font-family:var(--min);font-weight:600;font-size:16px;flex-shrink:0;color:var(--shu)}
+input[type=range]{width:100%;accent-color:var(--shu);height:28px}
+
+textarea{width:100%;min-height:220px;font-family:var(--go);font-size:13.5px;line-height:2;border:1px solid var(--kei);background:#FFF;padding:15px;color:var(--sumi);resize:vertical;border-radius:10px}
+.fine{font-size:12.5px;color:var(--sumi-3);line-height:2}
+.fine ul{padding-left:1.3em;margin:8px 0}
+.fine li{margin:6px 0}
+
+.typecode{font-family:var(--min);font-size:clamp(32px,10vw,50px);letter-spacing:.14em;margin:4px 0 2px;line-height:1.1;color:var(--shu)}
+.typename{font-family:var(--min);font-weight:600;font-size:clamp(20px,5.5vw,28px);letter-spacing:.06em;margin:0 0 8px}
+.axes{margin:22px 0 0}
+.ax{display:grid;grid-template-columns:86px 1fr 86px;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--kei-2)}
+.ax:last-child{border-bottom:0}
+.ax .l,.ax .r2{font-size:11.5px;color:var(--sumi-3);line-height:1.45}
+.ax .r2{text-align:right}
+.ax .l.on,.ax .r2.on{color:var(--sumi);font-weight:700}
+.ax .tr{position:relative;height:5px;background:var(--kei-2);border-radius:99px}
+.ax .tr i{position:absolute;top:-4px;width:3px;height:13px;background:var(--shu);border-radius:99px}
+.ax .tr u{position:absolute;top:-2px;left:50%;width:1px;height:9px;background:var(--sumi-3);text-decoration:none}
+
+.dist{position:relative;height:46px;margin:24px 0 6px;border-bottom:1px solid var(--kei)}
+.dist .bin{position:absolute;bottom:0;background:var(--kei);width:calc(2% - 1px);border-radius:1px}
+.dist .bin.on{background:var(--shu)}
+.dist .you{position:absolute;bottom:0;top:-4px;width:2px;background:var(--sumi)}
+.dist .tg{position:absolute;top:-24px;transform:translateX(-50%);font-size:10.5px;letter-spacing:.06em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.distx{display:flex;justify-content:space-between;font-size:10.5px;color:var(--sumi-3)}
+
+.tips{background:var(--kami);border-radius:10px;padding:16px 18px;margin:12px 0}
+.tips h6{margin:0 0 6px;font-family:var(--min);font-size:15px;font-weight:600;letter-spacing:.03em}
+.tips p{margin:0;font-size:13.5px;line-height:2;color:var(--sumi-2)}
+.tips .ex{display:block;margin-top:8px;font-size:12px;color:var(--shu)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--sumi);color:var(--haku);font-size:13.5px;padding:12px 22px;border-radius:99px;z-index:99;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+footer.cl{margin-top:68px;padding-top:22px;border-top:1px solid var(--kei);font-size:11.5px;color:var(--sumi-3);line-height:2}
+footer.cl .l1{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 16px}
+footer.cl button{background:none;border:0;padding:0;color:var(--sumi-3);text-decoration:underline;cursor:pointer;font-size:11.5px}
+
+@media print{
+  body{background:#fff;font-size:12px}
+  .brand,.rail,.toolbar,.btnrow,#s0,#s1,#s2,#s3,.noprint,.jump,.summary .acts,footer.cl button{display:none!important}
+  section.step{display:block!important;padding-top:0}
+  .panel,.kpi>div,.summary,.tips,.cards3 .c,details.cat{background:#fff}
+  .hyakumasu i{animation:none;opacity:1;transform:none}
+  h3.grp{page-break-after:avoid}
+  .twoup,.panel,.tips,.kpi,ol.rank li{page-break-inside:avoid}
+  footer.cl{display:block}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="brand">
+  <a class="mark" href="#top" data-home><i></i>表現科学研究所</a>
+  <span class="ver">名もなき家事診断 ひとり版 ver.3</span>
+</header>
+
+<!-- ============ STEP 0：表紙 ============ -->
+<section class="step on" id="s0">
+  <div class="sheet">
+    <div class="ad-head">
+      <p class="ad-tag">見えないものを、数える。</p>
+      <p class="ad-lab"><i></i>表現科学研究所</p>
+    </div>
+    <figure class="illust"><svg viewBox="0 0 1200 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="台所に立つ人と、そのまわりに浮かぶ名もなき家事のしるし">
+<rect width="1200" height="540" fill="#FAF6F3"/>
+
+<rect x="96" y="92" width="190" height="156" rx="3" fill="#FFFFFF"/>
+<rect x="99" y="95" width="184" height="150" rx="3" fill="none" stroke="#EBE3D9" stroke-width="6"/>
+<path d="M191,95 V245 M99,170 H283" stroke="#EBE3D9" stroke-width="6"/>
+
+<rect x="1000" y="168" width="162" height="8" rx="4" fill="#EBE3D9"/>
+<rect x="1028" y="126" width="34" height="42" rx="6" fill="#F0B6B6"/>
+<rect x="1074" y="136" width="30" height="32" rx="6" fill="#DCE7EE"/>
+
+<g transform="translate(60,0)">
+<path d="M360,262 C318,264 292,290 286,332 L274,440 L446,440 L434,332 C428,290 402,264 360,262 Z" fill="#D4484C"/>
+<path d="M330,268 L390,268 L396,318 L404,440 L316,440 L324,318 Z" fill="#FFFFFF"/>
+<path d="M336,268 L352,250 M384,268 L368,250" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+<rect x="344" y="232" width="32" height="38" rx="15" fill="#EDC4A2"/>
+<ellipse cx="360" cy="196" rx="50" ry="56" fill="#F4D4BA"/>
+<path d="M360,124 C310,124 300,166 302,212 C303,236 306,252 300,268 L328,268 C324,248 324,228 326,210 C330,184 342,172 360,172 C378,172 390,184 394,210 C396,228 396,248 392,268 L420,268 C414,252 417,236 418,212 C420,166 410,124 360,124 Z" fill="#3E3732"/>
+<circle cx="328" cy="213" r="9" fill="#F0B6B6" opacity=".5"/>
+<circle cx="392" cy="213" r="9" fill="#F0B6B6" opacity=".5"/>
+<path d="M334,197 q9,-10 18,0 M368,197 q9,-10 18,0" stroke="#3E3732" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+<path d="M350,219 q10,10 20,0" stroke="#3E3732" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+<path d="M302,310 C266,348 280,398 320,414" stroke="#C53E42" stroke-width="34" fill="none" stroke-linecap="round"/>
+<path d="M418,310 C454,348 440,398 400,414" stroke="#C53E42" stroke-width="34" fill="none" stroke-linecap="round"/>
+</g>
+
+<circle cx="570" cy="170" r="30" fill="#D4484C"/>
+<path d="M570,152 V171 L583,179" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="637" y="101" width="46" height="58" rx="7" fill="#FFFFFF" stroke="#D7D0C7" stroke-width="4"/>
+<path d="M648,118 H672 M648,131 H672 M648,144 H662" stroke="#D7D0C7" stroke-width="4" stroke-linecap="round"/>
+<rect x="611" y="229" width="58" height="42" rx="10" fill="#D4484C"/>
+<path d="M627,271 L625,287 L645,271 Z" fill="#D4484C"/>
+<circle cx="628" cy="250" r="4" fill="#FFFFFF"/><circle cx="640" cy="250" r="4" fill="#FFFFFF"/><circle cx="652" cy="250" r="4" fill="#FFFFFF"/>
+<rect x="718" y="170" width="54" height="50" rx="6" fill="#FFFFFF" stroke="#D7D0C7" stroke-width="4"/>
+<path d="M718,186 H772" stroke="#D7D0C7" stroke-width="4"/>
+<circle cx="732" cy="200" r="3.5" fill="#D7D0C7"/><circle cx="745" cy="200" r="3.5" fill="#D7D0C7"/><circle cx="758" cy="200" r="3.5" fill="#D7D0C7"/><circle cx="732" cy="211" r="3.5" fill="#D7D0C7"/>
+<rect x="676" y="293" width="48" height="54" rx="7" fill="#FFFFFF" stroke="#D7D0C7" stroke-width="4"/>
+<path d="M687,311 l6,6 l10,-12 M687,331 l6,6 l10,-12" stroke="#D7D0C7" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M820,142 h42 l5,38 h-52 Z" fill="#D4484C"/>
+<path d="M830,142 v-6 a11,11 0 0 1 22,0 v6" stroke="#B2383C" stroke-width="4" fill="none"/>
+<rect x="842" y="240" width="42" height="52" rx="7" fill="#FFFFFF" stroke="#D7D0C7" stroke-width="4"/>
+<path d="M853,258 h20 M853,270 h20 M853,282 h12" stroke="#D7D0C7" stroke-width="4" stroke-linecap="round"/>
+<rect x="906" y="150" width="48" height="46" rx="7" fill="#FFFFFF" stroke="#D7D0C7" stroke-width="4"/>
+<path d="M918,173 l8,8 l16,-18" stroke="#D7D0C7" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="612" cy="120" r="5" fill="#F0B6B6"/><circle cx="790" cy="250" r="4" fill="#F0B6B6"/>
+<circle cx="700" cy="245" r="4" fill="#D7D0C7"/><circle cx="930" cy="235" r="5" fill="#F0B6B6"/><circle cx="596" cy="300" r="4" fill="#D7D0C7"/>
+
+<rect x="0" y="440" width="1200" height="22" fill="#E6D6C1"/>
+<rect x="0" y="462" width="1200" height="78" fill="#FFFFFF"/>
+<path d="M0,463 H1200" stroke="#F2EBE2" stroke-width="3"/>
+<path d="M300,470 V540 M620,470 V540 M940,470 V540" stroke="#F6F1E9" stroke-width="3"/>
+<rect x="258" y="496" width="30" height="7" rx="3.5" fill="#EDE6DC"/>
+<rect x="578" y="496" width="30" height="7" rx="3.5" fill="#EDE6DC"/>
+<rect x="898" y="496" width="30" height="7" rx="3.5" fill="#EDE6DC"/>
+
+<path d="M402,388 q9,-12 0,-23 q-9,-12 0,-21 M438,388 q9,-12 0,-23 q-9,-12 0,-21" stroke="#F0B6B6" stroke-width="5" fill="none" stroke-linecap="round" opacity=".85"/>
+<rect x="380" y="392" width="80" height="48" rx="7" fill="#F2EEE9" stroke="#E3DDD5" stroke-width="3"/>
+<ellipse cx="420" cy="392" rx="47" ry="9" fill="#E3DDD5"/>
+<circle cx="420" cy="379" r="7" fill="#BAB4AC"/>
+<rect x="786" y="400" width="108" height="40" rx="6" fill="#E6D6C1"/>
+<path d="M804,400 V440 M822,400 V440 M840,400 V440 M858,400 V440 M876,400 V440" stroke="#D8C5AA" stroke-width="3"/>
+<path d="M798,402 q13,-15 26,0 Z" fill="#FFFFFF"/>
+<path d="M824,402 q14,-19 28,0 Z" fill="#DCE7EE"/>
+<path d="M852,402 q13,-13 26,0 Z" fill="#FFFFFF"/>
+<rect x="120" y="412" width="104" height="28" rx="6" fill="#E6D6C1"/>
+<circle cx="146" cy="404" r="11" fill="#D4484C" opacity=".75"/>
+<circle cx="172" cy="402" r="13" fill="#7FA477" opacity=".8"/>
+<circle cx="199" cy="406" r="9" fill="#D4484C" opacity=".6"/>
+<path d="M1066,440 L1076,402 L1112,402 L1122,440 Z" fill="#E6D6C1"/>
+<path d="M1094,402 C1094,374 1076,364 1062,362 C1066,386 1078,398 1094,402 Z" fill="#7FA477"/>
+<path d="M1094,402 C1094,368 1112,356 1128,354 C1124,382 1112,396 1094,402 Z" fill="#93B389"/>
+
+<circle cx="382" cy="414" r="17" fill="#F4D4BA"/>
+<circle cx="458" cy="414" r="17" fill="#F4D4BA"/>
+</svg></figure>
+    <div class="strip"><svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="家事のこまごまとしたしるし">
+<g>
+<rect x="0" y="0" width="100" height="100" fill="#FBEFEF"/>
+<rect x="33" y="44" width="34" height="26" rx="4" fill="#D4484C"/>
+<ellipse cx="50" cy="44" rx="21" ry="5" fill="#B2383C"/>
+<circle cx="50" cy="37" r="4" fill="#B2383C"/>
+<path d="M44,30 q5,-7 0,-13 M56,30 q5,-7 0,-13" stroke="#D4484C" stroke-width="3.4" fill="none" stroke-linecap="round" opacity=".7"/>
+</g>
+<g>
+<rect x="100" y="0" width="100" height="100" fill="#F6F3EF"/>
+<path d="M150,30 v8" stroke="#A49D94" stroke-width="3" stroke-linecap="round"/>
+<path d="M150,25 a6,6 0 1 1 -4,10" stroke="#A49D94" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M150,38 L128,52 L133,58 L141,54 V72 h18 V54 l8,4 l5,-6 Z" fill="#5F87A0"/>
+</g>
+<g>
+<rect x="200" y="0" width="100" height="100" fill="#FBEFEF"/>
+<rect x="228" y="30" width="44" height="42" rx="4" fill="#FFFFFF" stroke="#D4484C" stroke-width="3.4"/>
+<path d="M228,42 H272" stroke="#D4484C" stroke-width="3.4"/>
+<circle cx="239" cy="53" r="3.2" fill="#D4484C"/><circle cx="250" cy="53" r="3.2" fill="#D4484C"/><circle cx="261" cy="53" r="3.2" fill="#D4484C"/>
+<circle cx="239" cy="63" r="3.2" fill="#F0B6B6"/><circle cx="250" cy="63" r="3.2" fill="#F0B6B6"/>
+</g>
+<g>
+<rect x="300" y="0" width="100" height="100" fill="#F6F3EF"/>
+<circle cx="350" cy="50" r="22" fill="none" stroke="#5F87A0" stroke-width="3.4"/>
+<path d="M350,36 V51 L360,57" stroke="#5F87A0" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g>
+<rect x="400" y="0" width="100" height="100" fill="#FBEFEF"/>
+<path d="M432,42 h36 l4,32 h-44 Z" fill="#D4484C"/>
+<path d="M441,42 v-5 a9,9 0 0 1 18,0 v5" stroke="#B2383C" stroke-width="3.4" fill="none"/>
+</g>
+<g>
+<rect x="500" y="0" width="100" height="100" fill="#F6F3EF"/>
+<path d="M534,40 q16,-10 32,0 l5,34 h-42 Z" fill="#A49D94"/>
+<path d="M543,40 q7,-12 14,0" stroke="#726B63" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+</g>
+<g>
+<rect x="600" y="0" width="100" height="100" fill="#FBEFEF"/>
+<rect x="631" y="30" width="38" height="44" rx="4" fill="#FFFFFF" stroke="#D4484C" stroke-width="3.4"/>
+<path d="M640,44 h20 M640,54 h20 M640,64 h12" stroke="#D4484C" stroke-width="3.4" stroke-linecap="round"/>
+</g>
+</svg></div>
+
+    <div class="tate-wrap">
+      <div class="tate">
+        <h1>名前のない仕事に、<br>名前をつける。</h1>
+        <p class="lead">やったことは、数えられる。<br><b>やる前に考えたことは、数えられない。</b><br>家の仕事を三百十二に分けて、<br>あなたが担っている量を数えます。<br>担い方のタイプも、出ます。</p>
+        <p class="sign">ひとりで答える、無料の診断です。</p>
+      </div>
+    </div>
+
+    <div class="lockup">
+      <span class="mk"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<circle cx="32" cy="32" r="30" fill="none" stroke="#D4484C" stroke-width="2.6"/>
+<path d="M19,16 a22,22 0 0 0 0,32" fill="none" stroke="#D4484C" stroke-width="3.4" stroke-linecap="round"/>
+<path d="M45,16 a22,22 0 0 1 0,32" fill="none" stroke="#D4484C" stroke-width="3.4" stroke-linecap="round"/>
+<circle cx="32" cy="32" r="6" fill="#D4484C"/>
+</svg></span>
+      <span class="lk-g"><span class="lk-t">名もなき家事診断</span><span class="lk-sub">ひとり版「312項目」</span></span>
+      <span class="lk-s">ONE PERSON,<br>312 TASKS</span>
+    </div>
+
+    <div class="resume" id="resume" hidden>
+      <p class="t">前回のつづきがあります</p>
+      <p id="resume-info"></p>
+      <div class="acts">
+        <button class="btn sm" id="resume-go">つづきから</button>
+        <button class="btn sm ghost" id="resume-new">最初からやり直す</button>
+      </div>
+    </div>
+
+    <div class="cta">
+      <button class="btn primary big" data-next="1">はじめてみる</button>
+    </div>
+
+    <ul class="facts">
+      <li><b>5〜10分</b><span>まとめて答えられます。途中保存もできます。</span></li>
+      <li><b>無料・登録なし</b><span>名前もメールもいりません。</span></li>
+      <li><b>ぜんぶ端末の中</b><span>入力も結果も、どこにも送りません。</span></li>
+    </ul>
+  </div>
+
+  <h2 class="h2">この診断で、わかること。</h2>
+  <div class="cards3">
+    <div class="c">
+      <div class="mini">
+        <div class="d"><div class="g" data-mini="time"></div><span class="lb">時間で見た分担</span></div>
+        <div class="d"><div class="g" data-mini="cog"></div><span class="lb">頭で見た分担</span></div>
+      </div>
+      <h3>時間の分担と、頭の分担のずれ</h3>
+      <p>手を動かした時間と、決める・覚える・気を配る負荷を別々に測り、100マスに並べて比べます。同じ家庭でも、この2枚は一致しません。</p>
+    </div>
+    <div class="c">
+      <div class="axes4">
+        <span><b>判断</b>／記憶</span><span><b>分断</b>／連続</span><span><b>対人</b>／対物</span><span><b>毎日</b>／まとめ</span>
+      </div>
+      <h3>あなたの担い方のタイプ</h3>
+      <p>4つの軸で16タイプ。量ではなく「偏り」を見るので、軸ごとに効く手が変わります。</p>
+    </div>
+    <div class="c">
+      <div class="axes4" style="grid-template-columns:1fr">
+        <span><b>01</b> 手放す順番（上位10件）</span><span><b>02</b> 削減シミュレーション</span><span><b>03</b> 話し合い用のメモ</span>
+      </div>
+      <h3>手放す順番と、話し合い用メモ</h3>
+      <p>負担が重く、渡しやすい項目から順に並べ、そのまま相手に見せられる文章にします。数字は主張ではなく、共通の土台です。</p>
+    </div>
+  </div>
+
+  <h2 class="h2">やることは、4つだけ。</h2>
+  <ol class="flow">
+    <li><b>世帯の形を選ぶ</b><span>あなたの家に無い項目を、最初から外します。</span></li>
+    <li><b>直感で当てる</b><span>答え合わせの前に、自分の負担を見積もります。</span></li>
+    <li><b>誰がやっているか答える</b><span>小分類ごとにまとめて答え、違うところだけ直します。</span></li>
+    <li><b>結果を見る</b><span>スコア・タイプ・手放す順番・メモが出ます。</span></li>
+  </ol>
+
+  <h2 class="h2">はじめる前に、少しだけ。</h2>
+  <details class="doc">
+    <summary>家事の4つの型</summary>
+    <div class="db">
+      <p>312項目は、性質で4つに分けています。型が違えば、渡せる相手も違います。</p>
+      <dl class="types">
+        <dt class="t-info">情報型</dt><dd>覚える・調べる・記録する。手は空いているのに頭が塞がる。</dd>
+        <dt class="t-judge">判断型</dt><dd>状況を読んで決める。文脈と価値観が要る。</dd>
+        <dt class="t-body">身体型</dt><dd>実際に手足を動かす。外から見えるのはここだけ。</dd>
+        <dt class="t-emo">感情型</dt><dd>察する・なだめる・伝える。人に渡すことも、自動化もできない。</dd>
+      </dl>
+    </div>
+  </details>
+  <details class="doc">
+    <summary>測り方と、この診断でわからないこと</summary>
+    <div class="db">
+      <p>各項目に「判断・記憶・割込・感情」の4つの重さ（各5点）と、所要時間・頻度を設定し、あなたの回答（自分／半々／相手／外部）を掛け合わせて集計します。数字には確度の違いがあります。</p>
+      <table class="conf">
+        <tr><th>所要時間・頻度・4つの重さ</th><td><span class="lv">設定値</span>一般的な家庭を想定した固定値。実測ではなく、あなたの家の実態とは必ずずれます。</td></tr>
+        <tr><th>スコア・分担率・時間</th><td><span class="lv">計算値</span>設定値にあなたの回答を掛けた集計。世帯内・領域間の比率として読んでください。</td></tr>
+        <tr><th>順位（上位◯%）</th><td><span class="lv">推定</span>あなたの家の項目を、起こりうる分け方で500通りに振り直した参照分布上の位置。実在の家庭との比較ではありません。</td></tr>
+        <tr><th>タイプ</th><td><span class="lv">相対判定</span>あなたの負荷の構成比を、312項目そのものの構成比と比べたもの。性格分類ではなく「いまの担い方の偏り」です。</td></tr>
+        <tr><th>削減余地・シミュレーション</th><td><span class="lv">試算</span>型ごとの置き換えやすさを仮定した目安です。</td></tr>
+      </table>
+      <ul>
+        <li>時間は延べ値です。同時に進む家事を別々に数えるため、世帯合計は1日の実時間を超えます。</li>
+        <li>1項目1回答なので「やっているのは自分、決めているのは相手」といった混在は表現できません。</li>
+        <li>312項目は網羅ではありません。介護・ペット・持ち家の維持管理・自営業との兼務などは十分に含まれていません。</li>
+        <li>医学的・心理学的な診断ではありません。どちらが正しいかを決めるためのものでもなく、何が見えていなかったかを、双方が同じ絵で見るためのものです。</li>
+      </ul>
+    </div>
+  </details>
+  <details class="doc">
+    <summary>つくっている人たちのこと</summary>
+    <div class="db">
+      <p>表現科学研究所は、声や言葉の「伝わり方」を数値で捉える研究ブランドです。同じ内容でも、伝え方によって受け取られ方が変わる理由を、測定できる変数に分解して調べています。</p>
+      <p>この診断は、その「見えないものを数える」アプローチを家庭に応用したものです。数値が正しいかどうかより、数値をきっかけに「見えていなかったもの」が同じ絵として共有されることを目的に設計しています。</p>
+    </div>
+  </details>
+</section>
+
+<nav class="rail" id="rail" hidden>
+  <button data-go="1" aria-current="true"><span class="n">1</span>世帯</button>
+  <button data-go="2" disabled><span class="n">2</span>見積り</button>
+  <button data-go="3" disabled><span class="n">3</span>分担</button>
+  <button data-go="4" disabled><span class="n">4</span>結果</button>
+</nav>
+
+<!-- ============ STEP 1 ============ -->
+<section class="step" id="s1">
+  <h2 class="sec"><span class="n">STEP 1</span>まず、数える範囲を決めます。</h2>
+  <p class="sec-note">家事の総量は世帯の形で変わります。ここで選んだ条件に当てはまらない項目は最初から除外し、「あなたの家に実在する項目の何%を担っているか」を出します。</p>
+
+  <div class="field">
+    <label>世帯の形</label>
+    <p class="hint">「相手」は、家事を分担しうる同居の大人（配偶者・パートナー・親など）です。</p>
+    <div class="chips" id="q-house"></div>
+  </div>
+  <div class="field" id="wrap-kids">
+    <label>同居している子ども（複数選択可）</label>
+    <p class="hint">選ばない場合、子育て関連の項目はすべて除外されます。</p>
+    <div class="chips" id="q-kids"></div>
+  </div>
+  <div class="field">
+    <label>あなたの就業</label>
+    <div class="chips" id="q-work"></div>
+  </div>
+
+  <div class="btnrow">
+    <button class="btn ghost" data-next="0">表紙へ</button>
+    <button class="btn" data-next="2">見積りへ進む</button>
+  </div>
+</section>
+
+<!-- ============ STEP 2 ============ -->
+<section class="step" id="s2">
+  <h2 class="sec"><span class="n">STEP 2</span>答え合わせの前に、当ててみてください。</h2>
+  <p class="sec-note">人は自分の負担を正確には見積もれません。見えている家事は数えられても、見えていない家事は数に入らないからです。<b>先に直感で答えて、あとで実測値と突き合わせます。</b>調べたり数えたりせず、いま思う数字で構いません。</p>
+
+  <div class="field">
+    <label>1. あなたの家に、名もなき家事はいくつあると思いますか</label>
+    <p class="hint">献立を考える、期限を覚えておく、機嫌を察する。そうした「作業名のない作業」を含めた総数です。</p>
+    <div class="inline"><input type="number" id="g-count" inputmode="numeric" min="0" max="2000" step="10" placeholder="例 80"><span class="unit">項目</span></div>
+    <div class="chips quick" data-for="g-count"><button class="chip" data-val="30">30</button><button class="chip" data-val="60">60</button><button class="chip" data-val="100">100</button><button class="chip" data-val="150">150</button><button class="chip" data-val="200">200</button><button class="chip" data-val="300">300</button></div>
+  </div>
+  <div class="field">
+    <label>2. そのうち、あなたが担っている割合は</label>
+    <div class="inline"><input type="number" id="g-share" inputmode="numeric" min="0" max="100" step="5" placeholder="例 60"><span class="unit">%</span></div>
+    <div class="chips quick" data-for="g-share"><button class="chip" data-val="25">25</button><button class="chip" data-val="50">50</button><button class="chip" data-val="75">75</button><button class="chip" data-val="100">100</button></div>
+  </div>
+  <div class="field">
+    <label>3. あなたが家事に使っている時間は、1ヶ月あたり</label>
+    <p class="hint">実際に手を動かしている時間です。考えている時間は含めなくて構いません。</p>
+    <div class="inline"><input type="number" id="g-hours" inputmode="numeric" min="0" max="700" step="5" placeholder="例 60"><span class="unit">時間 / 月</span></div>
+    <div class="chips quick" data-for="g-hours"><button class="chip" data-val="20">20</button><button class="chip" data-val="40">40</button><button class="chip" data-val="60">60</button><button class="chip" data-val="90">90</button><button class="chip" data-val="120">120</button></div>
+  </div>
+
+  <div class="btnrow">
+    <button class="btn ghost" data-next="1">戻る</button>
+    <button class="btn" data-next="3">分担の入力へ</button>
+  </div>
+</section>
+
+<!-- ============ STEP 3 ============ -->
+<section class="step" id="s3">
+  <h2 class="sec"><span class="n">STEP 3</span>誰がやっているか。</h2>
+  <p class="sec-note">いちばん時間がかかる工程です。<b>小分類ごとに「まとめて」答えて、違う項目だけ開いて直す</b>のが速いです。心当たりのない項目は「なし」で構いません。入力は自動で保存され、あとから続きができます。</p>
+  <details class="doc" id="howto">
+    <summary>答え方の目安</summary>
+    <div class="db">
+      <div class="legend-ans">
+        <b class="me">自分</b><span>主にあなたがやっている（決めている・覚えている）</span>
+        <b class="half">半々</b><span>あなたと相手で、ほぼ同じくらい分けている</span>
+        <b class="pt">相手</b><span>主に相手がやっている</span>
+        <b class="ext">外部</b><span>食洗機・乾燥機・ネットスーパー・家事代行・自動引落など、人手を使っていない</span>
+        <b class="na">なし</b><span>うちでは発生しない。計算から除外します</span>
+      </div>
+      <p>「手は相手、決めるのは自分」のような場合は、頭を使っている側を選んでください。この診断が測りたいのは、その部分です。</p>
+    </div>
+  </details>
+
+  <div class="toolbar">
+    <div class="bar"><i id="pbar"></i></div>
+    <div class="line">
+      <span class="count"><b id="pnum">0</b> / <span id="ptot">0</span> 項目　<span id="pleft"></span></span>
+      <span class="tools">
+        <button type="button" id="fill-half">全部を半々に</button>
+        <button type="button" id="next-blank">次の未回答へ</button>
+        <button type="button" id="toggle-rows">項目を全部見る</button>
+        <button type="button" id="clear-all">消去</button>
+      </span>
+    </div>
+  </div>
+
+  <div id="cats"></div>
+
+  <div class="btnrow">
+    <button class="btn ghost" data-next="2">戻る</button>
+    <button class="btn primary" id="calc" disabled>結果を見る</button>
+    <span class="note" id="calc-note"></span>
+  </div>
+</section>
+
+<!-- ============ STEP 4 ============ -->
+<section class="step" id="s4">
+  <div id="report"></div>
+  <div class="btnrow noprint">
+    <button class="btn ghost" data-next="3">分担を直す</button>
+    <button class="btn ghost" id="print2">印刷 / PDFで保存</button>
+    <button class="btn ghost" data-next="0">表紙へ</button>
+  </div>
+</section>
+
+<footer class="cl">
+  <div class="l1">
+    <span>名もなき家事診断 ひとり版 ver.3（312項目）　つくっているのは、表現科学研究所です。</span>
+    <span>入力と結果は、この端末のブラウザにのみ保存されます</span>
+  </div>
+  <div class="noprint">これは医学的・心理学的な診断ではありません。　<button type="button" id="wipe">保存したデータを消す</button></div>
+</footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ================================================================
+   データ（312項目）
+   c:領域 s:小分類 n:項目名 f:頻度 t:型 j/k/w/e:判断・記憶・割込・感情(各5点) m:所要分 req:適用条件
+   ================================================================ */
+const ITEMS = [{"id":1,"c":"食事","s":"計画","n":"今週の献立を考える","f":"週1","t":"判断型","j":5,"k":4,"w":3,"e":3,"m":25,"req":""},{"id":2,"c":"食事","s":"計画","n":"家族の好き嫌い・アレルギーを踏まえる","f":"随時","t":"情報型","j":4,"k":5,"w":2,"e":3,"m":5,"req":""},{"id":3,"c":"食事","s":"計画","n":"栄養バランスを調整する","f":"週1","t":"情報型","j":4,"k":4,"w":2,"e":2,"m":10,"req":""},{"id":4,"c":"食事","s":"計画","n":"昨日と同じメニューにならないか思い出す","f":"毎日","t":"情報型","j":3,"k":5,"w":2,"e":2,"m":3,"req":""},{"id":5,"c":"食事","s":"計画","n":"家族の予定（外食・不在）を献立に反映する","f":"週1","t":"判断型","j":4,"k":5,"w":3,"e":3,"m":8,"req":""},{"id":6,"c":"食事","s":"計画","n":"天気・気温から食べたいものを推測する","f":"毎日","t":"判断型","j":3,"k":2,"w":2,"e":2,"m":2,"req":""},{"id":7,"c":"食事","s":"計画","n":"特売チラシを確認する","f":"週1","t":"情報型","j":2,"k":3,"w":2,"e":1,"m":10,"req":""},{"id":8,"c":"食事","s":"計画","n":"使いかけ食材から逆算して献立を決める","f":"毎日","t":"判断型","j":5,"k":5,"w":3,"e":3,"m":8,"req":""},{"id":9,"c":"食事","s":"計画","n":"冷凍庫の在庫を思い出す","f":"毎日","t":"情報型","j":3,"k":5,"w":2,"e":2,"m":3,"req":""},{"id":10,"c":"食事","s":"計画","n":"作り置きの計画を立てる","f":"週1","t":"判断型","j":4,"k":4,"w":2,"e":2,"m":15,"req":""},{"id":11,"c":"食事","s":"在庫・買い物","n":"冷蔵庫の在庫を確認する","f":"週数回","t":"情報型","j":2,"k":4,"w":2,"e":1,"m":8,"req":""},{"id":12,"c":"食事","s":"在庫・買い物","n":"調味料の残量を確認する","f":"週1","t":"情報型","j":2,"k":4,"w":2,"e":1,"m":5,"req":""},{"id":13,"c":"食事","s":"在庫・買い物","n":"米・パンなど主食の残量を確認する","f":"週数回","t":"情報型","j":2,"k":4,"w":2,"e":1,"m":2,"req":""},{"id":14,"c":"食事","s":"在庫・買い物","n":"買い物リストを作る","f":"週1","t":"情報型","j":3,"k":4,"w":2,"e":1,"m":10,"req":""},{"id":15,"c":"食事","s":"在庫・買い物","n":"買い忘れがないか出発前に確認する","f":"週1","t":"情報型","j":3,"k":4,"w":3,"e":2,"m":2,"req":""},{"id":16,"c":"食事","s":"在庫・買い物","n":"どの店に行くか決める","f":"週1","t":"判断型","j":3,"k":3,"w":2,"e":1,"m":3,"req":""},{"id":17,"c":"食事","s":"在庫・買い物","n":"買い物に行く","f":"週1","t":"身体型","j":2,"k":2,"w":3,"e":2,"m":60,"req":""},{"id":18,"c":"食事","s":"在庫・買い物","n":"予算内に収める","f":"週1","t":"判断型","j":4,"k":3,"w":3,"e":3,"m":10,"req":""},{"id":19,"c":"食事","s":"在庫・買い物","n":"重い荷物を運ぶ","f":"週1","t":"身体型","j":1,"k":1,"w":2,"e":2,"m":10,"req":""},{"id":20,"c":"食事","s":"在庫・買い物","n":"買った物を仕分けて収納する","f":"週1","t":"身体型","j":2,"k":3,"w":2,"e":1,"m":15,"req":""},{"id":21,"c":"食事","s":"在庫・買い物","n":"ネットスーパーで注文する","f":"週1","t":"情報型","j":3,"k":3,"w":2,"e":1,"m":20,"req":""},{"id":22,"c":"食事","s":"在庫・買い物","n":"定期宅配の内容を変更する","f":"月1","t":"情報型","j":3,"k":4,"w":1,"e":1,"m":10,"req":""},{"id":23,"c":"食事","s":"在庫・買い物","n":"調味料を詰め替える・小分けにする","f":"週1","t":"身体型","j":1,"k":2,"w":2,"e":1,"m":10,"req":""},{"id":24,"c":"食事","s":"在庫・買い物","n":"賞味期限を見て手前に並べ替える","f":"週1","t":"身体型","j":2,"k":4,"w":2,"e":2,"m":8,"req":""},{"id":25,"c":"食事","s":"下ごしらえ","n":"野菜を洗う","f":"毎日","t":"身体型","j":1,"k":1,"w":3,"e":1,"m":5,"req":""},{"id":26,"c":"食事","s":"下ごしらえ","n":"野菜を切る","f":"毎日","t":"身体型","j":2,"k":2,"w":3,"e":1,"m":10,"req":""},{"id":27,"c":"食事","s":"下ごしらえ","n":"肉・魚を下味につける","f":"週数回","t":"身体型","j":2,"k":3,"w":2,"e":1,"m":8,"req":""},{"id":28,"c":"食事","s":"下ごしらえ","n":"米を研ぐ・炊飯を予約する","f":"毎日","t":"身体型","j":1,"k":3,"w":2,"e":1,"m":5,"req":""},{"id":29,"c":"食事","s":"下ごしらえ","n":"出汁をとる","f":"週数回","t":"身体型","j":2,"k":2,"w":2,"e":1,"m":10,"req":""},{"id":30,"c":"食事","s":"下ごしらえ","n":"解凍のタイミングを逆算する","f":"毎日","t":"判断型","j":4,"k":5,"w":3,"e":2,"m":3,"req":""},{"id":31,"c":"食事","s":"調理","n":"複数の鍋を同時進行で管理する","f":"毎日","t":"判断型","j":5,"k":4,"w":5,"e":3,"m":25,"req":""},{"id":32,"c":"食事","s":"調理","n":"火加減を見る","f":"毎日","t":"身体型","j":3,"k":2,"w":4,"e":2,"m":10,"req":""},{"id":33,"c":"食事","s":"調理","n":"味を見て調整する","f":"毎日","t":"判断型","j":4,"k":3,"w":3,"e":2,"m":5,"req":""},{"id":34,"c":"食事","s":"調理","n":"家族ごとに取り分け・味を変える","f":"毎日","t":"判断型","j":4,"k":4,"w":3,"e":3,"m":8,"req":""},{"id":35,"c":"食事","s":"調理","n":"子ども用に小さく切る・冷ます","f":"毎日","t":"身体型","j":2,"k":3,"w":3,"e":2,"m":5,"req":""},{"id":36,"c":"食事","s":"調理","n":"アレルギー対応で別調理する","f":"随時","t":"判断型","j":4,"k":5,"w":3,"e":4,"m":15,"req":""},{"id":37,"c":"食事","s":"調理","n":"弁当を作る","f":"週数回","t":"身体型","j":4,"k":4,"w":3,"e":3,"m":25,"req":""},{"id":38,"c":"食事","s":"調理","n":"弁当の隙間埋めを考える","f":"週数回","t":"判断型","j":4,"k":3,"w":3,"e":2,"m":5,"req":""},{"id":39,"c":"食事","s":"調理","n":"全品を温かいうちに出せるよう時間を合わせる","f":"毎日","t":"判断型","j":5,"k":4,"w":4,"e":3,"m":5,"req":""},{"id":40,"c":"食事","s":"配膳","n":"食器を選ぶ","f":"毎日","t":"判断型","j":2,"k":2,"w":2,"e":1,"m":3,"req":""},{"id":41,"c":"食事","s":"配膳","n":"盛り付ける","f":"毎日","t":"身体型","j":2,"k":2,"w":3,"e":2,"m":8,"req":""},{"id":42,"c":"食事","s":"配膳","n":"配膳する","f":"毎日","t":"身体型","j":1,"k":2,"w":3,"e":1,"m":5,"req":""},{"id":43,"c":"食事","s":"配膳","n":"家族を食卓に呼ぶ・待つ","f":"毎日","t":"感情型","j":2,"k":2,"w":4,"e":3,"m":5,"req":""},{"id":44,"c":"食事","s":"配膳","n":"飲み物を用意する","f":"毎日","t":"身体型","j":1,"k":2,"w":3,"e":1,"m":3,"req":""},{"id":45,"c":"食事","s":"片付け","n":"食器を下げる","f":"毎日","t":"身体型","j":1,"k":1,"w":3,"e":1,"m":5,"req":""},{"id":46,"c":"食事","s":"片付け","n":"食べ残しの処理を判断する","f":"毎日","t":"判断型","j":3,"k":3,"w":3,"e":2,"m":3,"req":""},{"id":47,"c":"食事","s":"片付け","n":"食器を洗う／食洗機に入れる","f":"毎日","t":"身体型","j":2,"k":2,"w":3,"e":2,"m":20,"req":""},{"id":48,"c":"食事","s":"片付け","n":"食洗機から食器を戻す","f":"毎日","t":"身体型","j":1,"k":2,"w":2,"e":1,"m":8,"req":""},{"id":49,"c":"食事","s":"片付け","n":"シンクを洗う","f":"毎日","t":"身体型","j":1,"k":1,"w":2,"e":1,"m":5,"req":""},{"id":50,"c":"食事","s":"片付け","n":"三角コーナー・排水口の生ゴミを処理する","f":"毎日","t":"身体型","j":1,"k":2,"w":2,"e":3,"m":5,"req":""},{"id":51,"c":"食事","s":"片付け","n":"テーブルを拭く","f":"毎日","t":"身体型","j":1,"k":1,"w":3,"e":1,"m":3,"req":""},{"id":52,"c":"食事","s":"片付け","n":"床にこぼれた物を拭く","f":"毎日","t":"身体型","j":1,"k":1,"w":4,"e":2,"m":3,"req":""},{"id":53,"c":"食事","s":"片付け","n":"残り物をタッパーに移す","f":"毎日","t":"身体型","j":2,"k":3,"w":3,"e":1,"m":5,"req":""},{"id":54,"c":"食事","s":"片付け","n":"冷蔵庫に何を入れたか覚えておく","f":"毎日","t":"情報型","j":2,"k":5,"w":2,"e":2,"m":1,"req":""},{"id":55,"c":"食事","s":"片付け","n":"食洗機をいつ回すか判断する","f":"毎日","t":"判断型","j":3,"k":3,"w":2,"e":1,"m":2,"req":""},{"id":56,"c":"食事","s":"管理","n":"食材ロスをチェックする","f":"週1","t":"情報型","j":3,"k":4,"w":2,"e":3,"m":5,"req":""},{"id":57,"c":"食事","s":"管理","n":"献立の記録をつける","f":"週1","t":"情報型","j":2,"k":3,"w":1,"e":1,"m":5,"req":""},{"id":58,"c":"食事","s":"管理","n":"レシピを探す・保存する","f":"週1","t":"情報型","j":3,"k":3,"w":2,"e":1,"m":10,"req":""},{"id":59,"c":"食事","s":"管理","n":"家族が食べた量を観察する","f":"毎日","t":"感情型","j":3,"k":4,"w":2,"e":2,"m":3,"req":""},{"id":60,"c":"食事","s":"管理","n":"体調に合わせて食事内容を変える","f":"随時","t":"判断型","j":4,"k":4,"w":3,"e":3,"m":10,"req":""},{"id":61,"c":"食事","s":"管理","n":"調味料を補充・買い足す","f":"月1","t":"情報型","j":2,"k":4,"w":1,"e":1,"m":5,"req":""},{"id":62,"c":"食事","s":"管理","n":"食器・調理器具の破損をチェックする","f":"月1","t":"身体型","j":2,"k":2,"w":1,"e":1,"m":5,"req":""},{"id":63,"c":"食事","s":"管理","n":"冷蔵庫を整理・掃除する","f":"月1","t":"身体型","j":2,"k":2,"w":2,"e":2,"m":30,"req":""},{"id":64,"c":"食事","s":"管理","n":"パントリー・食品庫を整理する","f":"月1","t":"身体型","j":3,"k":3,"w":2,"e":1,"m":20,"req":""},{"id":65,"c":"食事","s":"管理","n":"外食・中食にするか判断する","f":"週1","t":"判断型","j":4,"k":3,"w":3,"e":3,"m":5,"req":""},{"id":66,"c":"洗濯","s":"回収","n":"脱衣所の洗濯物を回収する","f":"毎日","t":"身体型","j":1,"k":1,"w":3,"e":2,"m":3,"req":""},{"id":67,"c":"洗濯","s":"回収","n":"家中に落ちている衣類を集める","f":"毎日","t":"身体型","j":2,"k":3,"w":4,"e":3,"m":5,"req":""},{"id":68,"c":"洗濯","s":"回収","n":"ポケットの中身を確認する","f":"毎日","t":"身体型","j":2,"k":4,"w":3,"e":2,"m":3,"req":""},{"id":69,"c":"洗濯","s":"回収","n":"裏返しの衣類を戻す","f":"毎日","t":"身体型","j":1,"k":2,"w":3,"e":3,"m":3,"req":""},{"id":70,"c":"洗濯","s":"回収","n":"靴下のペアを確認する","f":"毎日","t":"身体型","j":2,"k":4,"w":2,"e":2,"m":3,"req":""},{"id":71,"c":"洗濯","s":"仕分け","n":"色柄で分ける","f":"毎日","t":"判断型","j":3,"k":3,"w":2,"e":1,"m":3,"req":""},{"id":72,"c":"洗濯","s":"仕分け","n":"手洗い・ネットが必要な物を分ける","f":"毎日","t":"判断型","j":4,"k":4,"w":2,"e":2,"m":5,"req":""},{"id":73,"c":"洗濯","s":"仕分け","n":"汚れの程度で前処理を判断する","f":"毎日","t":"判断型","j":4,"k":3,"w":3,"e":2,"m":5,"req":""},{"id":74,"c":"洗濯","s":"仕分け","n":"泥・食べこぼしの染み抜きをする","f":"週数回","t":"身体型","j":3,"k":3,"w":3,"e":3,"m":10,"req":""},{"id":75,"c":"洗濯","s":"仕分け","n":"上履き・体操服など期限付きを優先する","f":"週1","t":"判断型","j":4,"k":5,"w":3,"e":3,"m":3,"req":"school"},{"id":76,"c":"洗濯","s":"洗浄","n":"洗濯機を回す","f":"毎日","t":"身体型","j":2,"k":3,"w":3,"e":1,"m":5,"req":""},{"id":77,"c":"洗濯","s":"洗浄","n":"洗剤・柔軟剤の量を計る","f":"毎日","t":"身体型","j":1,"k":2,"w":2,"e":1,"m":2,"req":""},{"id":78,"c":"洗濯","s":"洗浄","n":"洗剤の残量を管理する","f":"週1","t":"情報型","j":2,"k":4,"w":1,"e":1,"m":3,"req":""},{"id":79,"c":"洗濯","s":"洗浄","n":"洗濯コースを選ぶ","f":"毎日","t":"判断型","j":3,"k":3,"w":2,"e":1,"m":2,"req":""},{"id":80,"c":"洗濯","s":"洗浄","n":"洗濯機の終了時刻を覚えておく","f":"毎日","t":"情報型","j":2,"k":5,"w":3,"e":2,"m":1,"req":""},{"id":81,"c":"洗濯","s":"洗浄","n":"手洗いする","f":"週1","t":"身体型","j":2,"k":2,"w":2,"e":2,"m":15,"req":""},{"id":82,"c":"洗濯","s":"洗浄","n":"つけ置きの時間を管理する","f":"週1","t":"情報型","j":3,"k":5,"w":2,"e":2,"m":3,"req":""},{"id":83,"c":"洗濯","s":"乾燥","n":"天気予報を見て干し方を決める","f":"毎日","t":"判断型","j":4,"k":4,"w":3,"e":2,"m":5,"req":""},{"id":84,"c":"洗濯","s":"乾燥","n":"洗濯物を干す","f":"毎日","t":"身体型","j":2,"k":2,"w":4,"e":2,"m":15,"req":""},{"id":85,"c":"洗濯","s":"乾燥","n":"ハンガー・ピンチの数を管理する","f":"週1","t":"身体型","j":2,"k":3,"w":2,"e":1,"m":3,"req":""},{"id":86,"c":"洗濯","s":"乾燥","n":"部屋干しの場所を確保する","f":"随時","t":"判断型","j":3,"k":3,"w":3,"e":2,"m":5,"req":""},{"id":87,"c":"洗濯","s":"乾燥","n":"乾き具合を確認する","f":"毎日","t":"身体型","j":2,"k":3,"w":3,"e":1,"m":3,"req":""},{"id":88,"c":"洗濯","s":"乾燥","n":"雨が降りそうな時に取り込む","f":"随時","t":"判断型","j":4,"k":4,"w":5,"e":4,"m":5,"req":""},{"id":89,"c":"洗濯","s":"乾燥","n":"乾燥機に入れてよい素材か判断する","f":"毎日","t":"判断型","j":3,"k":3,"w":2,"e":1,"m":2,"req":""},{"id":90,"c":"洗濯","s":"乾燥","n":"洗濯物を取り込む","f":"毎日","t":"身体型","j":1,"k":2,"w":3,"e":1,"m":10,"req":""},{"id":91,"c":"洗濯","s":"収納","n":"洗濯物を畳む","f":"毎日","t":"身体型","j":1,"k":2,"w":4,"e":2,"m":20,"req":""},{"id":92,"c":"洗濯","s":"収納","n":"家族ごとに仕分ける","f":"毎日","t":"身体型","j":2,"k":3,"w":3,"e":1,"m":8,"req":""},{"id":93,"c":"洗濯","s":"収納","n":"各自のタンスにしまう","f":"毎日","t":"身体型","j":1,"k":2,"w":3,"e":2,"m":10,"req":""},{"id":94,"c":"洗濯","s":"収納","n":"誰の物か分からない衣類を判定する","f":"週1","t":"判断型","j":3,"k":4,"w":2,"e":2,"m":3,"req":""},{"id":95,"c":"洗濯","s":"収納","n":"サイズアウトした衣類を抜く","f":"月1","t":"判断型","j":3,"k":4,"w":1,"e":3,"m":20,"req":""},{"id":96,"c":"洗濯","s":"収納","n":"季節の衣替えをする","f":"季節","t":"身体型","j":3,"k":4,"w":1,"e":2,"m":120,"req":""},{"id":97,"c":"洗濯","s":"収納","n":"収納量に合わせて処分を判断する","f":"季節","t":"判断型","j":4,"k":4,"w":1,"e":3,"m":30,"req":""},{"id":98,"c":"洗濯","s":"メンテ・補修","n":"アイロンをかける","f":"週1","t":"身体型","j":2,"k":2,"w":3,"e":2,"m":20,"req":""},{"id":99,"c":"洗濯","s":"メンテ・補修","n":"ボタン付け・ほつれを直す","f":"月1","t":"身体型","j":2,"k":3,"w":2,"e":2,"m":15,"req":""},{"id":100,"c":"洗濯","s":"メンテ・補修","n":"名前を書く・ゼッケンを付ける","f":"随時","t":"身体型","j":3,"k":4,"w":2,"e":3,"m":20,"req":""},{"id":101,"c":"洗濯","s":"メンテ・補修","n":"洗濯槽を掃除する","f":"月1","t":"身体型","j":2,"k":4,"w":1,"e":1,"m":20,"req":""},{"id":102,"c":"洗濯","s":"メンテ・補修","n":"乾燥機のフィルターを掃除する","f":"週数回","t":"身体型","j":1,"k":3,"w":2,"e":1,"m":3,"req":""},{"id":103,"c":"洗濯","s":"メンテ・補修","n":"洗濯機の排水口を掃除する","f":"月1","t":"身体型","j":1,"k":3,"w":1,"e":2,"m":10,"req":""},{"id":104,"c":"洗濯","s":"メンテ・補修","n":"洗濯ネットを補充・買い替える","f":"年1","t":"情報型","j":2,"k":3,"w":1,"e":1,"m":10,"req":""},{"id":105,"c":"洗濯","s":"メンテ・補修","n":"制服・体操服の予備を確保する","f":"季節","t":"判断型","j":4,"k":4,"w":1,"e":2,"m":20,"req":""},{"id":106,"c":"洗濯","s":"メンテ・補修","n":"クリーニングに出す・受け取る","f":"季節","t":"情報型","j":3,"k":4,"w":2,"e":1,"m":40,"req":""},{"id":107,"c":"洗濯","s":"メンテ・補修","n":"靴を洗う","f":"週1","t":"身体型","j":1,"k":2,"w":2,"e":2,"m":15,"req":""},{"id":108,"c":"洗濯","s":"メンテ・補修","n":"上履きの持ち帰り忘れを確認する","f":"週1","t":"情報型","j":3,"k":5,"w":2,"e":3,"m":2,"req":"school"},{"id":109,"c":"洗濯","s":"メンテ・補修","n":"寝具カバーを洗う","f":"週1","t":"身体型","j":2,"k":3,"w":2,"e":1,"m":25,"req":""},{"id":110,"c":"洗濯","s":"メンテ・補修","n":"タオルの交換サイクルを管理する","f":"週数回","t":"情報型","j":2,"k":4,"w":2,"e":1,"m":3,"req":""},{"id":111,"c":"掃除","s":"リビング","n":"散らかった物を元の場所に戻す","f":"毎日","t":"身体型","j":3,"k":4,"w":5,"e":3,"m":15,"req":""},{"id":112,"c":"掃除","s":"リビング","n":"床に掃除機をかける","f":"週数回","t":"身体型","j":1,"k":2,"w":3,"e":1,"m":15,"req":""},{"id":113,"c":"掃除","s":"リビング","n":"床を拭き掃除する","f":"週1","t":"身体型","j":1,"k":1,"w":2,"e":1,"m":15,"req":""},{"id":114,"c":"掃除","s":"リビング","n":"テーブル周りを片付ける","f":"毎日","t":"身体型","j":2,"k":3,"w":4,"e":2,"m":5,"req":""},{"id":115,"c":"掃除","s":"リビング","n":"ソファ・クッションを整える","f":"毎日","t":"身体型","j":1,"k":1,"w":3,"e":1,"m":2,"req":""},{"id":116,"c":"掃除","s":"リビング","n":"リモコン等を定位置に戻す","f":"毎日","t":"身体型","j":2,"k":3,"w":3,"e":2,"m":2,"req":""},{"id":117,"c":"掃除","s":"リビング","n":"郵便物・書類を仕分ける","f":"週数回","t":"判断型","j":4,"k":4,"w":3,"e":2,"m":10,"req":""},{"id":118,"c":"掃除","s":"リビング","n":"おもちゃを分類して戻す","f":"毎日","t":"身体型","j":3,"k":4,"w":4,"e":3,"m":15,"req":""},{"id":119,"c":"掃除","s":"リビング","n":"観葉植物に水をやる","f":"週1","t":"情報型","j":1,"k":4,"w":1,"e":1,"m":5,"req":""},{"id":120,"c":"掃除","s":"リビング","n":"照明・電球を交換する","f":"年1","t":"身体型","j":2,"k":3,"w":1,"e":1,"m":10,"req":""},{"id":121,"c":"掃除","s":"キッチン","n":"コンロ周りの油汚れを拭く","f":"毎日","t":"身体型","j":1,"k":2,"w":2,"e":2,"m":5,"req":""},{"id":122,"c":"掃除","s":"キッチン","n":"換気扇のフィルターを交換する","f":"月1","t":"身体型","j":2,"k":4,"w":1,"e":2,"m":15,"req":""},{"id":123,"c":"掃除","s":"キッチン","n":"換気扇を分解掃除する","f":"年1","t":"身体型","j":2,"k":3,"w":1,"e":3,"m":90,"req":""},{"id":124,"c":"掃除","s":"キッチン","n":"冷蔵庫の中を拭く","f":"月1","t":"身体型","j":1,"k":2,"w":1,"e":2,"m":20,"req":""},{"id":125,"c":"掃除","s":"キッチン","n":"電子レンジの内部を掃除する","f":"月1","t":"身体型","j":1,"k":3,"w":1,"e":2,"m":10,"req":""},{"id":126,"c":"掃除","s":"キッチン","n":"食器棚を整理する","f":"季節","t":"身体型","j":3,"k":3,"w":1,"e":1,"m":45,"req":""},{"id":127,"c":"掃除","s":"キッチン","n":"スポンジ・布巾を交換する","f":"週1","t":"情報型","j":1,"k":4,"w":1,"e":1,"m":3,"req":""},{"id":128,"c":"掃除","s":"キッチン","n":"排水口のぬめりを取る","f":"週1","t":"身体型","j":1,"k":3,"w":1,"e":4,"m":10,"req":""},{"id":129,"c":"掃除","s":"キッチン","n":"ゴミ袋の在庫を管理する","f":"月1","t":"情報型","j":2,"k":4,"w":1,"e":1,"m":3,"req":""},{"id":130,"c":"掃除","s":"浴室","n":"浴槽を洗う","f":"毎日","t":"身体型","j":1,"k":2,"w":3,"e":2,"m":8,"req":""},{"id":131,"c":"掃除","s":"浴室","n":"床・壁のカビを取る","f":"月1","t":"身体型","j":2,"k":3,"w":1,"e":3,"m":30,"req":""},{"id":132,"c":"掃除","s":"浴室","n":"排水口の髪の毛を取る","f":"週数回","t":"身体型","j":1,"k":2,"w":2,"e":4,"m":5,"req":""},{"id":133,"c":"掃除","s":"浴室","n":"鏡の水垢を落とす","f":"月1","t":"身体型","j":2,"k":2,"w":1,"e":2,"m":15,"req":""},{"id":134,"c":"掃除","s":"浴室","n":"シャンプー等を詰め替える","f":"月1","t":"身体型","j":1,"k":4,"w":1,"e":1,"m":5,"req":""},{"id":135,"c":"掃除","s":"浴室","n":"換気を回す・止める判断をする","f":"毎日","t":"判断型","j":2,"k":3,"w":2,"e":1,"m":1,"req":""},{"id":136,"c":"掃除","s":"浴室","n":"風呂の追い焚き・湯量を管理する","f":"毎日","t":"判断型","j":3,"k":4,"w":3,"e":2,"m":3,"req":""},{"id":137,"c":"掃除","s":"浴室","n":"バスマット・タオルを交換する","f":"週数回","t":"身体型","j":1,"k":3,"w":2,"e":1,"m":3,"req":""},{"id":138,"c":"掃除","s":"浴室","n":"風呂おもちゃのカビ対策をする","f":"週1","t":"身体型","j":2,"k":3,"w":1,"e":3,"m":10,"req":""},{"id":139,"c":"掃除","s":"洗面所","n":"洗面ボウルを洗う","f":"週数回","t":"身体型","j":1,"k":2,"w":2,"e":2,"m":5,"req":""},{"id":140,"c":"掃除","s":"洗面所","n":"歯ブラシの交換時期を管理する","f":"月1","t":"情報型","j":2,"k":4,"w":1,"e":1,"m":3,"req":""},{"id":141,"c":"掃除","s":"洗面所","n":"タオルを交換する","f":"毎日","t":"身体型","j":1,"k":3,"w":2,"e":1,"m":2,"req":""},{"id":142,"c":"掃除","s":"洗面所","n":"鏡・蛇口の水垢を取る","f":"週1","t":"身体型","j":1,"k":2,"w":1,"e":2,"m":8,"req":""},{"id":143,"c":"掃除","s":"洗面所","n":"床の髪の毛を拾う","f":"毎日","t":"身体型","j":1,"k":1,"w":3,"e":3,"m":3,"req":""},{"id":144,"c":"掃除","s":"洗面所","n":"洗剤・消耗品を補充する","f":"月1","t":"情報型","j":2,"k":4,"w":1,"e":1,"m":5,"req":""},{"id":145,"c":"掃除","s":"トイレ","n":"便器を洗う","f":"週数回","t":"身体型","j":1,"k":2,"w":2,"e":3,"m":8,"req":""},{"id":146,"c":"掃除","s":"トイレ","n":"床・壁を拭く","f":"週1","t":"身体型","j":1,"k":2,"w":1,"e":3,"m":8,"req":""},{"id":147,"c":"掃除","s":"トイレ","n":"トイレットペーパーを補充・在庫管理する","f":"週数回","t":"情報型","j":2,"k":4,"w":2,"e":2,"m":3,"req":""},{"id":148,"c":"掃除","s":"トイレ","n":"サニタリーのゴミを捨てる","f":"週1","t":"身体型","j":1,"k":2,"w":1,"e":3,"m":3,"req":""},{"id":149,"c":"掃除","s":"トイレ","n":"芳香剤・消臭剤を交換する","f":"月1","t":"情報型","j":2,"k":3,"w":1,"e":1,"m":3,"req":""},{"id":150,"c":"掃除","s":"トイレ","n":"トイレの換気扇を掃除する","f":"季節","t":"身体型","j":1,"k":3,"w":1,"e":2,"m":15,"req":""},{"id":151,"c":"掃除","s":"玄関・その他","n":"靴を並べる","f":"毎日","t":"身体型","j":1,"k":1,"w":3,"e":2,"m":3,"req":""},{"id":152,"c":"掃除","s":"玄関・その他","n":"玄関を掃く","f":"週1","t":"身体型","j":1,"k":2,"w":2,"e":1,"m":10,"req":""},{"id":153,"c":"掃除","s":"玄関・その他","n":"靴箱を整理し季節の靴を入れ替える","f":"季節","t":"身体型","j":3,"k":3,"w":1,"e":1,"m":30,"req":""},{"id":154,"c":"掃除","s":"玄関・その他","n":"傘を乾かす・管理する","f":"随時","t":"身体型","j":2,"k":3,"w":2,"e":1,"m":5,"req":""},{"id":155,"c":"掃除","s":"玄関・その他","n":"階段・廊下を掃除する","f":"週1","t":"身体型","j":1,"k":2,"w":2,"e":1,"m":10,"req":""},{"id":156,"c":"掃除","s":"玄関・その他","n":"寝室のシーツを交換する","f":"週1","t":"身体型","j":1,"k":3,"w":2,"e":1,"m":15,"req":""},{"id":157,"c":"掃除","s":"玄関・その他","n":"布団を干す・布団乾燥機をかける","f":"週1","t":"身体型","j":2,"k":4,"w":2,"e":1,"m":20,"req":""},{"id":158,"c":"掃除","s":"玄関・その他","n":"クローゼットの除湿剤を交換する","f":"季節","t":"情報型","j":2,"k":4,"w":1,"e":1,"m":10,"req":""},{"id":159,"c":"掃除","s":"玄関・その他","n":"ベランダを掃除する","f":"月1","t":"身体型","j":1,"k":2,"w":1,"e":2,"m":20,"req":""},{"id":160,"c":"掃除","s":"玄関・その他","n":"窓・網戸を掃除する","f":"季節","t":"身体型","j":2,"k":3,"w":1,"e":2,"m":60,"req":""},{"id":161,"c":"掃除","s":"玄関・その他","n":"エアコンのフィルターを掃除する","f":"月1","t":"身体型","j":2,"k":4,"w":1,"e":2,"m":20,"req":""},{"id":162,"c":"掃除","s":"玄関・その他","n":"エアコンの季節切替・試運転をする","f":"季節","t":"判断型","j":3,"k":4,"w":1,"e":1,"m":20,"req":""},{"id":163,"c":"掃除","s":"玄関・その他","n":"加湿器・空気清浄機を手入れする","f":"週1","t":"身体型","j":2,"k":4,"w":1,"e":2,"m":10,"req":""},{"id":164,"c":"掃除","s":"玄関・その他","n":"家電の埃を取る","f":"月1","t":"身体型","j":1,"k":2,"w":1,"e":1,"m":15,"req":""},{"id":165,"c":"掃除","s":"ゴミ","n":"各部屋のゴミを集める","f":"週数回","t":"身体型","j":2,"k":3,"w":3,"e":2,"m":8,"req":""},{"id":166,"c":"掃除","s":"ゴミ","n":"分別ルールを判断する","f":"毎日","t":"判断型","j":4,"k":4,"w":3,"e":2,"m":3,"req":""},{"id":167,"c":"掃除","s":"ゴミ","n":"ゴミ出しの曜日を覚えておく","f":"週数回","t":"情報型","j":3,"k":5,"w":3,"e":3,"m":1,"req":""},{"id":168,"c":"掃除","s":"ゴミ","n":"ゴミを出しに行く","f":"週数回","t":"身体型","j":1,"k":2,"w":3,"e":2,"m":8,"req":""},{"id":169,"c":"掃除","s":"ゴミ","n":"ゴミ箱を洗う","f":"月1","t":"身体型","j":1,"k":2,"w":1,"e":3,"m":10,"req":""},{"id":170,"c":"掃除","s":"ゴミ","n":"資源ごみの一時保管場所を管理する","f":"週1","t":"身体型","j":2,"k":3,"w":2,"e":2,"m":10,"req":""},{"id":171,"c":"掃除","s":"ゴミ","n":"粗大ゴミを申し込む・搬出する","f":"年1","t":"情報型","j":4,"k":4,"w":1,"e":3,"m":60,"req":""},{"id":172,"c":"掃除","s":"ゴミ","n":"電池・電球など特殊ごみの処分方法を調べる","f":"年1","t":"情報型","j":4,"k":3,"w":1,"e":2,"m":20,"req":""},{"id":173,"c":"掃除","s":"設備メンテ","n":"電池をストック管理・交換する","f":"月1","t":"情報型","j":2,"k":4,"w":1,"e":1,"m":5,"req":""},{"id":174,"c":"掃除","s":"設備メンテ","n":"火災報知器を点検する","f":"年1","t":"情報型","j":3,"k":5,"w":1,"e":2,"m":20,"req":""},{"id":175,"c":"掃除","s":"設備メンテ","n":"家電の保証書・説明書を管理する","f":"年1","t":"情報型","j":3,"k":4,"w":1,"e":1,"m":20,"req":""},{"id":176,"c":"掃除","s":"設備メンテ","n":"家電の買い替え時期を判断する","f":"年1","t":"判断型","j":5,"k":4,"w":1,"e":3,"m":60,"req":""},{"id":177,"c":"掃除","s":"設備メンテ","n":"修理業者を手配する","f":"年1","t":"情報型","j":4,"k":3,"w":2,"e":3,"m":45,"req":""},{"id":178,"c":"掃除","s":"設備メンテ","n":"水回りのパッキン等の劣化を確認する","f":"季節","t":"身体型","j":3,"k":3,"w":1,"e":2,"m":15,"req":""},{"id":179,"c":"掃除","s":"設備メンテ","n":"防災備蓄を点検・入れ替える","f":"季節","t":"情報型","j":4,"k":5,"w":1,"e":3,"m":45,"req":""},{"id":180,"c":"掃除","s":"設備メンテ","n":"消火器・避難経路を確認する","f":"年1","t":"情報型","j":3,"k":4,"w":1,"e":2,"m":20,"req":""},{"id":181,"c":"子育て","s":"生活習慣","n":"子どもを起こす・起きるまで見守る","f":"毎日","t":"感情型","j":3,"k":3,"w":4,"e":4,"m":15,"req":"kid"},{"id":182,"c":"子育て","s":"生活習慣","n":"着替えを促す・手伝う","f":"毎日","t":"感情型","j":3,"k":3,"w":4,"e":3,"m":10,"req":"pre"},{"id":183,"c":"子育て","s":"生活習慣","n":"検温・体調を確認する","f":"毎日","t":"情報型","j":3,"k":4,"w":3,"e":3,"m":5,"req":"pre"},{"id":184,"c":"子育て","s":"生活習慣","n":"歯磨き・仕上げ磨きをする","f":"毎日","t":"身体型","j":2,"k":3,"w":3,"e":2,"m":10,"req":"pre"},{"id":185,"c":"子育て","s":"生活習慣","n":"トイレ介助・おむつを替える","f":"毎日","t":"身体型","j":1,"k":2,"w":4,"e":2,"m":10,"req":"pre"},{"id":186,"c":"子育て","s":"生活習慣","n":"お風呂に入れる","f":"毎日","t":"身体型","j":2,"k":3,"w":4,"e":3,"m":25,"req":"kid"},{"id":187,"c":"子育て","s":"生活習慣","n":"髪を乾かす","f":"毎日","t":"身体型","j":1,"k":2,"w":3,"e":2,"m":10,"req":"kid"},{"id":188,"c":"子育て","s":"生活習慣","n":"爪を切る","f":"週1","t":"身体型","j":1,"k":4,"w":2,"e":2,"m":10,"req":"kid"},{"id":189,"c":"子育て","s":"生活習慣","n":"寝かしつける","f":"毎日","t":"感情型","j":3,"k":3,"w":4,"e":4,"m":30,"req":"pre"},{"id":190,"c":"子育て","s":"生活習慣","n":"睡眠時間を管理する","f":"毎日","t":"情報型","j":3,"k":4,"w":2,"e":3,"m":3,"req":"kid"},{"id":191,"c":"子育て","s":"生活習慣","n":"生活リズムの乱れに気づく","f":"随時","t":"感情型","j":4,"k":4,"w":2,"e":3,"m":5,"req":"kid"},{"id":192,"c":"子育て","s":"生活習慣","n":"スクリーンタイムを管理する","f":"毎日","t":"感情型","j":4,"k":3,"w":4,"e":4,"m":10,"req":"kid"},{"id":193,"c":"子育て","s":"園・学校","n":"連絡帳を読む・書く","f":"毎日","t":"情報型","j":3,"k":4,"w":3,"e":2,"m":10,"req":"school"},{"id":194,"c":"子育て","s":"園・学校","n":"プリントを読んで予定を把握する","f":"毎日","t":"情報型","j":4,"k":5,"w":3,"e":3,"m":10,"req":"school"},{"id":195,"c":"子育て","s":"園・学校","n":"提出物の期限を管理する","f":"週数回","t":"情報型","j":4,"k":5,"w":3,"e":4,"m":5,"req":"school"},{"id":196,"c":"子育て","s":"園・学校","n":"書類に押印・記名する","f":"週数回","t":"身体型","j":2,"k":4,"w":2,"e":2,"m":5,"req":"kid"},{"id":197,"c":"子育て","s":"園・学校","n":"翌日の持ち物を準備する","f":"毎日","t":"情報型","j":3,"k":5,"w":3,"e":3,"m":10,"req":"kid"},{"id":198,"c":"子育て","s":"園・学校","n":"持ち物に名前を書く","f":"随時","t":"身体型","j":2,"k":4,"w":2,"e":3,"m":15,"req":"kid"},{"id":199,"c":"子育て","s":"園・学校","n":"明日の時間割を確認する","f":"毎日","t":"情報型","j":3,"k":5,"w":3,"e":2,"m":5,"req":"school"},{"id":200,"c":"子育て","s":"園・学校","n":"給食の献立を確認して夕食と重複を避ける","f":"週1","t":"情報型","j":3,"k":4,"w":2,"e":1,"m":5,"req":"school"},{"id":201,"c":"子育て","s":"園・学校","n":"欠席・遅刻の連絡を入れる","f":"随時","t":"情報型","j":3,"k":3,"w":3,"e":3,"m":5,"req":"kid"},{"id":202,"c":"子育て","s":"園・学校","n":"行事の日程をカレンダーに入れる","f":"週1","t":"情報型","j":3,"k":5,"w":2,"e":2,"m":10,"req":"kid"},{"id":203,"c":"子育て","s":"園・学校","n":"送迎する","f":"毎日","t":"身体型","j":2,"k":3,"w":3,"e":2,"m":30,"req":"kid"},{"id":204,"c":"子育て","s":"園・学校","n":"保護者会・懇談会に出る","f":"月1","t":"感情型","j":3,"k":4,"w":2,"e":3,"m":90,"req":"school"},{"id":205,"c":"子育て","s":"園・学校","n":"PTA・役員の仕事をする","f":"月1","t":"感情型","j":4,"k":4,"w":2,"e":4,"m":60,"req":"school"},{"id":206,"c":"子育て","s":"園・学校","n":"先生とやり取りする","f":"随時","t":"感情型","j":4,"k":4,"w":2,"e":4,"m":15,"req":"kid"},{"id":207,"c":"子育て","s":"園・学校","n":"上履き・体操服の持ち帰りを管理する","f":"週1","t":"情報型","j":3,"k":5,"w":2,"e":3,"m":3,"req":"school"},{"id":208,"c":"子育て","s":"園・学校","n":"集金・現金を準備する","f":"月1","t":"情報型","j":3,"k":5,"w":1,"e":2,"m":10,"req":"school"},{"id":209,"c":"子育て","s":"学習","n":"宿題の有無を確認する","f":"毎日","t":"情報型","j":3,"k":4,"w":3,"e":3,"m":5,"req":"school"},{"id":210,"c":"子育て","s":"学習","n":"宿題に付き添う・教える","f":"毎日","t":"感情型","j":4,"k":3,"w":4,"e":4,"m":30,"req":"school"},{"id":211,"c":"子育て","s":"学習","n":"音読を聞いてサインする","f":"毎日","t":"身体型","j":2,"k":4,"w":3,"e":2,"m":10,"req":"school"},{"id":212,"c":"子育て","s":"学習","n":"丸つけをする","f":"毎日","t":"身体型","j":2,"k":2,"w":3,"e":2,"m":10,"req":"school"},{"id":213,"c":"子育て","s":"学習","n":"教材・ドリルを選ぶ","f":"月1","t":"判断型","j":4,"k":3,"w":1,"e":2,"m":30,"req":"kid"},{"id":214,"c":"子育て","s":"学習","n":"学習の遅れ・つまずきに気づく","f":"随時","t":"感情型","j":5,"k":4,"w":2,"e":4,"m":10,"req":"kid"},{"id":215,"c":"子育て","s":"学習","n":"進路・受験の情報を集める","f":"年1","t":"情報型","j":5,"k":4,"w":1,"e":4,"m":120,"req":"teen"},{"id":216,"c":"子育て","s":"学習","n":"テスト結果を一緒に振り返る","f":"月1","t":"感情型","j":4,"k":3,"w":2,"e":3,"m":20,"req":"teen"},{"id":217,"c":"子育て","s":"健康・医療","n":"予防接種のスケジュールを管理する","f":"月1","t":"情報型","j":4,"k":5,"w":1,"e":3,"m":15,"req":"kid"},{"id":218,"c":"子育て","s":"健康・医療","n":"健診を予約して受診する","f":"年1","t":"情報型","j":3,"k":5,"w":1,"e":2,"m":60,"req":"kid"},{"id":219,"c":"子育て","s":"健康・医療","n":"病院を選ぶ・予約する","f":"随時","t":"判断型","j":4,"k":3,"w":3,"e":3,"m":15,"req":"kid"},{"id":220,"c":"子育て","s":"健康・医療","n":"通院に付き添う","f":"随時","t":"身体型","j":2,"k":3,"w":3,"e":3,"m":90,"req":"kid"},{"id":221,"c":"子育て","s":"健康・医療","n":"薬を飲ませる・管理する","f":"随時","t":"情報型","j":3,"k":5,"w":3,"e":3,"m":5,"req":"kid"},{"id":222,"c":"子育て","s":"健康・医療","n":"保険証・医療証を管理する","f":"随時","t":"情報型","j":2,"k":4,"w":1,"e":2,"m":5,"req":"kid"},{"id":223,"c":"子育て","s":"健康・医療","n":"体調不良時の登園・登校を判断する","f":"随時","t":"判断型","j":5,"k":4,"w":4,"e":5,"m":10,"req":"kid"},{"id":224,"c":"子育て","s":"健康・医療","n":"感染症の流行状況を把握する","f":"随時","t":"情報型","j":3,"k":3,"w":2,"e":3,"m":5,"req":"kid"},{"id":225,"c":"子育て","s":"健康・医療","n":"発達・成長を記録する","f":"月1","t":"情報型","j":3,"k":4,"w":1,"e":2,"m":15,"req":"kid"},{"id":226,"c":"子育て","s":"健康・医療","n":"歯科検診・フッ素塗布に連れて行く","f":"季節","t":"情報型","j":3,"k":5,"w":1,"e":2,"m":60,"req":"kid"},{"id":227,"c":"子育て","s":"習い事","n":"習い事を選ぶ・体験に行く","f":"年1","t":"判断型","j":5,"k":3,"w":1,"e":3,"m":120,"req":"kid"},{"id":228,"c":"子育て","s":"習い事","n":"月謝の支払いを管理する","f":"月1","t":"情報型","j":2,"k":4,"w":1,"e":1,"m":10,"req":"kid"},{"id":229,"c":"子育て","s":"習い事","n":"習い事のスケジュールを組む","f":"月1","t":"判断型","j":4,"k":4,"w":2,"e":3,"m":20,"req":"kid"},{"id":230,"c":"子育て","s":"習い事","n":"習い事の送迎をする","f":"週数回","t":"身体型","j":2,"k":3,"w":3,"e":2,"m":45,"req":"kid"},{"id":231,"c":"子育て","s":"習い事","n":"用具・道具を準備し管理する","f":"週1","t":"情報型","j":3,"k":4,"w":2,"e":2,"m":10,"req":"kid"},{"id":232,"c":"子育て","s":"習い事","n":"発表会・試合の準備をする","f":"季節","t":"判断型","j":4,"k":4,"w":1,"e":3,"m":90,"req":"kid"},{"id":233,"c":"子育て","s":"習い事","n":"やめ時・続け時を判断する","f":"年1","t":"感情型","j":5,"k":3,"w":1,"e":4,"m":30,"req":"kid"},{"id":234,"c":"子育て","s":"行事・イベント","n":"誕生日を計画する","f":"年1","t":"判断型","j":4,"k":4,"w":1,"e":2,"m":120,"req":"kid"},{"id":235,"c":"子育て","s":"行事・イベント","n":"プレゼントを選ぶ","f":"年1","t":"判断型","j":4,"k":3,"w":1,"e":3,"m":60,"req":"kid"},{"id":236,"c":"子育て","s":"行事・イベント","n":"クリスマス等の季節行事を準備する","f":"年1","t":"判断型","j":4,"k":4,"w":1,"e":2,"m":90,"req":"kid"},{"id":237,"c":"子育て","s":"行事・イベント","n":"写真を撮る・整理する","f":"週1","t":"情報型","j":2,"k":3,"w":2,"e":2,"m":15,"req":"kid"},{"id":238,"c":"子育て","s":"行事・イベント","n":"アルバム・記念品を作る","f":"年1","t":"情報型","j":3,"k":3,"w":1,"e":2,"m":120,"req":"kid"},{"id":239,"c":"子育て","s":"行事・イベント","n":"帰省・旅行を計画する","f":"年1","t":"判断型","j":5,"k":4,"w":1,"e":3,"m":180,"req":"kid"},{"id":240,"c":"子育て","s":"行事・イベント","n":"行事用の服装を用意する","f":"季節","t":"判断型","j":3,"k":4,"w":1,"e":2,"m":30,"req":"kid"},{"id":241,"c":"子育て","s":"情緒・関係","n":"子どもの話を聞く","f":"毎日","t":"感情型","j":3,"k":3,"w":4,"e":4,"m":20,"req":"kid"},{"id":242,"c":"子育て","s":"情緒・関係","n":"きょうだい喧嘩を仲裁する","f":"毎日","t":"感情型","j":4,"k":3,"w":5,"e":5,"m":10,"req":"kid"},{"id":243,"c":"子育て","s":"情緒・関係","n":"感情の変化に気づく","f":"毎日","t":"感情型","j":5,"k":4,"w":3,"e":5,"m":10,"req":"kid"},{"id":244,"c":"子育て","s":"情緒・関係","n":"叱り方・伝え方を選ぶ","f":"毎日","t":"感情型","j":5,"k":3,"w":4,"e":5,"m":10,"req":"kid"},{"id":245,"c":"子育て","s":"情緒・関係","n":"褒める・認める","f":"毎日","t":"感情型","j":3,"k":3,"w":3,"e":2,"m":5,"req":"kid"},{"id":246,"c":"子育て","s":"情緒・関係","n":"友人関係の悩みを把握する","f":"週1","t":"感情型","j":4,"k":4,"w":2,"e":4,"m":15,"req":"kid"},{"id":247,"c":"子育て","s":"情緒・関係","n":"学校での様子を推測する","f":"毎日","t":"感情型","j":4,"k":4,"w":2,"e":4,"m":5,"req":"school"},{"id":248,"c":"子育て","s":"情緒・関係","n":"家庭内のルールを決め直す","f":"月1","t":"判断型","j":4,"k":3,"w":2,"e":3,"m":20,"req":"kid"},{"id":249,"c":"子育て","s":"情緒・関係","n":"子どもの言い分と事実を切り分ける","f":"随時","t":"判断型","j":5,"k":4,"w":3,"e":4,"m":10,"req":"kid"},{"id":250,"c":"子育て","s":"衣類・持ち物","n":"サイズアウトを見越して衣類を買う","f":"季節","t":"判断型","j":4,"k":4,"w":1,"e":2,"m":60,"req":"kid"},{"id":251,"c":"子育て","s":"衣類・持ち物","n":"おさがりを管理・受け渡しする","f":"年1","t":"情報型","j":3,"k":4,"w":1,"e":2,"m":45,"req":"kid"},{"id":252,"c":"子育て","s":"衣類・持ち物","n":"おもちゃの取捨選択をする","f":"季節","t":"判断型","j":3,"k":3,"w":1,"e":3,"m":45,"req":"kid"},{"id":253,"c":"子育て","s":"衣類・持ち物","n":"学用品（鉛筆・消しゴム等）を補充する","f":"月1","t":"情報型","j":2,"k":4,"w":1,"e":1,"m":10,"req":"school"},{"id":254,"c":"子育て","s":"衣類・持ち物","n":"落とし物・忘れ物を探す","f":"週1","t":"身体型","j":3,"k":3,"w":4,"e":3,"m":10,"req":"kid"},{"id":255,"c":"家計","s":"記録","n":"レシートを整理する","f":"週1","t":"情報型","j":1,"k":3,"w":2,"e":2,"m":10,"req":""},{"id":256,"c":"家計","s":"記録","n":"家計簿をつける","f":"週1","t":"情報型","j":2,"k":3,"w":2,"e":2,"m":20,"req":""},{"id":257,"c":"家計","s":"記録","n":"支出を費目に分類する","f":"週1","t":"情報型","j":3,"k":3,"w":2,"e":1,"m":10,"req":""},{"id":258,"c":"家計","s":"記録","n":"予算と実績を比較する","f":"月1","t":"判断型","j":4,"k":3,"w":1,"e":3,"m":20,"req":""},{"id":259,"c":"家計","s":"記録","n":"使途不明金を追跡する","f":"月1","t":"情報型","j":4,"k":4,"w":1,"e":3,"m":15,"req":""},{"id":260,"c":"家計","s":"支払い","n":"公共料金の引き落としを確認する","f":"月1","t":"情報型","j":2,"k":4,"w":1,"e":2,"m":10,"req":""},{"id":261,"c":"家計","s":"支払い","n":"カードの明細を確認する","f":"月1","t":"情報型","j":3,"k":4,"w":1,"e":3,"m":15,"req":""},{"id":262,"c":"家計","s":"支払い","n":"口座残高を管理する","f":"週1","t":"情報型","j":3,"k":4,"w":2,"e":3,"m":5,"req":""},{"id":263,"c":"家計","s":"支払い","n":"現金を下ろす","f":"月1","t":"身体型","j":2,"k":3,"w":2,"e":1,"m":15,"req":""},{"id":264,"c":"家計","s":"支払い","n":"学校・園への集金を準備する","f":"月1","t":"情報型","j":3,"k":5,"w":1,"e":2,"m":10,"req":"school"},{"id":265,"c":"家計","s":"支払い","n":"冠婚葬祭費を工面する","f":"随時","t":"判断型","j":4,"k":3,"w":1,"e":3,"m":30,"req":""},{"id":266,"c":"家計","s":"契約・見直し","n":"サブスクを棚卸しする","f":"季節","t":"判断型","j":4,"k":4,"w":1,"e":2,"m":30,"req":""},{"id":267,"c":"家計","s":"契約・見直し","n":"携帯・通信プランを見直す","f":"年1","t":"判断型","j":5,"k":3,"w":1,"e":3,"m":90,"req":""},{"id":268,"c":"家計","s":"契約・見直し","n":"保険を見直す","f":"年1","t":"判断型","j":5,"k":4,"w":1,"e":4,"m":120,"req":""},{"id":269,"c":"家計","s":"契約・見直し","n":"電気・ガス会社を比較する","f":"年1","t":"判断型","j":4,"k":3,"w":1,"e":2,"m":60,"req":""},{"id":270,"c":"家計","s":"契約・見直し","n":"住宅ローン・家賃を管理する","f":"月1","t":"情報型","j":3,"k":4,"w":1,"e":3,"m":10,"req":""},{"id":271,"c":"家計","s":"資産","n":"積立・投資の設定と確認をする","f":"月1","t":"判断型","j":4,"k":3,"w":1,"e":3,"m":20,"req":""},{"id":272,"c":"家計","s":"資産","n":"NISA・iDeCoの手続きをする","f":"年1","t":"判断型","j":5,"k":3,"w":1,"e":3,"m":90,"req":""},{"id":273,"c":"家計","s":"資産","n":"教育資金を計画する","f":"年1","t":"判断型","j":5,"k":4,"w":1,"e":4,"m":90,"req":""},{"id":274,"c":"家計","s":"資産","n":"老後・将来の資金を計画する","f":"年1","t":"判断型","j":5,"k":4,"w":1,"e":4,"m":120,"req":""},{"id":275,"c":"家計","s":"税・公的手続き","n":"年末調整・確定申告をする","f":"年1","t":"情報型","j":5,"k":4,"w":1,"e":4,"m":180,"req":""},{"id":276,"c":"家計","s":"税・公的手続き","n":"医療費を集計する","f":"年1","t":"情報型","j":3,"k":4,"w":1,"e":2,"m":60,"req":""},{"id":277,"c":"家計","s":"税・公的手続き","n":"児童手当等を申請・更新する","f":"年1","t":"情報型","j":4,"k":5,"w":1,"e":2,"m":45,"req":""},{"id":278,"c":"家計","s":"税・公的手続き","n":"自治体の助成金を調べる","f":"年1","t":"情報型","j":4,"k":3,"w":1,"e":2,"m":45,"req":""},{"id":279,"c":"家計","s":"税・公的手続き","n":"各種証明書を取りに行く","f":"年1","t":"身体型","j":3,"k":3,"w":1,"e":2,"m":60,"req":""},{"id":280,"c":"家計","s":"税・公的手続き","n":"マイナンバー等の重要書類を管理する","f":"年1","t":"情報型","j":3,"k":4,"w":1,"e":2,"m":20,"req":""},{"id":281,"c":"家計","s":"ポイント・特典","n":"ポイントの有効期限を管理する","f":"月1","t":"情報型","j":3,"k":5,"w":1,"e":2,"m":10,"req":""},{"id":282,"c":"家計","s":"ポイント・特典","n":"還元率の高い支払い方法を選ぶ","f":"週1","t":"判断型","j":4,"k":4,"w":2,"e":1,"m":3,"req":""},{"id":283,"c":"家計","s":"ポイント・特典","n":"クーポン・優待を使い切る","f":"月1","t":"情報型","j":3,"k":4,"w":1,"e":2,"m":10,"req":""},{"id":284,"c":"家計","s":"ポイント・特典","n":"ふるさと納税を選定・手続きする","f":"年1","t":"判断型","j":4,"k":4,"w":1,"e":2,"m":120,"req":""},{"id":285,"c":"関係・メンタル","s":"家族観察","n":"パートナーの機嫌を察する","f":"毎日","t":"感情型","j":4,"k":3,"w":3,"e":4,"m":5,"req":"partner"},{"id":286,"c":"関係・メンタル","s":"家族観察","n":"家族の体調変化に気づく","f":"毎日","t":"感情型","j":4,"k":4,"w":3,"e":4,"m":5,"req":""},{"id":287,"c":"関係・メンタル","s":"家族観察","n":"誰が何を負担しているか把握する","f":"週1","t":"感情型","j":5,"k":4,"w":1,"e":4,"m":10,"req":""},{"id":288,"c":"関係・メンタル","s":"家族観察","n":"家族全員の予定を頭に入れておく","f":"毎日","t":"情報型","j":4,"k":5,"w":3,"e":3,"m":5,"req":""},{"id":289,"c":"関係・メンタル","s":"家族観察","n":"家庭内の不満の兆候に気づく","f":"週1","t":"感情型","j":5,"k":4,"w":2,"e":5,"m":10,"req":""},{"id":290,"c":"関係・メンタル","s":"コミュニケーション","n":"家事の分担を交渉する","f":"月1","t":"感情型","j":5,"k":3,"w":2,"e":5,"m":30,"req":"partner"},{"id":291,"c":"関係・メンタル","s":"コミュニケーション","n":"家族の予定をすり合わせる","f":"週1","t":"判断型","j":4,"k":4,"w":2,"e":3,"m":15,"req":""},{"id":292,"c":"関係・メンタル","s":"コミュニケーション","n":"家族会議を開く","f":"月1","t":"感情型","j":4,"k":3,"w":1,"e":3,"m":45,"req":"partner"},{"id":293,"c":"関係・メンタル","s":"コミュニケーション","n":"感謝を言葉にする","f":"毎日","t":"感情型","j":2,"k":2,"w":2,"e":1,"m":3,"req":""},{"id":294,"c":"関係・メンタル","s":"コミュニケーション","n":"言いにくいことを伝える","f":"月1","t":"感情型","j":5,"k":3,"w":2,"e":5,"m":20,"req":""},{"id":295,"c":"関係・メンタル","s":"コミュニケーション","n":"子どもの前での言い方を選ぶ","f":"毎日","t":"感情型","j":4,"k":2,"w":4,"e":4,"m":5,"req":""},{"id":296,"c":"関係・メンタル","s":"贈答・儀礼","n":"お中元・お歳暮を手配する","f":"年1","t":"判断型","j":4,"k":4,"w":1,"e":2,"m":60,"req":""},{"id":297,"c":"関係・メンタル","s":"贈答・儀礼","n":"年賀状を準備する","f":"年1","t":"情報型","j":4,"k":4,"w":1,"e":3,"m":180,"req":""},{"id":298,"c":"関係・メンタル","s":"贈答・儀礼","n":"お礼状・お返しを送る","f":"随時","t":"判断型","j":4,"k":4,"w":1,"e":3,"m":45,"req":""},{"id":299,"c":"関係・メンタル","s":"贈答・儀礼","n":"親戚の誕生日・記念日を覚えておく","f":"月1","t":"情報型","j":3,"k":5,"w":1,"e":2,"m":5,"req":""},{"id":300,"c":"関係・メンタル","s":"贈答・儀礼","n":"冠婚葬祭に対応する","f":"年1","t":"判断型","j":5,"k":4,"w":1,"e":4,"m":180,"req":""},{"id":301,"c":"関係・メンタル","s":"贈答・儀礼","n":"手土産を選ぶ","f":"月1","t":"判断型","j":4,"k":3,"w":1,"e":2,"m":30,"req":""},{"id":302,"c":"関係・メンタル","s":"対外関係","n":"近所付き合い・挨拶をする","f":"週1","t":"感情型","j":3,"k":3,"w":2,"e":3,"m":10,"req":""},{"id":303,"c":"関係・メンタル","s":"対外関係","n":"町内会・自治会の当番をこなす","f":"年1","t":"感情型","j":3,"k":4,"w":1,"e":3,"m":120,"req":""},{"id":304,"c":"関係・メンタル","s":"対外関係","n":"回覧板を回す","f":"月1","t":"身体型","j":1,"k":4,"w":2,"e":1,"m":5,"req":""},{"id":305,"c":"関係・メンタル","s":"対外関係","n":"宅配・再配達を管理する","f":"週数回","t":"情報型","j":3,"k":4,"w":3,"e":2,"m":10,"req":""},{"id":306,"c":"関係・メンタル","s":"対外関係","n":"実家・義実家と連絡を取る","f":"週1","t":"感情型","j":4,"k":4,"w":2,"e":4,"m":20,"req":"partner"},{"id":307,"c":"関係・メンタル","s":"対外関係","n":"親の介護・見守りを調整する","f":"月1","t":"感情型","j":5,"k":4,"w":2,"e":5,"m":60,"req":""},{"id":308,"c":"関係・メンタル","s":"自己ケア","n":"自分の休憩時間を確保する","f":"毎日","t":"感情型","j":4,"k":2,"w":5,"e":4,"m":5,"req":""},{"id":309,"c":"関係・メンタル","s":"自己ケア","n":"自分の通院・健診に行く","f":"年1","t":"情報型","j":3,"k":5,"w":1,"e":3,"m":120,"req":""},{"id":310,"c":"関係・メンタル","s":"自己ケア","n":"自分の服・美容を管理する","f":"月1","t":"判断型","j":3,"k":3,"w":1,"e":2,"m":60,"req":""},{"id":311,"c":"関係・メンタル","s":"自己ケア","n":"「後でやること」を頭の中に保持し続ける","f":"毎日","t":"情報型","j":5,"k":5,"w":5,"e":5,"m":5,"req":""},{"id":312,"c":"関係・メンタル","s":"自己ケア","n":"やることの優先順位を組み替える","f":"毎日","t":"判断型","j":5,"k":4,"w":5,"e":4,"m":15,"req":""}];
+const FREQ  = {"毎日": 30.4, "週数回": 13.0, "週1": 4.3, "隔週": 2.2, "月1": 1.0, "季節": 0.33, "年1": 0.083, "随時": 2.0};
+const TYPE  = {"情報型": {"base": 0.75, "add": 0.1}, "判断型": {"base": 0.45, "add": 0.05}, "身体型": {"base": 0.1, "add": 0.0}, "感情型": {"base": 0.15, "add": 0.0}};
+const BASE_MIX = [0.453473, 0.26998, 0.209917, 0.902978];   // 312項目そのものの構成比（タイプ判定の固定基準）
+const TCLS = {'情報型':'t-info','判断型':'t-judge','身体型':'t-body','感情型':'t-emo'};
+const TYPE_NOTE = {
+  '情報型':'覚える・調べる・記録する。手は空いているのに頭が塞がる。',
+  '判断型':'状況を読んで決める。文脈と価値観が要る。',
+  '身体型':'実際に手足を動かす。外から見えるのはここだけ。',
+  '感情型':'察する・なだめる・伝える。人に渡すことも、自動化もできない。'
+};
+
+const S = {house:null, kids:[], work:null, guess:{}, a:{}};
+const $ = s=>document.querySelector(s);
+const $$ = s=>[...document.querySelectorAll(s)];
+const SHARE = {me:1, half:.5, pt:0, ext:null, na:null};
+const LBL = {me:'自分', half:'半々', pt:'相手', ext:'外部', na:'なし'};
+let POOL = [], OPTS = [], builtSig = null;
+const KEY='nkd.v1', HKEY='nkd.hist.v1';
+
+/* ---------- 保存（この端末のブラウザ内のみ） ---------- */
+let curStep = 0;
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify({ts:Date.now(), step:curStep, S})); }catch(e){} }
+function loadSaved(){ try{ const j=JSON.parse(localStorage.getItem(KEY)||'null'); if(j&&j.S&&j.S.house) return j; }catch(e){} return null; }
+function wipe(){ try{ localStorage.removeItem(KEY); localStorage.removeItem(HKEY); }catch(e){} }
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast._h); toast._h=setTimeout(()=>t.classList.remove('on'),1800); }
+const fmtDate = ts => { const d=new Date(ts); return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`; };
+const today = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+
+/* ---------- STEP 1 ---------- */
+const HOUSE = [['solo','一人暮らし'],['duo','大人2人'],['fam','大人2人＋子ども'],['single','大人1人＋子ども'],['multi','三世代同居']];
+const KIDS  = [['pre','未就学'],['ele','小学生'],['teen','中高生']];
+const WORK  = [['ft','フルタイム'],['pt','パート・時短'],['self','自営・フリー'],['home','家庭に専念']];
+function chips(el,opts,key,multi){
+  el.innerHTML = opts.map(([v,l])=>`<button type="button" class="chip" data-v="${v}" aria-pressed="false">${l}</button>`).join('');
+  el.onclick = e=>{
+    const b = e.target.closest('.chip'); if(!b) return;
+    if(multi){
+      const on = b.getAttribute('aria-pressed')==='true';
+      b.setAttribute('aria-pressed', on?'false':'true');
+      S[key] = [...el.querySelectorAll('[aria-pressed="true"]')].map(x=>x.dataset.v);
+    }else{
+      [...el.children].forEach(x=>x.setAttribute('aria-pressed','false'));
+      b.setAttribute('aria-pressed','true'); S[key]=b.dataset.v;
+    }
+    if(key==='house') syncKids();
+    save();
+  };
+}
+function syncKids(){
+  const adultsOnly = S.house==='solo' || S.house==='duo';
+  $('#wrap-kids').style.display = adultsOnly ? 'none' : 'block';
+  if(adultsOnly){ S.kids = []; $$('#q-kids .chip').forEach(x=>x.setAttribute('aria-pressed','false')); }
+}
+function syncChips(){                               // S → 画面（再開時）
+  $$('#q-house .chip').forEach(x=>x.setAttribute('aria-pressed', x.dataset.v===S.house?'true':'false'));
+  $$('#q-kids .chip').forEach(x=>x.setAttribute('aria-pressed', S.kids.includes(x.dataset.v)?'true':'false'));
+  $$('#q-work .chip').forEach(x=>x.setAttribute('aria-pressed', x.dataset.v===S.work?'true':'false'));
+  $('#g-count').value = S.guess.count||''; $('#g-share').value = S.guess.share||''; $('#g-hours').value = S.guess.hours||'';
+  syncKids();
+}
+chips($('#q-house'),HOUSE,'house',false);
+chips($('#q-kids'),KIDS,'kids',true);
+chips($('#q-work'),WORK,'work',false);
+
+/* STEP 2 のクイック入力 */
+$$('.chips.quick').forEach(box=>{
+  box.addEventListener('click',e=>{
+    const b=e.target.closest('.chip'); if(!b) return;
+    const inp=$('#'+box.dataset.for); inp.value=b.dataset.val;
+    [...box.children].forEach(x=>x.setAttribute('aria-pressed', x===b?'true':'false'));
+  });
+});
+$$('#s2 input').forEach(inp=>inp.addEventListener('input',()=>{
+  const box=document.querySelector(`.chips.quick[data-for="${inp.id}"]`);
+  [...box.children].forEach(x=>x.setAttribute('aria-pressed', x.dataset.val===inp.value?'true':'false'));
+}));
+
+const hasPartner = ()=> S.house!=='solo' && S.house!=='single';
+function applicable(it){
+  if(it.req==='kid'   && !S.kids.length) return false;
+  if(it.req==='pre'   && !S.kids.includes('pre')) return false;
+  if(it.req==='school'&& !(S.kids.includes('ele')||S.kids.includes('teen'))) return false;
+  if(it.req==='teen'  && !S.kids.includes('teen')) return false;
+  if(it.req==='partner' && !hasPartner()) return false;
+  return true;
+}
+const sig = ()=> [S.house, [...S.kids].sort().join(',')].join('|');
+
+/* ---------- 遷移 ---------- */
+let maxStep = 0;
+function go(n){
+  if(n>=3 && sig()!==builtSig) build();
+  curStep = n; maxStep = Math.max(maxStep, n);
+  $$('.step').forEach(s=>s.classList.remove('on'));
+  $('#s'+n).classList.add('on');
+  $('#rail').hidden = (n===0);
+  $$('#rail button').forEach(b=>{
+    const k=+b.dataset.go;
+    b.setAttribute('aria-current', k===n?'true':'false');
+    b.disabled = k>maxStep;
+    b.classList.toggle('done', k<n);
+  });
+  window.scrollTo({top:0,behavior:'instant'});
+  if(n>0) save();
+}
+document.body.addEventListener('click',e=>{
+  const home=e.target.closest('[data-home]');
+  if(home){ e.preventDefault(); go(0); return; }
+  const b=e.target.closest('[data-next]'); if(!b) return;
+  const n=+b.dataset.next;
+  if(n>=2 && !S.house){ toast('世帯の形を選んでください'); go(1); return; }
+  if(n===3){
+    S.guess.count=+$('#g-count').value||0;
+    S.guess.share=+$('#g-share').value||0;
+    S.guess.hours=+$('#g-hours').value||0;
+  }
+  go(n);
+});
+$('#rail').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b||b.disabled) return;
+  const n=+b.dataset.go;
+  if(n===4){ if(!$('#report').innerHTML){ render(compute()); } }
+  go(n);
+});
+
+/* ---------- STEP 3 描画 ---------- */
+function build(){
+  POOL = ITEMS.filter(applicable);
+  builtSig = sig();
+  OPTS = hasPartner() ? ['me','half','pt','ext','na'] : ['me','ext','na'];
+  const keep = {};                                   // 生き残った項目の回答は引き継ぐ
+  POOL.forEach(i=>{ if(OPTS.includes(S.a[i.id])) keep[i.id]=S.a[i.id]; });
+  S.a = keep;
+  const segHtml = (attrs)=> `<span class="seg" ${attrs}>${OPTS.map(o=>`<button type="button" class="${o}" data-o="${o}" aria-pressed="false">${LBL[o]}</button>`).join('')}</span>`;
+  const cats = [...new Set(POOL.map(i=>i.c))];
+  $('#cats').innerHTML = cats.map((c,ci)=>{
+    const list = POOL.filter(i=>i.c===c);
+    const subs = [...new Set(list.map(i=>i.s))];
+    return `<details class="cat" data-c="${c}" ${ci===0?'open':''}>
+      <summary><span class="cn">${c}</span><span class="st" data-st="${c}">0 / ${list.length}</span></summary>
+      <div class="catbody">${subs.map(s=>{
+        const rows = list.filter(i=>i.s===s), key=c+'||'+s;
+        return `<div class="sub" data-sub="${key}">
+          <div class="subhead"><span class="sn">${s}<small>${rows.length}項目</small></span><span class="mix" data-mix="${key}">未回答</span></div>
+          <div class="seg bulk" data-bulk="${key}">${OPTS.map(o=>`<button type="button" class="${o}" data-o="${o}" aria-pressed="false">${LBL[o]}</button>`).join('')}</div>
+          <details class="rows"><summary>${rows.length}項目を見て、違うところを直す</summary><div class="rw">${rows.map(i=>
+            `<div class="row" data-row="${i.id}"><span class="nm">${i.n}<em class="tag ${TCLS[i.t]}">${i.t.replace('型','')}</em></span>${segHtml(`data-id="${i.id}"`)}</div>`
+          ).join('')}</div></details>
+        </div>`;
+      }).join('')}</div></details>`;
+  }).join('');
+  $('#ptot').textContent = POOL.length;
+  Object.keys(S.a).forEach(id=>paint(id, S.a[id]));
+  $$('.sub').forEach(el=>refreshSub(el.dataset.sub));
+  prog();
+}
+$('#cats').addEventListener('click',e=>{
+  const bb = e.target.closest('.bulk button');
+  if(bb){
+    const key=bb.closest('.bulk').dataset.bulk, [c,s]=key.split('||');
+    POOL.filter(i=>i.c===c&&i.s===s).forEach(i=>set(i.id,bb.dataset.o));
+    refreshSub(key); prog(); return;
+  }
+  const b = e.target.closest('.row .seg button'); if(!b) return;
+  set(b.closest('.seg').dataset.id, b.dataset.o);
+  refreshSub(b.closest('.sub').dataset.sub); prog();
+});
+function set(id,o){ S.a[id]=o; paint(id,o); }
+function paint(id,o){
+  const seg=document.querySelector(`.seg[data-id="${id}"]`); if(!seg) return;
+  [...seg.children].forEach(x=>x.setAttribute('aria-pressed', x.dataset.o===o?'true':'false'));
+}
+function refreshSub(key){
+  const [c,s]=key.split('||'); const rows=POOL.filter(i=>i.c===c&&i.s===s);
+  const cnt={}; let ans=0;
+  rows.forEach(i=>{ const o=S.a[i.id]; if(o){ ans++; cnt[o]=(cnt[o]||0)+1; } });
+  const keys=Object.keys(cnt), uniform = ans===rows.length && keys.length===1;
+  const bulk=document.querySelector(`.bulk[data-bulk="${key}"]`), mix=document.querySelector(`.mix[data-mix="${key}"]`);
+  if(!bulk||!mix) return;
+  [...bulk.children].forEach(x=>x.setAttribute('aria-pressed', (uniform && x.dataset.o===keys[0])?'true':'false'));
+  mix.textContent = ans===0 ? '未回答' : uniform ? `全部「${LBL[keys[0]]}」` : keys.map(k=>`${LBL[k]}${cnt[k]}`).join('・') + (ans<rows.length?`・未回答${rows.length-ans}`:'');
+  mix.classList.toggle('mixed', !uniform && ans>0);
+}
+$('#fill-half').onclick = ()=>{
+  const d = hasPartner()?'half':'me';
+  POOL.forEach(i=>set(i.id,d)); $$('.sub').forEach(el=>refreshSub(el.dataset.sub)); prog();
+  toast(hasPartner()?'全項目を「半々」にしました。違うところを直してください':'全項目を「自分」にしました。違うところを直してください');
+};
+$('#next-blank').onclick = ()=>{
+  const it = POOL.find(i=>!S.a[i.id]);
+  if(!it){ toast('すべて回答済みです'); return; }
+  const row=document.querySelector(`.row[data-row="${it.id}"]`);
+  row.closest('details.cat').open=true; row.closest('details.rows').open=true;
+  row.scrollIntoView({block:'center',behavior:'smooth'});
+  row.classList.add('hl'); setTimeout(()=>row.classList.remove('hl'),1800);
+};
+$('#toggle-rows').onclick = function(){
+  const on=document.body.classList.toggle('showrows');
+  this.classList.toggle('on',on); this.textContent = on?'項目をたたむ':'項目を全部見る';
+  if(on) $$('details.cat').forEach(d=>d.open=true);
+};
+$('#clear-all').onclick = ()=>{
+  if(!confirm('この工程の回答をすべて消します。よろしいですか？')) return;
+  S.a={}; $$('.seg button').forEach(b=>b.setAttribute('aria-pressed','false'));
+  $$('.sub').forEach(el=>refreshSub(el.dataset.sub)); prog();
+};
+function prog(){
+  const n = POOL.filter(i=>S.a[i.id]).length, need=Math.min(30,POOL.length);
+  $('#pnum').textContent=n;
+  $('#pbar').style.width = (n/POOL.length*100)+'%';
+  $('#pleft').textContent = n<POOL.length ? `残り ${POOL.length-n}` : '入力完了';
+  $('#calc').disabled = n < need;
+  $('#calc-note').textContent = n<need ? `結果を見るには、あと ${need-n} 項目の回答が必要です` : (n<POOL.length ? `未回答の ${POOL.length-n} 項目は計算に含めません（あとから追加できます）` : '');
+  [...new Set(POOL.map(i=>i.c))].forEach(c=>{
+    const l = POOL.filter(i=>i.c===c), d = l.filter(i=>S.a[i.id]).length;
+    const el = document.querySelector(`[data-st="${c}"]`); if(!el) return;
+    el.textContent = `${d} / ${l.length}`;
+    el.classList.toggle('done', d===l.length);
+  });
+  save();
+}
+
+/* ---------- 計算 ---------- */
+function compute(){
+  const R = {
+    n:0, nAns:0, nBlank:0, time:{me:0,pt:0,ext:0,all:0}, cog:{me:0,pt:0,ext:0,all:0},
+    byType:{}, byCat:{}, axes:{j:0,k:0,w:0,e:0}, items:[]
+  };
+  ['情報型','判断型','身体型','感情型'].forEach(t=>R.byType[t]={me:0,all:0,time:0,timeMe:0,n:0});
+  POOL.forEach(i=>{
+    const o = S.a[i.id]; R.n++;
+    if(!o){ R.nBlank++; return; }
+    if(o==='na') return;
+    R.nAns++;
+    const f = FREQ[i.f], t = i.m*f/60, load = i.j+i.k+i.w+i.e, cg = load*f;
+    R.time.all+=t; R.cog.all+=cg;
+    R.byType[i.t].all+=cg; R.byType[i.t].n++; R.byType[i.t].time+=t;
+    R.byCat[i.c] = R.byCat[i.c]||{me:0,all:0,time:0,timeMe:0,n:0};
+    R.byCat[i.c].all+=cg; R.byCat[i.c].time+=t; R.byCat[i.c].n++;
+    if(o==='ext'){ R.time.ext+=t; R.cog.ext+=cg; return; }
+    const sh = SHARE[o];
+    R.time.me+=t*sh; R.time.pt+=t*(1-sh);
+    R.cog.me+=cg*sh; R.cog.pt+=cg*(1-sh);
+    R.byType[i.t].me+=cg*sh; R.byType[i.t].timeMe+=t*sh;
+    R.byCat[i.c].me+=cg*sh; R.byCat[i.c].timeMe+=t*sh;
+    R.axes.j+=i.j*f*sh; R.axes.k+=i.k*f*sh; R.axes.w+=i.w*f*sh; R.axes.e+=i.e*f*sh;
+    if(sh>0) R.items.push({...i, sh, cogMe:cg*sh, timeMe:t*sh, ai:aiRate(i)});
+  });
+  return R;
+}
+function aiRate(i){ const T = TYPE[i.t]; return Math.min(.95, T.base + (i.k>=4 ? T.add : 0)); }
+const pct = (a,b)=> b>0 ? Math.round(a/b*100) : 0;
+const h1  = v=> (Math.round(v*10)/10).toLocaleString('ja-JP');
+
+/* ---------- 名もなき家事スコア ---------- */
+// 自分が担っている月間認知負荷ptを、100点満点の指数に変換する。基準は「その世帯で発生する全負荷を1人で抱えた場合」＝100点。
+function score(R){ return R.cog.all>0 ? Math.round(R.cog.me/R.cog.all*1000)/10 : 0; }
+
+// 参照分布：起こりうる分担パターンを等確率で振った場合に、スコアがどう散らばるか（実在データではない）。
+// θ（その人の全体的な関与度）を0〜1から一様に引き、各項目を θ²で「自分」、2θ(1-θ)で「半々」、(1-θ)²で「相手」に割り当てる。
+// 型ごとの偏りだけ加えてある（身体型は分担されやすく、感情型は偏りやすい）。乱数は固定シードなので、同じ入力なら同じ結果になる。
+function rng(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function distribution(){
+  const N=500, out=[], rand=rng(20260902);
+  const bias={'情報型':.06,'判断型':.04,'身体型':-.09,'感情型':.10};
+  let total=0;
+  const pool=POOL.map(i=>{const cg=(i.j+i.k+i.w+i.e)*FREQ[i.f]; total+=cg; return {t:i.t,cg};});
+  if(total<=0) return [];
+  for(let n=0;n<N;n++){
+    const th=rand(); let me=0;
+    pool.forEach(p=>{
+      const q=Math.max(.02,Math.min(.98, th+bias[p.t]));
+      const r=rand(), a=q*q, b=a+2*q*(1-q);
+      me += p.cg * (r<a ? 1 : (r<b ? .5 : 0));
+    });
+    out.push(me/total*100);
+  }
+  return out.sort((a,b)=>a-b);
+}
+function percentile(dist,v){ let lo=0; while(lo<dist.length && dist[lo]<v) lo++; return Math.round(lo/dist.length*100); }
+const BAND=[[85,'ほぼ一人で回している'],[70,'大半を担っている'],[55,'過半を担っている'],[45,'ほぼ半々'],[30,'一部を担っている'],[0,'限定的']];
+const band=s=>BAND.find(b=>s>=b[0])[1];
+
+/* ---------- 16タイプ ---------- */
+const AXES=[
+  {id:0,a:'J',b:'K',al:'判断',bl:'記憶',an:'決めることが中心',bn:'覚えていることが中心'},
+  {id:1,a:'W',b:'S',al:'分断',bl:'連続',an:'中断されながら',bn:'まとまった時間で'},
+  {id:2,a:'E',b:'M',al:'対人',bl:'対物',an:'人に向かう',bn:'物と仕組みに向かう'},
+  {id:3,a:'C',b:'B',al:'毎日',bl:'まとめ',an:'毎日くり返す',bn:'たまに来る大物'}
+];
+const NAMES={
+  JWEC:'家庭の交通整理係', JWEB:'火消し役',       JSEC:'家族会議の議長',   JSEB:'節目の決裁者',
+  JWMC:'台所の管制塔',     JWMB:'週末の総司令',   JSMC:'段取りの設計者',   JSMB:'一括処理の職人',
+  KWEC:'気配りのセンサー', KWEB:'記念日の番人',   KSEC:'家族の記録係',     KSEB:'思い出の編集者',
+  KWMC:'在庫と期限の見張り番', KWMB:'補充の職人', KSMC:'家のシステム管理者', KSMB:'季節の整備士'
+};
+const DESC={
+  JWEC:'人まわりの判断を、毎日、中断されながらその場で下しています。',
+  JWEB:'人がらみの大きめの判断を、割り込まれながら、たまに集中して処理しています。',
+  JSEC:'人に関わることを、毎日まとまった時間をとって決めています。',
+  JSEB:'行事や進路など、たまに来る人まわりの大きな決定を、腰を据えて下しています。',
+  JWMC:'毎日の物と段取りを、割り込まれながら判断して回しています。',
+  JWMB:'物まわりの大物を、中断されつつ指揮して片付けています。',
+  JSMC:'毎日の物と仕組みを、まとまった時間で組み立てています。',
+  JSMB:'たまに来る大物を、腰を据えて一気に判断し、片付けています。',
+  KWEC:'人の様子を毎日覚えて察し、細切れに対応しています。',
+  KWEB:'人に関わる節目を忘れずに覚えていて、その都度、割り込まれながら動いています。',
+  KSEC:'家族の情報を、毎日まとまった時間で記録・管理しています。',
+  KSEB:'行事や記録を、たまにまとめて、腰を据えて整えています。',
+  KWMC:'物の在庫と期限を、毎日細切れに覚えて追っています。',
+  KWMB:'まとめ買いや補充など、たまに来る物まわりを覚えておき、割り込まれながら回しています。',
+  KSMC:'家の仕組みと情報を、毎日まとまった時間で管理しています。',
+  KSMB:'季節ごとの大きな手入れを覚えておき、時期にまとめて処理しています。',
+  '————':'特定の何かに寄っているのではなく、全部を満遍なく背負っています。'
+};
+function ratios(list, wf){
+  let j=0,k=0,w=0,e=0,hi=0,all=0;
+  list.forEach(i=>{
+    const f=FREQ[i.f], s=wf(i); if(!s) return;
+    j+=i.j*f*s; k+=i.k*f*s; w+=i.w*f*s; e+=i.e*f*s;
+    const cg=(i.j+i.k+i.w+i.e)*f*s; all+=cg; if(f>=13) hi+=cg;
+  });
+  const tt=j+k+w+e||1;
+  return [ j/((j+k)||1), w/tt, e/tt, hi/(all||1) ];
+}
+// 基準は「家事312項目そのものの構成比」に固定（BASE_MIX）。世帯の形が違う人どうしでも型を比べられる。
+const WEAK = 0.02;                                   // 相対差2%未満は「どちらでもない」
+function typing(R){
+  const mine = ratios(POOL, i=>{const o=S.a[i.id]; return (o&&o!=='na'&&o!=='ext')?SHARE[o]:0;});
+  const ax = AXES.map((A,n)=>{
+    const base=BASE_MIX[n], d=mine[n]-base, rel=d/(base||.2);
+    return {...A, pole:d>=0?A.a:A.b, val:mine[n], base, d, rel, weak:Math.abs(rel)<WEAK, pos:Math.max(4,Math.min(96, 50+rel*400))};
+  });
+  const allWeak = ax.every(a=>a.weak);
+  const code = allWeak ? '————' : ax.map(a=>a.pole).join('');
+  return {code, name: allWeak ? '全方位型' : (NAMES[code]||'—'), ax, allWeak, nWeak: ax.filter(a=>a.weak).length};
+}
+const TIPS={
+ J:['決める回数を減らす','負担の中心は作業ではなく決定です。決める回数そのものを減らすと効きます。曜日ごとに献立の枠を固定する、買う店を1つに絞る、判断基準を1枚に書いて家族に渡す。「相談して決める」を「基準を渡して任せる」に変えると、判断が手元に戻ってきません。'],
+ K:['頭の外に出す','負担の中心は覚えていることです。あなたが忘れなければ回る、という状態がいちばんきつい。期限のあるものは全部カレンダーとリマインダーに移し、「思い出す」を「通知が来る」に置き換えてください。共有カレンダーにすれば、覚える人を増やせます。'],
+ W:['中断されない時間をつくる','中断されながらやる仕事に偏っています。1回あたりを速くするより、割り込みの入らない時間帯を1日1回つくるほうが効きます。中断される前提で、途中から再開できるチェックリストを置いておくと、やり直しが減ります。'],
+ S:['時間の塊を守る','まとまった時間を必要とする仕事に偏っています。細切れに崩されると全部倒れるので、「この30分は声をかけない」を家族と先に合意してください。守るべきは総量ではなく、連続した時間です。'],
+ E:['ここは減らせないと認める','感情労働の比率が高い状態です。察する・なだめる・伝えるは、外注も自動化もできません。だから削るのはここではなく、他です。感情型以外を1つ手放して、その分をこちらに回してください。消耗している自覚を先に共有するのも仕事のうちです。'],
+ M:['自動化がいちばん効く','物と仕組みに向かう仕事が中心です。家電・定期購入・自動引落の効果が最も大きい配置にいます。下の「手放す順番」の上位を、順に仕組みに置き換えてください。'],
+ C:['頻度そのものを疑う','毎日発生するものに負担が集中しています。1回を短くするより、頻度を落とすほうが効きます。毎日を隔日にできないか、1回にまとめられないか、そもそもやめても困らないかを、上位の項目から順に検討してください。'],
+ B:['先にカレンダーへ置く','低頻度だけれど重い仕事に負担が集中しています。忘れた頃に来て、来たときに全部持っていかれるタイプです。年間の一覧を先に作り、前倒しで小さく分割しておくと、当日の山が下がります。']
+};
+function topItem(R,key){
+  const m={J:'j',K:'k',W:'w',E:'e'}[key]; if(!m) return null;
+  return R.items.slice().sort((a,b)=>(b[m]*FREQ[b.f]*b.sh)-(a[m]*FREQ[a.f]*a.sh))[0];
+}
+function distGraph(dist,you){
+  const bins=new Array(50).fill(0);
+  dist.forEach(v=>{ bins[Math.max(0,Math.min(49,Math.floor(v/2)))]++; });
+  const mx=Math.max(...bins)||1, yi=Math.max(0,Math.min(49,Math.floor(you/2)));
+  return `<div class="dist">${bins.map((b,i)=>`<i class="bin ${i===yi?'on':''}" style="left:${i*2}%;height:${Math.round(b/mx*40)}px"></i>`).join('')}
+    <span class="you" style="left:${Math.min(99,you)}%"></span>
+    <span class="tg" style="left:${Math.max(8,Math.min(92,you))}%">あなた ${you.toFixed(1)}</span>
+  </div><div class="distx"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>`;
+}
+/* 100マス */
+function masu(me,pt,ext){
+  const a=Math.round(me), b=Math.round(pt), c=Math.round(ext);
+  let out='',k=0;
+  const push=(cls,n)=>{for(let x=0;x<n;x++,k++) out+=`<i class="${cls}" style="animation-delay:${k*7}ms"></i>`;};
+  push('me',a); push('pt',b); push('ext',c); push('',Math.max(0,100-a-b-c));
+  return `<div class="hyakumasu">${out}</div>`;
+}
+const legend = ()=>`<div class="legend"><span><em class="me"></em>自分</span><span><em class="pt"></em>相手</span><span><em class="ext"></em>外部（家電・外注・自動化）</span><span><em class="none"></em>未回答・なし</span></div>`;
+
+/* ---------- 履歴（前回との比較） ---------- */
+function pushHistory(entry){
+  try{
+    let h=JSON.parse(localStorage.getItem(HKEY)||'[]');
+    if(h.length && h[h.length-1].date===entry.date) h[h.length-1]=entry; else h.push(entry);
+    localStorage.setItem(HKEY, JSON.stringify(h.slice(-12)));
+  }catch(e){}
+}
+function prevHistory(date){
+  try{ const h=JSON.parse(localStorage.getItem(HKEY)||'[]').filter(x=>x.date!==date); return h[h.length-1]||null; }catch(e){ return null; }
+}
+const delta=(a,b,unit='')=>{ const d=Math.round((b-a)*10)/10; if(d===0) return `<span>±0${unit}</span>`; return `<span class="${d>0?'up':'dn'}">${d>0?'+':''}${d}${unit}</span>`; };
+
+/* ---------- レポート ---------- */
+$('#calc').onclick = ()=>{ render(compute()); go(4); };
+$('#print2').onclick = ()=>window.print();
+window.addEventListener('beforeprint',()=>$$('details').forEach(d=>{ d.dataset.was=d.open?'1':''; d.open=true; }));
+window.addEventListener('afterprint',()=>$$('details').forEach(d=>{ d.open=!!d.dataset.was; }));
+
+function render(R){
+  const cogMe = pct(R.cog.me,R.cog.all), timeMe = pct(R.time.me,R.time.all);
+  const SC = score(R), DIST = distribution(), PCT = percentile(DIST,SC), TY = typing(R);
+  const nMine = R.items.length;
+  const body = pct(R.byType['身体型'].me, R.byType['身体型'].all);
+  const invisAll = R.byType['情報型'].all + R.byType['感情型'].all + R.byType['判断型'].all;
+  const invisMe  = R.byType['情報型'].me  + R.byType['感情型'].me  + R.byType['判断型'].me;
+  const invis = pct(invisMe, invisAll);
+  const gapV = invis - body;
+  const gapCount = R.nAns - S.guess.count;
+  const gapShare = cogMe - S.guess.share;
+  const gapHours = Math.round(R.time.me) - S.guess.hours;
+  const cats = Object.keys(R.byCat);
+  const types = ['情報型','判断型','身体型','感情型'];
+
+  /* 手放し候補 */
+  const drop = R.items.filter(i=>i.t!=='感情型').map(i=>({...i, save:i.cogMe*i.ai})).sort((a,b)=>b.save-a.save).slice(0,10);
+  const keep = R.items.filter(i=>i.t==='感情型').sort((a,b)=>b.cogMe-a.cogMe).slice(0,5);
+  const lever = i => i.t==='情報型' ? 'AI・仕組み化' : (i.t==='身体型' ? '家電・外注' : 'AIに下書きさせる');
+  const first = drop[0];
+
+  /* 前回との比較 */
+  const dt = today();
+  const prev = prevHistory(dt);
+  const entry = {date:dt, score:SC, code:TY.code, name:TY.name, timeMe, cogMe, gapV, nMine};
+  pushHistory(entry);
+
+  const diffLine = cogMe-timeMe>=8
+    ? `時間の分担は ${timeMe}%、頭の分担は ${cogMe}%。作業は渡せていても、「決める・覚えておく」部分が渡っていません。`
+    : timeMe-cogMe>=8
+    ? `時間の分担は ${timeMe}%、頭の分担は ${cogMe}%。手を動かす側に寄っていて、決定権は相手側にあります。`
+    : `時間 ${timeMe}%、頭 ${cogMe}%。分担の実態と体感がほぼ一致しています。`;
+
+  $('#report').innerHTML = `
+  <h2 class="sec"><span class="n">STEP 4</span>あなたの、答え合わせ。</h2>
+  <p class="sec-note">まず要約、そのあと詳細です。数字は「どちらが正しいか」ではなく「何が見えていなかったか」を見るためのものです。</p>
+
+  <div class="summary">
+    <div class="top">
+      <div>
+        <span class="lb">名もなき家事スコア</span>
+        <div class="big">${SC.toFixed(1)}<small>/ 100</small></div>
+        <div class="band">${band(SC)}</div>
+        <p class="desc">あなたの家で発生している名もなき家事の負荷のうち、${SC.toFixed(1)}% をあなたが担っています。100点は「ひとりで全部抱えている」状態です。</p>
+      </div>
+      <div>
+        <span class="lb">担い方のタイプ</span>
+        <div class="typecode">${TY.code}</div>
+        <div class="typename">${TY.name}</div>
+        <p class="desc">${DESC[TY.code]||''}</p>
+      </div>
+    </div>
+    <div class="three">
+      <div><span class="lb">時間の分担</span><b>${timeMe}<small>%</small></b></div>
+      <div><span class="lb">頭の分担</span><b>${cogMe}<small>%</small></b></div>
+      <div><span class="lb">差</span><b>${cogMe-timeMe>0?'+':''}${cogMe-timeMe}<small>pt</small></b></div>
+    </div>
+    <div class="first">
+      <span class="lb">読み方</span>${diffLine}
+      ${first?`<div style="margin-top:10px"><span class="lb">今週、まず1つ手放すなら</span><b>${first.n}</b><span class="lv">${lever(first)}</span></div>`:''}
+    </div>
+    ${prev?`<div class="prev"><span class="lb">前回（${prev.date.replace(/-/g,'/')}）との比較</span>
+      スコア <b>${prev.score.toFixed(1)} → ${SC.toFixed(1)}</b>（${delta(prev.score,SC)}）　頭の分担 <b>${prev.cogMe}% → ${cogMe}%</b>（${delta(prev.cogMe,cogMe,'pt')}）　時間の分担 <b>${prev.timeMe}% → ${timeMe}%</b>（${delta(prev.timeMe,timeMe,'pt')}）
+      ${prev.code!==TY.code?`　タイプ <b>${prev.name} → ${TY.name}</b>`:''}
+    </div>`:''}
+    <div class="acts noprint">
+      <button class="btn sm" id="copy-memo">話し合い用メモをコピー</button>
+      <button class="btn sm ghost" id="print1">印刷 / PDFで保存</button>
+    </div>
+  </div>
+  ${R.nBlank?`<div class="warn">未回答の ${R.nBlank} 項目は計算に含めていません。「分担を直す」から追加すると、結果が変わります。</div>`:''}
+
+  <nav class="jump noprint">
+    <a href="#rA">タイプ</a><a href="#rB">提案</a><a href="#rC">内訳</a><a href="#rD">見積りとのずれ</a><a href="#rE">時間と頭</a><a href="#rF">4つの型</a><a href="#rG">マトリクス</a><a href="#rH">手放す順番</a><a href="#rI">手放せない項目</a><a href="#rJ">シミュレーション</a><a href="#rK">メモ</a><a href="#rL">前提</a>
+  </nav>
+
+  ${hasPartner() ? `
+  <h3 class="grp" id="rS"><span class="a">参考</span>起こりうる分担の中での位置</h3>
+  <p class="fine">あなたの家の項目を、起こりうる分け方で500通りに振り直したときのスコアの散らばりです。実在の家庭との比較ではありません。</p>
+  <div class="panel">
+    ${distGraph(DIST,SC)}
+    <p><b>500通りの中で、上位 ${Math.max(1,100-PCT)}%。担い方は「${band(SC)}」。</b>高いほど良いという指標ではなく、多く抱えていることを示すだけの数字です。</p>
+  </div>` : `
+  <div class="panel"><p>家事を分担する相手がいない世帯のため、分担の比較は行いません。スコアは構造上100点に近づきます。このあとのタイプ判定と提案は<b>何に負荷が寄っているか</b>を見るものなので、ひとり世帯でも意味があります。</p></div>`}
+
+  <h3 class="grp" id="rA"><span class="a">A</span>あなたのタイプ</h3>
+  <p class="fine">量ではなく<b>偏り</b>で判定します。あなたの負荷の構成比を、家事312項目そのものの構成比と比べたものです。基準が固定なので、世帯の形が違う人どうしでもタイプを比べられます。</p>
+  <div class="panel mark">
+    <div class="typecode">${TY.code}</div>
+    <div class="typename">${TY.name}</div>
+    <p>${TY.allWeak
+      ? `4つの軸のどれにも偏りが出ませんでした。<b>特定の何かに寄っているのではなく、全部を満遍なく背負っている</b>状態です。ほぼ一人で回している場合にこうなります。偏りがないぶん「ここを削れば効く」という急所もないので、下の「手放す順番」を上から順に片付けるのが最短です。`
+      : TY.ax.filter(a=>!a.weak).map(a=>a.pole===a.a?a.an:a.bn).join('／')+'。そういう担い方をしています。'
+      + (TY.nWeak ? `<br><span class="fine">${TY.ax.filter(a=>a.weak).map(a=>a.a+a.b+'軸').join('・')}は偏りが小さく、どちらとも言えません。</span>`:'')}</p>
+    <div class="axes">${TY.ax.map(a=>{
+      const on=a.pole===a.a;
+      return `<div class="ax">
+        <span class="l ${on&&!a.weak?'on':''}">${a.a}・${a.al}<br><small>${a.an}</small></span>
+        <span class="tr"><u></u><i style="left:${a.pos}%;${a.weak?'background:var(--sumi-3)':''}"></i></span>
+        <span class="r2 ${!on&&!a.weak?'on':''}">${a.bl}・${a.b}<br><small>${a.bn}</small></span>
+      </div>`;
+    }).join('')}</div>
+    <p class="fine" style="margin-top:12px">中央の細い線が、家事312項目そのものの構成比。赤い印があなたの位置です。灰色の印は偏りが小さく、その軸は判定に使っていません。タイプは性格ではなく「いまの担い方」なので、分担が変われば変わります。</p>
+  </div>
+
+  <h3 class="grp" id="rB"><span class="a">B</span>このタイプへの提案</h3>
+  <p class="fine">4つの軸それぞれに、効く手が違います。上から順に、あなたの実際の項目名を添えてあります。</p>
+  ${(TY.ax.some(a=>!a.weak)?TY.ax.filter(a=>!a.weak):TY.ax).map(a=>{
+    const T=TIPS[a.pole]; if(!T) return '';
+    const it=topItem(R,a.pole);
+    return `<div class="tips"><h6>${a.a}${a.b}軸 → ${T[0]}</h6><p>${T[1]}${it?`<span class="ex">あなたの中で最も重いのは：${it.n}</span>`:''}</p></div>`;
+  }).join('')}
+
+  <h3 class="grp" id="rC"><span class="a">C</span>内訳</h3>
+  <div class="kpi">
+    <div><span class="lb">担当している項目</span><div class="vl">${nMine}<small>項目</small></div><div class="sb">発生している ${R.nAns} 項目のうち</div></div>
+    <div><span class="lb">あなたの時間（延べ）</span><div class="vl">${h1(R.time.me)}<small>時間/月</small></div><div class="sb">世帯計 ${h1(R.time.all)} 時間。同時進行を別々に数えた延べ値</div></div>
+    <div><span class="lb">頭の分担</span><div class="vl">${cogMe}<small>%</small></div><div class="sb">認知負荷（判断・記憶・割込・感情）ベース</div></div>
+    <div><span class="lb">見えない家事への偏り</span><div class="vl">${gapV>0?'+':''}${gapV}<small>pt</small></div><div class="sb">見えない家事の担当率 − 見える家事の担当率</div></div>
+  </div>
+
+  <h3 class="grp" id="rD"><span class="a">D</span>見積りと実測のずれ</h3>
+  <p class="fine">左があなたの見積り、右が集計値です。ずれの大きさそのものが、見えていなかった量を表します。</p>
+  ${gapRow('項目数','個',S.guess.count,R.nAns,gapCount)}
+  ${gapRow('自分の分担率','%',S.guess.share,cogMe,gapShare)}
+  ${gapRow('自分の月間時間','時間',S.guess.hours,Math.round(R.time.me),gapHours)}
+  <div class="panel mark">
+    <h5>読み取り</h5>
+    <p>${
+      gapCount>0
+      ? `集計は見積りより <b>${gapCount}項目</b> 多い。数え落としていた分が、そのまま「名前がついていないので認識されない仕事」です。`
+      : gapCount<0
+      ? `集計は見積りより <b>${-gapCount}項目</b> 少ない。負担感の出どころは項目数ではなく、1件あたりの重さの側にあります。`
+      : `見積りと集計がほぼ一致しています。ご自身の負担を正確に把握できている状態です。`
+    }</p>
+    <p>${
+      Math.abs(gapHours)>=10
+      ? `時間の見積りは、${gapHours>0?'集計のほうが '+gapHours+' 時間多い':'集計のほうが '+(-gapHours)+' 時間少ない'}。1日あたり ${h1(Math.abs(gapHours)/30.4)} 時間の差です。`
+      : `時間の見積りは集計とほぼ一致しています。`
+    }</p>
+  </div>
+
+  <h3 class="grp" id="rE"><span class="a">E</span>時間の分担と、頭の分担</h3>
+  <p class="fine">1マス＝1%。同じ家庭でも、この2枚は一致しません。ずれる方向にこそ意味があります。</p>
+  <div class="twoup">
+    <div>
+      <div class="masu-t">時間で見た分担<span>手を動かしている延べ時間</span></div>
+      ${masu(timeMe, pct(R.time.pt,R.time.all), pct(R.time.ext,R.time.all))}
+      <div class="fine">自分 ${timeMe}% ／ 相手 ${pct(R.time.pt,R.time.all)}% ／ 外部 ${pct(R.time.ext,R.time.all)}%</div>
+    </div>
+    <div>
+      <div class="masu-t">頭で見た分担<span>判断・記憶・割込・感情</span></div>
+      ${masu(cogMe, pct(R.cog.pt,R.cog.all), pct(R.cog.ext,R.cog.all))}
+      <div class="fine">自分 ${cogMe}% ／ 相手 ${pct(R.cog.pt,R.cog.all)}% ／ 外部 ${pct(R.cog.ext,R.cog.all)}%</div>
+    </div>
+  </div>
+  ${legend()}
+  <div class="panel">
+    <h5>${cogMe-timeMe>=8 ? '時間は分けられていても、頭は分けられていない' : (timeMe-cogMe>=8 ? '手は動かしているが、決定権は相手側にある' : '時間と頭が同じ方向を向いている')}</h5>
+    <p>${
+      cogMe-timeMe>=8
+      ? `時間の分担率は ${timeMe}% ですが、頭では ${cogMe}%。差は ${cogMe-timeMe}ポイント。作業は渡せていても、<b>「何をいつやるか決める」「覚えておく」部分が渡っていない</b>状態です。家事分担の話し合いが噛み合わない典型的な原因がここにあります。相手から見えているのは左の絵、あなたが感じているのは右の絵です。`
+      : timeMe-cogMe>=8
+      ? `時間では ${timeMe}% を担っていますが、頭では ${cogMe}%。差は ${timeMe-cogMe}ポイント。指示された作業を実行する側に寄っています。負担の重さは時間の長さとして出ますが、裁量の少なさとして疲労にも出ます。`
+      : `時間 ${timeMe}%、頭 ${cogMe}%。ずれは ${Math.abs(cogMe-timeMe)}ポイントで、分担の実態と体感がほぼ一致しています。`
+    }</p>
+  </div>
+
+  <h3 class="grp" id="rF"><span class="a">F</span>4つの型で見る偏り</h3>
+  <p class="fine">同じ家事でも、性質が違えば渡せる相手が違います。1マス＝5%、あなたの担当割合です。</p>
+  ${types.map(t=>{
+    const T=R.byType[t], p=pct(T.me,T.all);
+    return `<div style="margin:16px 0 4px">
+      <div class="masu-t">${t}<span>${T.n}項目 ／ あなた ${p}%</span></div>
+      <div class="hyakumasu" style="grid-template-columns:repeat(20,1fr);max-width:420px">${
+        Array.from({length:20},(_,k)=>`<i class="${k<Math.round(p/5)?'me':''}" style="animation-delay:${k*10}ms"></i>`).join('')
+      }</div>
+      <div class="fine">${TYPE_NOTE[t]}</div>
+    </div>`;
+  }).join('')}
+  <div class="panel mark">
+    <h5>見えない家事への偏り ${gapV>0?'+':''}${gapV}pt</h5>
+    <p>外から見える身体型の担当率が <b>${body}%</b>、外から見えない情報型・判断型・感情型の担当率が <b>${invis}%</b>。${
+      gapV>=10
+      ? `<b>見えない側に ${gapV}ポイント偏っています。</b>これは「手伝おうか」と言われても解決しません。手伝える対象として認識されているのは身体型だけだからです。下の「手放す順番」で、偏っている中身を具体的な項目名まで下ろします。`
+      : gapV<=-10
+      ? `見える側に ${-gapV}ポイント偏っています。作業量として認識されやすい一方、努力が過小評価されにくい配分でもあります。`
+      : `偏りは ${Math.abs(gapV)}ポイントで、見える家事と見えない家事の担当率がほぼ揃っています。`
+    }</p>
+  </div>
+
+  <h3 class="grp" id="rG"><span class="a">G</span>領域 × 型のマトリクス</h3>
+  <p class="fine">数字はあなたの担当率（頭の分担ベース）。下段は該当項目数です。空欄は該当項目なし。</p>
+  <div style="overflow-x:auto">
+  <table class="mx">
+    <thead><tr><th style="text-align:left">領域</th>${types.map(t=>`<th>${t.replace('型','')}</th>`).join('')}<th>領域計</th><th>時間/月</th></tr></thead>
+    <tbody>${cats.map(c=>{
+      return `<tr><td class="h">${c}</td>${types.map(t=>{
+        const sel = POOL.filter(i=>i.c===c && i.t===t && S.a[i.id] && S.a[i.id]!=='na');
+        if(!sel.length) return '<td></td>';
+        let all=0,me=0;
+        sel.forEach(i=>{const cg=(i.j+i.k+i.w+i.e)*FREQ[i.f]; all+=cg; if(S.a[i.id]!=='ext') me+=cg*SHARE[S.a[i.id]];});
+        const p=pct(me,all);
+        return `<td style="background:rgba(201,58,43,${(p/100*0.3).toFixed(3)})"><b>${p}%</b><small>${sel.length}件</small></td>`;
+      }).join('')}<td><b>${pct(R.byCat[c].me,R.byCat[c].all)}%</b><small>${R.byCat[c].n}件</small></td>
+      <td><b>${h1(R.byCat[c].timeMe)}</b><small>計${h1(R.byCat[c].time)}</small></td></tr>`;
+    }).join('')}</tbody>
+  </table></div>
+
+  <h3 class="grp" id="rH"><span class="a">H</span>手放す順番</h3>
+  <p class="fine">あなたが担当していて、負担が重く、かつ渡せる余地が大きい順の10件。上から順に着手すると、削減効率が最も高くなります。</p>
+  <ol class="rank">${drop.map(i=>`<li><div class="bd">
+    <div class="t">${i.n}</div>
+    <div class="d">${i.c}・${i.t} ／ 月${Math.round(i.cogMe)}pt ／ 削減余地 ${Math.round(i.ai*100)}%</div>
+  </div><span class="lv">${lever(i)}</span></li>`).join('')}</ol>
+
+  <h3 class="grp" id="rI"><span class="a">I</span>手放せない項目</h3>
+  <p class="fine">感情型は自動化も外注もできません。ここを守るために、Hを削ります。順番が逆になっている家庭が多い領域です。</p>
+  <ol class="rank">${keep.length?keep.map(i=>`<li><div class="bd">
+    <div class="t">${i.n}</div><div class="d">${i.c} ／ 月${Math.round(i.cogMe)}pt</div>
+  </div><span class="lv">移譲不可</span></li>`).join(''):'<li><div class="bd"><div class="t">該当なし</div></div></li>'}</ol>
+
+  <h3 class="grp" id="rJ"><span class="a">J</span>削減シミュレーション</h3>
+  <p class="fine">3つのレバーをどこまで実行するかで、あなたに残る負担が変わります。動かしてみてください（型ごとの置き換えやすさを仮定した試算です）。</p>
+  <div class="slider"><label><span>AI・仕組み化で減らす（情報型・判断型）</span><b><span id="v1">0</span>%</b></label><input type="range" id="r1" min="0" max="100" value="0" step="5"></div>
+  <div class="slider"><label><span>家電・外注に出す（身体型）</span><b><span id="v2">0</span>%</b></label><input type="range" id="r2" min="0" max="100" value="0" step="5"></div>
+  <div class="slider"><label><span>相手・子どもに渡す（感情型を除く）</span><b><span id="v3">0</span>%</b></label><input type="range" id="r3" min="0" max="100" value="0" step="5"></div>
+  <div id="simout"></div>
+
+  <h3 class="grp" id="rK"><span class="a">K</span>話し合いに持っていく用のメモ</h3>
+  <p class="fine">診断結果を、そのまま相手に見せられる文章にしました。編集して使ってください。数字は主張ではなく、共通の土台として置くものです。</p>
+  <textarea id="memo"></textarea>
+  <div class="noprint" style="margin-top:8px"><button class="btn sm" id="copy-memo2">メモをコピー</button></div>
+
+  <h3 class="grp" id="rL"><span class="a">前提</span>この診断でわからないこと</h3>
+  <div class="fine">
+    <ul>
+      <li>所要時間・発生頻度・4軸の評価値は、一般的な家庭を想定した<b>設定値</b>です。実測ではありません。あなたの家の実態とは必ずずれます。</li>
+      <li><b>時間は延べ値です。</b><span>同時に進む家事を別々に計上しているため、世帯合計は1日の実時間を超えます（本版は全項目合計で1日16時間相当）。現時点では絶対量ではなく、領域間・人の間の比率として読んでください。</span></li>
+      <li>認知負荷ポイントは、判断・記憶・割込・感情の4項目を各5点で足した独自の合成指標です。心理学の標準尺度ではなく、項目間の相対比較にのみ使えます。</li>
+      <li>1項目1回答なので、「やっているのは自分だが決めているのは相手」のような混在は表現できません。</li>
+      <li>312項目は網羅ではありません。介護・ペット・持ち家の維持管理・自営業との兼務などは、まだ十分に含まれていません。</li>
+      <li><b>順位は実在の家庭との比較ではありません。</b><span>あなたの家の家事を、起こりうる分け方で500通りに振り直し、その分布の中での位置を出しています。「他人より重い」ではなく「取りうる分け方の中で重いほう」という意味です。本版は端末内で完結する設計のため、実在データとの比較は持っていません。</span></li>
+      <li>タイプは性格分類ではありません。<b>いまの担い方の偏り</b>を4軸で表したものです。分担が変われば型も変わります。基準は「家事312項目そのものの構成比」に固定しているため、ほぼ一人で家事を回している場合は<b>どの軸にも偏りが出ず「全方位型」</b>になります。これは判定不能ではなく、「特定の何かではなく全部を背負っている」という結果です（世帯の形によって除外された項目が多い場合は、基準との差が残るため型が付くことがあります）。</li>
+      <li>スコアは「その家の負荷を1人で全部抱えたら100点」という相対指標です。家族の人数や子どもの年齢で分母が変わるため、<b>他の家庭とスコアの数字を直接比べることはできません</b>。</li>
+      <li>この結果は、どちらが正しいかを決めるためのものではありません。何が見えていなかったかを、双方が同じ絵で見るためのものです。医学的・心理学的な診断ではありません。</li>
+    </ul>
+  </div>`;
+
+  /* シミュレーション */
+  const sim = ()=>{
+    const a=+$('#r1').value/100, b=+$('#r2').value/100, c=+$('#r3').value/100;
+    let after=0, tAfter=0;
+    R.items.forEach(i=>{
+      let cg=i.cogMe, tm=i.timeMe;
+      if(i.t==='情報型'||i.t==='判断型'){ cg*=(1-a*i.ai); tm*=(1-a*i.ai*0.5); }
+      if(i.t==='身体型'){ cg*=(1-b*0.9); tm*=(1-b*0.9); }
+      if(i.t!=='感情型'){ cg*=(1-c*0.8); tm*=(1-c*0.8); }
+      after+=cg; tAfter+=tm;
+    });
+    $('#v1').textContent=Math.round(a*100); $('#v2').textContent=Math.round(b*100); $('#v3').textContent=Math.round(c*100);
+    const p = pct(after, R.cog.all), cut = R.cog.me>0 ? Math.round((1-after/R.cog.me)*100) : 0;
+    $('#simout').innerHTML = `
+      <div class="masu-t" style="margin-top:18px">実行後の、あなたの頭の分担<span>実行前 ${cogMe}%</span></div>
+      ${masu(p, pct(R.cog.pt,R.cog.all), 100-p-pct(R.cog.pt,R.cog.all))}
+      <div class="kpi" style="margin-top:14px">
+        <div><span class="lb">頭の分担</span><div class="vl">${p}<small>%</small></div><div class="sb">${cogMe}% → ${p}%</div></div>
+        <div><span class="lb">負荷の減少</span><div class="vl">${cut}<small>%減</small></div><div class="sb">あなたの認知負荷</div></div>
+        <div><span class="lb">あなたの時間</span><div class="vl">${h1(tAfter)}<small>時間/月</small></div><div class="sb">${h1(R.time.me)} 時間から ${h1(R.time.me-tAfter)} 時間減</div></div>
+      </div>`;
+  };
+  ['r1','r2','r3'].forEach(id=>$('#'+id).addEventListener('input',sim));
+  sim();
+
+  $('#memo').value =
+`【名もなき家事診断の結果】${dt.replace(/-/g,'/')}
+
+名もなき家事スコア：${SC.toFixed(1)} / 100${hasPartner()?`（取りうる分担パターンの中で上位${Math.max(1,100-PCT)}%）`:''}
+タイプ：${TY.code}「${TY.name}」
+
+・我が家で発生している名もなき家事：${R.nAns}項目
+・世帯全体の家事時間：月 ${h1(R.time.all)}時間（うち私が ${h1(R.time.me)}時間）
+
+■ 時間で見た私の分担　${timeMe}%
+■ 頭で見た私の分担　　${cogMe}%
+　（判断する・覚えておく・中断される・気を遣う、の合計）
+
+この2つの数字が ${Math.abs(cogMe-timeMe)}ポイント違っています。
+${cogMe-timeMe>=8
+ ? '作業そのものは分けられていますが、「何をいつやるか決める」「忘れないよう覚えておく」部分が私に残っています。手伝ってもらう、ではなく、この項目は最初から任せる、という形にしたいです。'
+ : timeMe-cogMe>=8
+ ? '手を動かす作業は私に寄っていますが、決める部分は相手側にあります。作業だけでなく、決める部分も一緒に持ちたいです。'
+ : '時間と負担感がおおむね一致しています。'}
+
+■ 外から見える家事（身体型）の私の担当　${body}%
+■ 外から見えない家事の私の担当　　　　　${invis}%
+
+■ まず手放したい5件
+${drop.slice(0,5).map((i,k)=>`${k+1}. ${i.n}（${lever(i)}）`).join('\n')}
+
+■ 私が引き受け続けたい5件（人にしかできない部分）
+${keep.slice(0,5).map((i,k)=>`${k+1}. ${i.n}`).join('\n') || '（該当なし）'}
+
+数字は主張ではなく、話の土台として出したものです。
+違うと思うところがあれば、そこから話したいです。
+
+（名もなき家事診断 ひとり版 ver.3 ／ 表現科学研究所）`;
+
+  const copy = ()=>{
+    const t=$('#memo').value;
+    const done=()=>toast('メモをコピーしました');
+    if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done,()=>{ $('#memo').select(); document.execCommand('copy'); done(); });
+    else { $('#memo').select(); document.execCommand('copy'); done(); }
+  };
+  $('#copy-memo').onclick = copy; $('#copy-memo2').onclick = copy;
+  $('#print1').onclick = ()=>window.print();
+}
+
+function gapRow(label,unit,g,a,d){
+  return `<div class="gap">
+    <div class="glb">${label}</div>
+    <div class="g1">${g||'—'}<small>あなたの見積り（${unit}）</small></div>
+    <div class="ar">${d===0?'＝':(d>0?'▶':'◀')}<br>${d>0?'+':''}${d}</div>
+    <div class="g2">${a}<small>集計（${unit}）</small></div>
+  </div>`;
+}
+
+/* ---------- 表紙のミニ図 ---------- */
+(function(){
+  const fill=(el,me,pt)=>{ el.innerHTML=Array.from({length:50},(_,k)=>`<i class="${k<me?'me':(k<me+pt?'pt':'')}"></i>`).join(''); };
+  fill(document.querySelector('[data-mini="time"]'),24,22);
+  fill(document.querySelector('[data-mini="cog"]'),32,14);
+})();
+
+/* ---------- 再開 ---------- */
+$('#wipe').onclick = ()=>{ if(confirm('この端末に保存した入力と結果の履歴を消します。よろしいですか？')){ wipe(); location.reload(); } };
+(function(){
+  const j=loadSaved(); if(!j) return;
+  const st=j.S;
+  // 進み具合を数える（保存時の条件で適用される項目だけ）
+  const tmp={house:st.house,kids:st.kids||[]};
+  const pool=ITEMS.filter(it=>{
+    const kids=tmp.kids;
+    if(it.req==='kid'&&!kids.length) return false;
+    if(it.req==='pre'&&!kids.includes('pre')) return false;
+    if(it.req==='school'&&!(kids.includes('ele')||kids.includes('teen'))) return false;
+    if(it.req==='teen'&&!kids.includes('teen')) return false;
+    if(it.req==='partner'&&(tmp.house==='solo'||tmp.house==='single')) return false;
+    return true;
+  });
+  const n=pool.filter(i=>st.a&&st.a[i.id]).length;
+  const stepName={1:'世帯',2:'見積り',3:'分担の入力',4:'結果'}[j.step]||'世帯';
+  $('#resume-info').textContent=`${fmtDate(j.ts)} に保存。${stepName}まで進んでいます（分担の回答 ${n} / ${pool.length} 項目）。`;
+  $('#resume').hidden=false;
+  $('#resume-go').onclick=()=>{
+    Object.assign(S, {house:st.house, kids:st.kids||[], work:st.work||null, guess:st.guess||{}, a:st.a||{}});
+    syncChips();
+    maxStep = Math.max(j.step,1);
+    if(j.step>=3) build();
+    if(j.step===4){ if($('#calc').disabled){ go(3); return; } render(compute()); }
+    go(Math.max(1,j.step));
+  };
+  $('#resume-new').onclick=()=>{ if(confirm('保存した入力を消して、最初からやり直しますか？')){ try{localStorage.removeItem(KEY);}catch(e){} $('#resume').hidden=true; toast('最初から始められます'); } };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,3596 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>声を、光に。 | 夏を感じれなかった君に</title>
+<style>
+/* =========================================================
+   CSS & UI Design
+   ========================================================= */
+:root{
+  --bg-color:#030508;
+  --text-color:rgba(255,255,255,.85);
+  --font-main:"Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Hiragino Sans",sans-serif;
+  --font-serif:"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP",serif;
+  --line-a:rgba(255,255,255,.18);
+  --mono-a:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;}
+body,html{
+  width:100%;height:100%;background-color:var(--bg-color);overflow:hidden;
+  font-family:var(--font-main);color:var(--text-color);
+  -webkit-font-smoothing:antialiased;touch-action:none;
+  -webkit-tap-highlight-color:transparent;
+}
+#bg-canvas,#gl-canvas,#main-canvas,#glow-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+/* GPU描画のときは、2D用の擬似Bloomは出さない（本物のBloomが出るため） */
+body.gfx-gl #glow-canvas{display:none;}
+body:not(.gfx-gl) #gl-canvas{display:none;}
+/* 擬似Bloom：本画面を縮小転写し、GPU側のぼかしと screen 合成で発光させる */
+#glow-canvas{mix-blend-mode:screen;filter:blur(15px) saturate(1.25);opacity:.95;}
+@media (max-width:600px){ #glow-canvas{filter:blur(11px) saturate(1.25);} }
+#interaction-layer{position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;}
+
+#intro{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  z-index:100;background:var(--bg-color);
+  transition:opacity 1.5s cubic-bezier(.4,0,.2,1);
+}
+#intro h1{
+  font-family:var(--font-serif);
+  font-size:1.9rem;letter-spacing:.34em;text-indent:.34em;font-weight:300;
+  margin-bottom:1.4rem;opacity:0;animation:fadeIn 3s ease forwards 1s;
+}
+#intro p{
+  font-size:.85rem;letter-spacing:.15em;color:rgba(255,255,255,.6);
+  margin-bottom:3.4rem;opacity:0;animation:fadeIn 3s ease forwards 2.5s;
+}
+#start-btn{
+  background:transparent;border:1px solid rgba(255,255,255,.3);color:var(--text-color);
+  padding:12px 32px;font-size:.75rem;letter-spacing:.2em;cursor:pointer;
+  transition:all .5s ease;opacity:0;animation:fadeIn 2s ease forwards 4s;
+}
+#start-btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.8);
+  box-shadow:0 0 15px rgba(255,255,255,.15);}
+#intro small{
+  display:block;margin-top:2.6rem;font-size:.55rem;letter-spacing:.14em;
+  color:rgba(255,255,255,.28);opacity:0;animation:fadeIn 2s ease forwards 4.2s;
+  text-align:center;line-height:1.9;padding:0 24px;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+
+#flash{position:absolute;top:0;left:0;width:100%;height:100%;background:#fff;
+  opacity:0;pointer-events:none;z-index:200;}
+
+/* ---------- HUD ---------- */
+#hud{position:absolute;
+  top:max(16px,env(safe-area-inset-top));left:max(18px,env(safe-area-inset-left));
+  z-index:50;display:flex;flex-direction:column;gap:8px;
+  opacity:0;transition:opacity 1.2s ease;pointer-events:none;}
+.hud-row{display:flex;align-items:center;font-size:.6rem;letter-spacing:.2em;
+  color:rgba(255,255,255,.4);width:150px;}
+.hud-row span:first-child{width:46px;}
+.bar-bg{flex-grow:1;height:1px;background:rgba(255,255,255,.15);position:relative;}
+.bar-fg{position:absolute;top:0;left:0;height:100%;background:var(--text-color);width:0%;
+  transition:width .1s linear;}
+/* 花火が上がる高さの目印 */
+.bar-bg .mark{position:absolute;top:-2px;width:1px;height:5px;background:rgba(255,255,255,.6);
+  transition:left .3s ease;}
+.led{width:4px;height:4px;border-radius:50%;background:rgba(255,80,80,.2);margin-left:auto;}
+.led.active{background:#ff3333;box-shadow:0 0 6px #ff3333;}
+.led.word{background:rgba(120,200,255,.2);}
+.led.word.active{background:#7ccfff;box-shadow:0 0 6px #7ccfff;}
+#hud-cmb{color:#fff;margin-left:auto;}
+
+#credit{position:absolute;
+  bottom:max(12px,env(safe-area-inset-bottom));right:max(18px,env(safe-area-inset-right));
+  font-size:.55rem;letter-spacing:.25em;
+  color:rgba(255,255,255,.3);text-transform:uppercase;opacity:0;transition:opacity 1.2s ease;
+  z-index:50;pointer-events:none;}
+
+/* ---------- ことば入力 ---------- */
+#word-bar{
+  touch-action:auto;
+  position:absolute;left:0;right:0;
+  bottom:calc(max(12px,env(safe-area-inset-bottom)) + 30px);
+  z-index:60;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;
+  gap:7px;padding:0 20px;opacity:0;transition:opacity 1.2s ease;
+}
+#word-bar.on{opacity:.4;}
+#word-bar:hover,#word-bar.touched{opacity:1;}
+.chip{
+  font-family:var(--font-serif);
+  background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.82);border-radius:2px;
+  padding:7px 14px;font-size:.78rem;letter-spacing:.1em;cursor:pointer;
+  transition:border-color .3s,background .3s,box-shadow .3s;
+}
+.chip:hover,.chip:active{border-color:rgba(255,255,255,.65);background:rgba(255,255,255,.08);
+  box-shadow:0 0 18px rgba(150,190,255,.18);}
+#word-input{
+  font-family:var(--font-serif);
+  user-select:text;-webkit-user-select:text;touch-action:auto;
+  background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.22);
+  color:#fff;padding:6px 8px;font-size:.78rem;letter-spacing:.1em;width:150px;outline:none;
+  text-align:center;
+}
+#word-input::placeholder{color:rgba(255,255,255,.3);}
+#word-input:focus{border-bottom-color:rgba(255,255,255,.7);}
+
+#hint{
+  position:absolute;left:0;right:0;top:46%;text-align:center;
+  font-family:var(--font-serif);font-size:1rem;letter-spacing:.4em;text-indent:.4em;
+  color:rgba(255,255,255,.75);z-index:55;pointer-events:none;opacity:0;
+  text-shadow:0 0 24px rgba(150,190,255,.5);padding:0 22px;line-height:2;
+}
+#hint.long{font-size:clamp(.68rem,3vw,.86rem);letter-spacing:.14em;text-indent:.14em;}
+
+#tools{
+  position:absolute;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));
+  z-index:70;display:flex;gap:8px;align-items:flex-start;
+}
+#tools button{
+  font-family:var(--font-serif);background:rgba(3,5,8,.35);
+  border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.72);border-radius:2px;
+  padding:6px 12px;font-size:.7rem;letter-spacing:.12em;cursor:pointer;white-space:nowrap;
+  transition:opacity .4s ease,border-color .3s,color .3s,background .3s;
+}
+#tools button:hover{border-color:rgba(255,255,255,.6);color:#fff;background:rgba(255,255,255,.07);}
+#gfx-btn{opacity:0;pointer-events:none;}
+#gfx-btn.on{opacity:.5;pointer-events:auto;}
+#gfx-btn.on:hover{opacity:1;}
+body.ui-off #gfx-btn{opacity:0 !important;pointer-events:none !important;}
+#dev-sel{
+  font-family:var(--font-main);background:rgba(3,5,8,.5);
+  border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.72);border-radius:2px;
+  padding:6px 8px;font-size:.66rem;letter-spacing:.06em;cursor:pointer;max-width:190px;
+  opacity:0;pointer-events:none;transition:opacity .4s ease,border-color .3s;
+}
+#dev-sel.on{opacity:.5;pointer-events:auto;}
+#dev-sel.on:hover{opacity:1;border-color:rgba(255,255,255,.6);}
+#dev-sel option{background:#0a0e16;color:#dfe9f8;}
+body.ui-off #dev-sel{opacity:0 !important;pointer-events:none !important;}
+#sens-btn{opacity:0;pointer-events:none;}
+#sens-btn.on{opacity:.5;pointer-events:auto;}
+#sens-btn.on:hover{opacity:1;}
+#ui-toggle{opacity:.5;}
+#ui-toggle:hover{opacity:1;}
+
+/* 表示を消したとき：作品だけが残る */
+body.ui-off #hud,
+body.ui-off #credit,
+body.ui-off #word-bar,
+body.ui-off #sens-btn{opacity:0 !important;pointer-events:none !important;}
+body.ui-off #ui-toggle{opacity:.14;background:transparent;border-color:rgba(255,255,255,.1);}
+body.ui-off #ui-toggle:hover{opacity:.9;}
+
+/* ---------- 会場モード ---------- */
+body.venue #hud,
+body.venue #credit,
+body.venue #word-bar,
+body.venue #tools{opacity:0 !important;pointer-events:none !important;}
+
+#stage-msg{
+  position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+  text-align:center;font-family:var(--font-serif);
+  font-size:clamp(1.3rem,4.2vw,3.2rem);letter-spacing:.42em;text-indent:.42em;
+  color:rgba(255,255,255,.82);text-shadow:0 0 40px rgba(150,190,255,.45);
+  z-index:40;pointer-events:none;opacity:0;transition:opacity 2s ease;
+  padding:0 24px;line-height:2;
+}
+#stage-msg.on{opacity:1;}
+
+/* ---------- 50インチ向けの表示サイズ ---------- */
+body.ui-big #hud{transform:scale(1.7);transform-origin:left top;}
+body.ui-big #tools{transform:scale(1.5);transform-origin:right top;}
+body.ui-big #credit{transform:scale(1.6);transform-origin:right bottom;}
+body.ui-big .chip{font-size:1.15rem;padding:13px 24px;}
+body.ui-big #word-input{font-size:1.1rem;width:230px;}
+
+/* ---------- 運営パネル ---------- */
+#admin{
+  position:absolute;inset:0;z-index:120;display:none;
+  align-items:center;justify-content:center;background:rgba(3,5,8,.86);
+  backdrop-filter:blur(6px);
+}
+#admin.on{display:flex;}
+#admin .box{
+  width:min(560px,92vw);max-height:88vh;overflow:auto;
+  border:1px solid var(--line-a);border-radius:3px;background:rgba(6,10,17,.9);
+  padding:22px 24px 20px;
+}
+#admin h2{font-size:.62rem;letter-spacing:.42em;color:rgba(168,196,232,.6);
+  font-weight:400;margin-bottom:4px;}
+#admin h3{font-size:.58rem;letter-spacing:.32em;color:rgba(168,196,232,.45);
+  font-weight:400;margin:18px 0 9px;border-top:1px solid var(--line-a);padding-top:13px;}
+#admin h3:first-of-type{border-top:none;padding-top:0;margin-top:14px;}
+#admin .grid{display:flex;flex-wrap:wrap;gap:7px;}
+#admin button{
+  flex:1 1 44%;background:transparent;border:1px solid var(--line-a);
+  color:rgba(255,255,255,.8);border-radius:2px;padding:11px 10px;
+  font-family:var(--font-main);font-size:.72rem;letter-spacing:.1em;cursor:pointer;
+  transition:all .3s;
+}
+#admin button:hover{border-color:rgba(255,255,255,.6);color:#fff;background:rgba(255,255,255,.07);}
+#admin button.hot{border-color:rgba(255,150,130,.5);color:#ffb3a4;}
+#admin button.hot:hover{background:rgba(255,120,100,.12);border-color:rgba(255,150,130,.9);}
+#admin .note{font-size:.6rem;letter-spacing:.08em;color:rgba(168,196,232,.4);
+  line-height:1.95;margin-top:9px;}
+#admin .close{position:absolute;top:18px;right:22px;flex:none;padding:7px 14px;}
+
+/* マイクの確認 */
+#mic-test{margin-top:10px;}
+#mic-bar{position:relative;height:14px;background:rgba(176,206,246,.1);
+  border:1px solid var(--line-a);border-radius:2px;overflow:hidden;}
+#mic-now{position:absolute;left:0;top:0;bottom:0;width:0%;
+  background:linear-gradient(90deg,rgba(130,180,240,.75),rgba(200,230,255,.95));
+  transition:width .08s linear;}
+#mic-peak{position:absolute;top:0;bottom:0;width:2px;background:#fff;left:0;
+  transition:left .25s ease;}
+#mic-line{position:absolute;top:-4px;bottom:-4px;width:1px;background:#ffd08a;left:30%;
+  transition:left .4s ease;}
+#mic-txt{display:flex;justify-content:space-between;font-size:.6rem;
+  letter-spacing:.1em;color:rgba(168,196,232,.5);margin-top:7px;}
+#mic-txt b{color:#e8f2ff;font-weight:400;}
+#mic-verdict{margin-top:8px;font-size:.66rem;letter-spacing:.12em;color:rgba(168,196,232,.75);}
+#ad-diag{font-family:var(--mono-a);font-size:.58rem;line-height:1.85;
+  color:rgba(200,222,248,.8);background:rgba(0,0,0,.35);border:1px solid var(--line-a);
+  border-radius:2px;padding:10px 12px;white-space:pre-wrap;word-break:break-all;
+  max-height:30vh;overflow:auto;margin-bottom:9px;}
+
+@media (max-width:600px){
+  #hud{bottom:14px;left:16px;transform:scale(.92);transform-origin:left bottom;}
+  #credit{bottom:14px;right:16px;font-size:.45rem;}
+  #word-bar{padding:0 14px;gap:6px;bottom:max(62px,calc(env(safe-area-inset-bottom) + 56px));}
+  .chip{padding:6px 11px;font-size:.72rem;}
+  #word-input{width:120px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<canvas id="gl-canvas"></canvas>
+<canvas id="main-canvas"></canvas>
+<canvas id="glow-canvas"></canvas>
+<div id="interaction-layer"></div>
+<div id="flash"></div>
+
+<div id="hud">
+  <div class="hud-row"><span>MIC</span><div id="hud-mic" class="led"></div></div>
+  <div class="hud-row"><span>WORD</span><div id="hud-word" class="led word"></div></div>
+  <div class="hud-row"><span>LVL</span><div class="bar-bg"><div class="bar-fg" id="hud-lvl"></div><i class="mark" id="hud-mark"></i></div></div>
+  <div class="hud-row"><span>PEAK</span><div class="bar-bg"><div class="bar-fg" id="hud-peak"></div></div></div>
+  <div class="hud-row"><span>FRQ</span><div class="bar-bg"><div class="bar-fg" id="hud-frq"></div></div></div>
+  <div class="hud-row"><span>ENG</span><div class="bar-bg"><div class="bar-fg" id="hud-eng"></div></div></div>
+  <div class="hud-row"><span>ACC</span><div class="bar-bg"><div class="bar-fg" id="hud-acc"></div></div></div>
+  <div class="hud-row"><span>CMB</span><span id="hud-cmb">0</span></div>
+</div>
+
+<div id="credit">Directed by Tsuyoshi Yamashita</div>
+<div id="tools">
+  <button id="gfx-btn">描画 ---</button>
+  <select id="dev-sel" title="入力機器"></select>
+  <button id="sens-btn">感度 ふつう</button>
+  <button id="ui-toggle">表示を消す</button>
+</div>
+
+<div id="hint"></div>
+<div id="stage-msg">こえを だして みて</div>
+
+<div id="admin">
+  <div class="box">
+    <h2>OPERATION</h2>
+    <button class="close" id="ad-close">とじる（Esc）</button>
+
+    <h3>かいじょう</h3>
+    <div class="grid">
+      <button id="ad-full">全画面（F）</button>
+      <button id="ad-venue">会場モード 開始</button>
+      <button id="ad-big">表示を大きく</button>
+      <button id="ad-sound">音を鳴らす：ON</button>
+      <button id="ad-qual">画質：高画質（自動）</button>
+      <button id="ad-qauto">画質を固定する</button>
+      <button id="ad-wave">音の波紋：なし</button>
+    </div>
+    <div class="note">重いときは画質がひとりでに下がります。<br>
+      下げたままにしたいときは「画質を固定する」を押してから選んでください。</div>
+
+    <h3>マイクの確認</h3>
+    <div id="mic-test">
+      <div id="mic-bar">
+        <div id="mic-now"></div><div id="mic-peak"></div><div id="mic-line"></div>
+      </div>
+      <div id="mic-txt"><span>いまの大きさ <b id="mic-v">0</b></span>
+        <span>この線をこえると花火 <b id="mic-h">0</b></span></div>
+      <div id="mic-verdict">こえを だしてみてください</div>
+    </div>
+    <div class="grid" style="margin-top:10px">
+      <button id="ad-sens">感度 ふつう</button>
+    </div>
+
+    <h3>デモ</h3>
+    <div class="grid">
+      <button id="ad-demo">デモを再生</button>
+      <button id="ad-idle">自動デモ：45秒</button>
+    </div>
+    <div class="note">だれも声を出さない時間がつづくと、ひとりでにデモが流れます。<br>
+      声を出すか画面にさわると、すぐにデモは止まります。</div>
+
+    <h3>いまの様子</h3>
+    <pre id="ad-diag">—</pre>
+    <div class="grid">
+      <button id="ad-copy">この内容をコピー</button>
+    </div>
+
+    <h3>こまったとき</h3>
+    <div class="grid">
+      <button id="ad-reset" class="hot">ぜんぶ消す（R）</button>
+      <button id="ad-reload" class="hot">最初からやり直す</button>
+    </div>
+    <div class="note">このパネルは Esc でいつでも開きます。<br>
+      スピーカーで鳴らすときは、指向性マイクかヘッドセットをおすすめします。</div>
+  </div>
+</div>
+
+<div id="word-bar">
+  <button class="chip" data-w="ありがとう">ありがとう</button>
+  <button class="chip" data-w="ごめんね">ごめんね</button>
+  <button class="chip" data-w="嫌い">嫌い</button>
+  <input id="word-input" type="text" maxlength="16" placeholder="じぶんで書く" autocomplete="off">
+</div>
+
+<div id="intro">
+  <h1>声を、光に。</h1>
+  <p>作った。夏を感じれなかった君に。</p>
+  <button id="start-btn">ENTER SYSTEM</button>
+  <small>
+    声を出すと花火があがります。ことばを言うと、そのことばの花火になります。<br>
+    声が出せないときは、画面の下のことばを押してください。<br>
+    あ・い・う・え・お で、花火の形が変わります。<br>
+    <span style="opacity:.75">※ことばの聞き取りにはブラウザの機能を使います。お使いのブラウザによっては、<br>
+    声が外部のサーバーに送られて文字に変換されます。</span>
+  </small>
+</div>
+
+<script>
+const PI2 = Math.PI * 2;
+// GPU描画のときは false になる。尾は GPU 側で速度から作るため、
+// CPU が毎フレーム位置を覚えておく必要がなくなる（そのぶん粒子を増やせる）
+let KEEP_TRAIL = true;
+const FINE = 0.62;   // 粒子の細かさ（すべての粒の大きさにかかる）
+let DENS = 1.5;      // 細くしたぶん、数を増やす（GPU描画では増える）
+const random = (min, max) => Math.random() * (max - min) + min;
+const randomInt = (min, max) => Math.floor(random(min, max + 1));
+const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+const hsla = (h, s, l, a) => `hsla(${h}, ${s}%, ${l}%, ${a})`;
+
+/* =========================================================
+   Procedural Sound Engine (Web Audio API)
+   ========================================================= */
+class SoundFX {
+    constructor(ctx) {
+        this.ctx = ctx;
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = 0.5;
+
+        this.compressor = this.ctx.createDynamicsCompressor();
+        this.compressor.threshold.value = -10;
+        this.compressor.knee.value = 10;
+        this.compressor.ratio.value = 12;
+        this.compressor.attack.value = 0;
+        this.compressor.release.value = 0.25;
+
+        this.masterGain.connect(this.compressor);
+        this.compressor.connect(this.ctx.destination);
+
+        const bufferSize = this.ctx.sampleRate * 2.0;
+        this.noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const output = this.noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+    }
+
+    playLaunch(duration) {
+        if (this.ctx.state === 'suspended') return;
+        const now = this.ctx.currentTime;
+        const source = this.ctx.createBufferSource();
+        source.buffer = this.noiseBuffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.Q.value = 15;
+        filter.frequency.setValueAtTime(300, now);
+        filter.frequency.exponentialRampToValueAtTime(1200, now + duration);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.3, now + 0.1);
+        gain.gain.linearRampToValueAtTime(0, now + duration);
+
+        source.connect(filter); filter.connect(gain); gain.connect(this.masterGain);
+        source.start(now); source.stop(now + duration);
+    }
+
+    playBurst(scale, isKamuro = false) {
+        if (this.ctx.state === 'suspended') return;
+        const now = this.ctx.currentTime;
+        const source = this.ctx.createBufferSource();
+        source.buffer = this.noiseBuffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        const startFreq = isKamuro ? 150 : Math.max(200, 1500 - (scale * 300));
+        filter.frequency.setValueAtTime(startFreq, now);
+        filter.frequency.exponentialRampToValueAtTime(50, now + (isKamuro ? 2.0 : 1.0));
+
+        const gain = this.ctx.createGain();
+        const maxVol = isKamuro ? 2.5 : clamp(scale * 0.5, 0.3, 1.5);
+        const decay = isKamuro ? 4.0 : 1.5;
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(maxVol, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + decay);
+
+        source.connect(filter); filter.connect(gain); gain.connect(this.masterGain);
+        source.start(now); source.stop(now + decay);
+
+        if (isKamuro) this.playCrackle(now + 0.2, 3.5, 40);
+    }
+
+    playCrackle(startTime, duration, count) {
+        for (let i = 0; i < count; i++) {
+            const t = startTime + random(0, duration);
+            const source = this.ctx.createBufferSource();
+            source.buffer = this.noiseBuffer;
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.value = random(2000, 5000);
+            const gain = this.ctx.createGain();
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(random(0.05, 0.15), t + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+            source.connect(filter); filter.connect(gain); gain.connect(this.masterGain);
+            source.start(t); source.stop(t + 0.15);
+        }
+    }
+
+    /* ことばが文字の形に集まるときの、ごく小さな澄んだ音 */
+    playChime(baseHz = 880, dur = 1.1, vol = 0.09) {
+        if (this.ctx.state === 'suspended') return;
+        const now = this.ctx.currentTime;
+        [1, 1.5, 2].forEach((mul, i) => {
+            const osc = this.ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = baseHz * mul;
+            const g = this.ctx.createGain();
+            g.gain.setValueAtTime(0, now);
+            g.gain.linearRampToValueAtTime(vol / (i + 1), now + 0.06);
+            g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+            osc.connect(g); g.connect(this.masterGain);
+            osc.start(now); osc.stop(now + dur);
+        });
+    }
+
+    /* ことばごとの開花音。種類で音色を変える */
+    playWordBurst(kind, scale) {
+        if (this.ctx.state === 'suspended') return;
+        switch (kind) {
+            case 'kamuro': this.playBurst(scale, true); break;
+            case 'sorry': this.playSoft(90, 2.6, 0.9); break;
+            case 'dud': this.playDud(); break;    // 不発は鈍い音だけ
+            case 'flower': break;                 // 花は自前で鳴らす
+            case 'heart': this.playSoft(140, 1.6, 1.0);
+                          setTimeout(() => this.playSoft(130, 1.4, 0.8), 620); break;
+            case 'senrin': this.playBurst(scale, false);
+                           this.playCrackle(this.ctx.currentTime + 0.65, 1.6, 34); break;
+            case 'pop':    this.playCrackle(this.ctx.currentTime, 0.7, 26);
+                           this.playBurst(scale * 0.7, false); break;
+            case 'nebula': this.playSoft(70, 3.4, 0.7); break;
+            case 'lonely': this.playSoft(110, 2.8, 0.6); break;
+            case 'ring':   this.playSoft(120, 2.2, 0.85); break;
+            default:       this.playBurst(scale, false);
+        }
+    }
+
+    /* 不発の音。開ききらない、くぐもった鈍い音 */
+    playDud() {
+        if (this.ctx.state === 'suspended') return;
+        const now = this.ctx.currentTime;
+        const src = this.ctx.createBufferSource();
+        src.buffer = this.noiseBuffer;
+        const f = this.ctx.createBiquadFilter();
+        f.type = 'lowpass';
+        f.frequency.setValueAtTime(280, now);
+        f.frequency.exponentialRampToValueAtTime(55, now + 0.5);
+        const g = this.ctx.createGain();
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(0.55, now + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+        src.connect(f); f.connect(g); g.connect(this.masterGain);
+        src.start(now); src.stop(now + 0.65);
+    }
+
+    /* やわらかい低音（破裂ではなく、ふくらむ音） */
+    playSoft(freq, decay, vol) {
+        const now = this.ctx.currentTime;
+        const source = this.ctx.createBufferSource();
+        source.buffer = this.noiseBuffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(freq * 4, now);
+        filter.frequency.exponentialRampToValueAtTime(40, now + decay);
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(vol, now + 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + decay);
+        source.connect(filter); filter.connect(gain); gain.connect(this.masterGain);
+        source.start(now); source.stop(now + decay);
+    }
+}
+
+/* =========================================================
+   ことば辞書 — 言われた言葉を、花火の性格に翻訳する
+   ========================================================= */
+/* ことばは3つだけ。これ以外は何も起こさない。
+   （flower・senrin など他の花火のつくりは下にそのまま残してある。
+     ここに1行足せば、いつでも戻せる） */
+const WORD_TABLE = [
+    { kind:'kamuro', label:'ありがとう', hue:42,
+      keys:['ありがとう','ありがとうございます','ありがと','あざす','あざーす',
+            'さんきゅ','サンキュー','かんしゃ','感謝','おおきに'] },
+    { kind:'sorry', label:'ごめんね', hue:205,
+      keys:['ごめん','ごめんね','ごめんよ','ごめんなさい','すみません','すいません',
+            'すまん','わるかった','ゆるして','あやまる'] },
+    { kind:'dud', label:'嫌い', hue:214,
+      keys:['きらい','嫌い','だいきらい','大嫌い','きらいだ','だいっきらい'] }
+];
+
+/* カタカナ→ひらがな、記号と空白を落として比較しやすくする */
+function normalizeJa(s) {
+    return (s || '')
+        .replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60))
+        .replace(/[\s、。！？!?,.・ー〜~]/g, '')
+        .toLowerCase();
+}
+
+/* 一番長く一致したものを採用する（「だいすき」が「すき」に負けないように） */
+function matchWord(text) {
+    const n = normalizeJa(text);
+    if (!n) return null;
+    let best = null, bestLen = 0;
+    for (const entry of WORD_TABLE) {
+        for (const k of entry.keys) {
+            const nk = normalizeJa(k);
+            if (nk && n.indexOf(nk) >= 0 && nk.length > bestLen) { best = entry; bestLen = nk.length; }
+        }
+    }
+    return best;
+}
+
+/* =========================================================
+   音の高さを測る
+   自己相関（NSDF）で基本周波数を出す。端末の中だけで終わり、
+   声はどこにも送られない。色と粒の性質はこの値から決まる。
+   ※ 以前はここで母音（あいうえお）も判定していたが、
+      実際に遊んでもらうと、ほとんどの人は花火に向かって
+      「バン！」としか言わなかった。母音がほぼ出ないので外した。
+   ========================================================= */
+class PitchEngine {
+    constructor(ctx, source) {
+        this.an = ctx.createAnalyser();
+        this.an.fftSize = 2048;
+        this.an.smoothingTimeConstant = 0.25;      // 変化に素早く追いつく
+        if (source) source.connect(this.an);
+
+        this.sr = ctx.sampleRate;
+        this.time = new Float32Array(this.an.fftSize);
+        this.pbuf = new Float32Array(512);
+        this.nsdf = new Float32Array(420);
+
+        this.f0 = 170;
+        this.clarity = 0;        // 波形の周期性 0〜1（澄んだ声ほど高い）
+        this.frame = 0;
+        this.gate = 13;
+    }
+
+    /* 基本周波数。NSDF の山から求める */
+    estimateF0() {
+        const T = this.time, b = this.pbuf, n = 512;
+        let mean = 0;
+        for (let i = 0; i < n; i++) { b[i] = (T[i * 2] + T[i * 2 + 1]) * 0.5; mean += b[i]; }
+        mean /= n;
+        for (let i = 0; i < n; i++) b[i] -= mean;
+
+        const sr2 = this.sr / 2;
+        const minLag = Math.max(2, Math.floor(sr2 / 900));
+        const maxLag = Math.min(Math.floor(sr2 / 70), n - 4, this.nsdf.length - 1);
+        let gmax = 0;
+        for (let lag = minLag; lag <= maxLag; lag++) {
+            let ac = 0, e = 0; const lim = n - lag;
+            for (let i = 0; i < lim; i++) { const x = b[i], y = b[i + lag]; ac += x * y; e += x * x + y * y; }
+            const v = e > 1e-9 ? (2 * ac) / e : 0;
+            this.nsdf[lag] = v;
+            if (v > gmax) gmax = v;
+        }
+        this.clarity = gmax;
+        if (gmax < 0.4) return;
+        const cut = gmax * 0.8;
+        for (let lag = minLag + 1; lag < maxLag; lag++) {
+            if (this.nsdf[lag] > cut && this.nsdf[lag] >= this.nsdf[lag - 1] &&
+                this.nsdf[lag] >= this.nsdf[lag + 1]) {
+                const hz = sr2 / lag;
+                if (hz > 60 && hz < 900) this.f0 = this.f0 * 0.6 + hz * 0.4;
+                return;
+            }
+        }
+    }
+
+    update(level) {
+        this.frame++;
+        if (level < this.gate) { this.clarity *= 0.85; return; }   // 静かなときは測らない
+        this.an.getFloatTimeDomainData(this.time);
+        this.estimateF0();
+    }
+}
+
+/* 声を伸ばしているあいだ昇っていく光の帯。色は声の高さで変わる */
+function emitStream(ve, x, y, tone, level) {
+    const hue = pitchHue(clamp(tone, 0, 1));
+    const n = 1 + Math.floor(clamp(level / 42, 0, 2.2));
+    for (let i = 0; i < n; i++) {
+        const a = random(0, PI2);
+        const s = random(0.5, 2.6) * (0.7 + tone * 0.8);
+        const p = ve.ps.emit(x + random(-6, 6), y + random(-6, 6),
+                             Math.cos(a) * s, Math.sin(a) * s - 0.4,
+                             random(26, 54), random(0.9, 2.2) * (1.3 - tone * 0.5),
+                             hue + random(-12, 12), 'normal', 8);
+        if (p) { p.gravity = 0.004; p.friction = 0.985; p.sat = random(55, 92); p.lit = random(60, 84); }
+    }
+}
+
+/* 柔らかい光の円。花びらの「体」を描くのに使う */
+const SOFT = {
+    steps: 18, size: 96, sprites: [],
+    build() {
+        for (let i = 0; i < this.steps; i++) {
+            const h = Math.round(i * 360 / this.steps);
+            const c = document.createElement('canvas');
+            c.width = c.height = this.size;
+            const g = c.getContext('2d'), r = this.size / 2;
+            const grd = g.createRadialGradient(r, r, 0, r, r, r);
+            const pre = `hsla(${h},92%,66%,`;
+            grd.addColorStop(0.00, pre + '1)');
+            grd.addColorStop(0.45, pre + '0.62)');
+            grd.addColorStop(0.78, pre + '0.18)');
+            grd.addColorStop(1.00, pre + '0)');
+            g.fillStyle = grd; g.fillRect(0, 0, this.size, this.size);
+            this.sprites.push(c);
+        }
+    },
+    get(h) { return this.sprites[Math.round((((h % 360) + 360) % 360) / 360 * this.steps) % this.steps]; }
+};
+SOFT.build();
+
+/* ============================================================================
+   声の性格 — 音の特徴量を、粒子の性質そのものへ翻訳する
+   ----------------------------------------------------------------------------
+   ここで決めた値は ParticleSystem.emit を通る全粒子にかかる。
+   だから既存のどのパターン（菊・リング・冠菊・母音花火）も、
+   一行も書き換えずに声の性格をまとうようになる。
+   ========================================================================== */
+const VOICE = { on: false, spd: 1, life: 1, size: 1, sat: 1, grav: 1, scatter: 0 };
+
+function voiceReset() {
+    VOICE.on = false; VOICE.spd = 1; VOICE.life = 1;
+    VOICE.size = 1; VOICE.sat = 1; VOICE.grav = 1; VOICE.scatter = 0;
+}
+
+/* 正規分布に近い乱数（散らばりの向きに使う） */
+function gauss() {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(PI2 * v);
+}
+
+/* 音の高さ 0〜1 → 色相。4色の切り替えではなく、連続して変わる。
+   低い=紫〜赤〜橙 / 中=緑〜シアン / 高い=青〜桃（ほぼ白） */
+const PITCH_HUE = [[0, 282], [0.18, 338], [0.34, 22], [0.52, 148],
+                   [0.68, 186], [0.84, 208], [1, 318]];
+function pitchHue(t) {
+    t = clamp(t, 0, 1);
+    let i = 0;
+    while (i < PITCH_HUE.length - 2 && t > PITCH_HUE[i + 1][0]) i++;
+    const a = PITCH_HUE[i], b = PITCH_HUE[i + 1];
+    const k = (t - a[0]) / (b[0] - a[0] || 1);
+    const d = (((b[1] - a[1]) % 360) + 540) % 360 - 180;   // 色相は円なので最短の向きで回す
+    return (a[1] + d * k + 360) % 360;
+}
+
+/* 音の高さを 0〜1 にする。音程が取れない音（拍手・ささやき）は明るさで代用 */
+function toneOf(f) {
+    if (f.pitched && f.f0 > 0) {
+        return clamp((Math.log2(clamp(f.f0, 70, 800)) - Math.log2(70)) /
+                     (Math.log2(800) - Math.log2(70)), 0, 1);
+    }
+    return f.centroidN === undefined ? 0.5 : f.centroidN;
+}
+
+/* ---- シェーダ（検証済み。外部ファイルなし） ---- */
+const GLSRC = {
+  particleVert: `#version 300 es
+/* 既存の2D粒子を、画面座標のまま HDR バッファへ描く。
+   尾は「速度を逆向きにたどった少し前の位置」として GPU 側で作る。
+   1粒子 = 1インスタンス、gl_VertexID = 尾の何番目か。
+   これで 1 回の描画命令だけで、頭と尾の全部が出る。 */
+precision highp float;
+
+in vec4 a_pos;    // x, y（画面の画素）, vx, vy（画素/フレーム）
+in vec4 a_col;    // 色相(度), 彩度 0-1, 明度 0-1, 透明度 0-1
+in vec4 a_misc;   // 大きさ, 尾の長さ(フレーム), 種類(0=通常 1=柔らかい光), 尾の濃さ
+
+uniform vec2  u_res;        // 画面の画素数
+uniform float u_sizeK;      // 粒の大きさの全体倍率
+uniform float u_trailStep;  // 1ステップが何フレーム分か
+uniform float u_maxPoint;   // 端末が許す点の最大径
+
+out vec3  v_color;
+out float v_alpha;
+out float v_soft;
+
+/* 色相・彩度・明度 → RGB */
+vec3 hsl2rgb(vec3 c) {
+    vec3 k = clamp(abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+    return c.z + c.y * (k - 0.5) * (1.0 - abs(2.0 * c.z - 1.0));
+}
+
+void main() {
+    float idx      = float(gl_VertexID);     // 0 = 頭、増えるほど後ろ
+    float back     = idx * u_trailStep;      // 何フレームぶん遡るか
+    float trailLen = a_misc.y;
+    float soft     = a_misc.z;
+
+    // 尾の長さを超えた分は、画面の外へ飛ばして描かせない
+    if (back >= trailLen) {
+        gl_Position  = vec4(2.0, 2.0, 2.0, 1.0);
+        gl_PointSize = 0.0;
+        v_alpha = 0.0; v_color = vec3(0.0); v_soft = 0.0;
+        return;
+    }
+
+    vec2 p = a_pos.xy - a_pos.zw * back;
+
+    // 画面座標（左上が原点・下向きが正）→ クリップ座標
+    vec2 ndc = (p / u_res) * 2.0 - 1.0;
+    gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
+
+    float t = back / max(trailLen, 0.0001);        // 0 = 頭, 1 = 尾の端
+    float head = step(idx, 0.5);                   // 頭だけ 1
+
+    // 柔らかい光は尾を持たず、大きさも変えない
+    float sz = a_misc.x * u_sizeK * mix(mix(1.0, 0.42, t), 1.0, soft);
+
+    // 速い粒子は点が飛び飛びになるので、移動量ぶん大きくして隙間を埋める。
+    // 頭は控えめにする（頭まで大きくすると粒が球に見えてしまう）
+    float blur = length(a_pos.zw) * u_trailStep * 0.55 * (1.0 - soft);
+    sz = max(sz, mix(blur, blur * 0.42, head));
+
+    gl_PointSize = clamp(sz * 2.0, 1.0, u_maxPoint);
+
+    vec3 rgb = hsl2rgb(vec3(fract(a_col.x / 360.0), a_col.y, a_col.z));
+
+    // HDR：明るい粒ほど 1 を超える値を出す。ここが発光の芯になる
+    float hdr = 1.0 + 1.8 * a_col.z * a_col.z;
+    v_color = rgb * hdr;
+
+    // 尾は頭より薄い。a_misc.w が種類ごとの尾の濃さ
+    v_alpha = a_col.w * mix((1.0 - t) * a_misc.w, 1.0, head);
+    v_soft  = soft;
+}
+`,
+  particleFrag: `#version 300 es
+/* 粒の見え方。2種類の輪郭を使い分ける。
+     通常      … 芯が強く、周りに薄い光の霧（既存の「丸＋にじみ」に対応）
+     柔らかい光 … 広くなだらか（既存の SOFT スプライトに対応） */
+precision highp float;
+
+in vec3  v_color;
+in float v_alpha;
+in float v_soft;
+out vec4 o_color;
+
+void main() {
+    vec2 d = gl_PointCoord - 0.5;
+    float r2 = dot(d, d);
+    if (r2 > 0.25) discard;
+    float r = sqrt(r2) * 2.0;             // 0 = 中心, 1 = ふち
+
+    // 通常：鋭い芯 + 薄い霧
+    float hard = pow(1.0 - r, 3.0) + pow(1.0 - r, 1.2) * 0.32;
+    // 柔らかい光：中心から外へなだらかに落ちる
+    float soft = pow(1.0 - r, 2.0) * 0.55;
+
+    float a = mix(hard, soft, v_soft) * v_alpha;
+    if (a <= 0.0008) discard;
+    o_color = vec4(v_color * a, a);
+}
+`,
+  quad: `#version 300 es
+precision highp float;
+out vec2 v_uv;
+void main() {
+    // 頂点バッファを使わない全画面三角形
+    vec2 p = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);
+    v_uv = p;
+    gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}
+`,
+  flat: `#version 300 es
+/* 何も書かないフラグメント。残光の減衰は混合関数だけで行うため、
+   描画先のテクスチャを読まないことが重要（読むと GL の規則違反になる） */
+precision highp float;
+out vec4 o_color;
+void main() { o_color = vec4(0.0); }
+`,
+  bright: `#version 300 es
+precision highp float;
+in vec2 v_uv;
+out vec4 o_color;
+uniform sampler2D u_src;
+uniform float u_threshold;
+uniform float u_knee;
+void main() {
+    vec3 c = texture(u_src, v_uv).rgb;
+    float b = max(c.r, max(c.g, c.b));
+    // しきい値の前後をなめらかにつなぐ（硬い縁が出ないように）
+    float soft = clamp(b - u_threshold + u_knee, 0.0, 2.0 * u_knee);
+    soft = soft * soft / (4.0 * u_knee + 0.0001);
+    float w = max(soft, b - u_threshold) / max(b, 0.0001);
+    o_color = vec4(c * w, 1.0);
+}
+`,
+  down: `#version 300 es
+precision highp float;
+in vec2 v_uv;
+out vec4 o_color;
+uniform sampler2D u_src;
+uniform vec2 u_texel;
+void main() {
+    // 13 タップの縮小。折り返しの目立たない定番の配置
+    vec3 a = texture(u_src, v_uv + u_texel * vec2(-2.0,  2.0)).rgb;
+    vec3 b = texture(u_src, v_uv + u_texel * vec2( 0.0,  2.0)).rgb;
+    vec3 c = texture(u_src, v_uv + u_texel * vec2( 2.0,  2.0)).rgb;
+    vec3 d = texture(u_src, v_uv + u_texel * vec2(-2.0,  0.0)).rgb;
+    vec3 e = texture(u_src, v_uv).rgb;
+    vec3 f = texture(u_src, v_uv + u_texel * vec2( 2.0,  0.0)).rgb;
+    vec3 g = texture(u_src, v_uv + u_texel * vec2(-2.0, -2.0)).rgb;
+    vec3 h = texture(u_src, v_uv + u_texel * vec2( 0.0, -2.0)).rgb;
+    vec3 i = texture(u_src, v_uv + u_texel * vec2( 2.0, -2.0)).rgb;
+    vec3 j = texture(u_src, v_uv + u_texel * vec2(-1.0,  1.0)).rgb;
+    vec3 k = texture(u_src, v_uv + u_texel * vec2( 1.0,  1.0)).rgb;
+    vec3 l = texture(u_src, v_uv + u_texel * vec2(-1.0, -1.0)).rgb;
+    vec3 m = texture(u_src, v_uv + u_texel * vec2( 1.0, -1.0)).rgb;
+    vec3 o = e * 0.125
+           + (a + c + g + i) * 0.03125
+           + (b + d + f + h) * 0.0625
+           + (j + k + l + m) * 0.125;
+    o_color = vec4(o, 1.0);
+}
+`,
+  up: `#version 300 es
+precision highp float;
+in vec2 v_uv;
+out vec4 o_color;
+uniform sampler2D u_src;
+uniform vec2 u_texel;
+uniform float u_radius;
+void main() {
+    // テント型の拡大。段を重ねるとガウスに近づく
+    vec2 t = u_texel * u_radius;
+    vec3 s = texture(u_src, v_uv + vec2(-t.x,  t.y)).rgb
+           + texture(u_src, v_uv + vec2( 0.0,  t.y)).rgb * 2.0
+           + texture(u_src, v_uv + vec2( t.x,  t.y)).rgb
+           + texture(u_src, v_uv + vec2(-t.x,  0.0)).rgb * 2.0
+           + texture(u_src, v_uv).rgb * 4.0
+           + texture(u_src, v_uv + vec2( t.x,  0.0)).rgb * 2.0
+           + texture(u_src, v_uv + vec2(-t.x, -t.y)).rgb
+           + texture(u_src, v_uv + vec2( 0.0, -t.y)).rgb * 2.0
+           + texture(u_src, v_uv + vec2( t.x, -t.y)).rgb;
+    o_color = vec4(s * (1.0 / 16.0), 1.0);
+}
+`,
+  comp: `#version 300 es
+/* 本画面 + Bloom を合成し、ACES でトーンマッピングして画面へ出す。
+   音のスペクトルによる干渉模様もここで重ねる。 */
+precision highp float;
+in vec2 v_uv;
+out vec4 o_color;
+
+uniform sampler2D u_scene;
+uniform sampler2D u_bloom;
+uniform sampler2D u_spectrum;   // 横 = 周波数, 縦 = 1
+uniform float u_bloomK;
+uniform float u_exposure;
+uniform float u_interference;
+uniform float u_time;
+uniform float u_aspect;
+uniform float u_vignette;
+uniform float u_outAlpha;   // 0 = 背景の星空の上に加算で重ねる / 1 = 不透明
+
+/* ACES フィルミック（Narkowicz 近似）。明るいところが白く飛ばずに色を残す */
+vec3 aces(vec3 x) {
+    const float a = 2.51, b = 0.03, c = 2.43, d = 0.59, e = 0.14;
+    return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+}
+
+void main() {
+    vec3 scene = texture(u_scene, v_uv).rgb;
+    vec3 bloom = texture(u_bloom, v_uv).rgb;
+    vec3 col = scene + bloom * u_bloomK;
+
+    // --- 音のスペクトルに反応する波紋 ---
+    // 既定では消えている。主役は花火なので、
+    //   ・鳴っていないときは一切描かない（谷が 0 になる式にする）
+    //   ・画面のまんなかは避け、外側の輪だけに出す
+    //   ・輪はうんと粗くして、細かい縞が目に刺さらないようにする
+    if (u_interference > 0.001) {
+        vec2 p = (v_uv - 0.5) * vec2(u_aspect, 1.0);
+        float r = length(p);
+        float spec = texture(u_spectrum, vec2(clamp(r * 1.2, 0.0, 1.0), 0.5)).r - 0.03;
+        if (spec > 0.0) {
+            float w = sin(r * 26.0 - u_time * 1.6) * 0.5 + 0.5;
+            w = pow(w, 6.0);                                   // 細い輪だけが残る
+            float band = smoothstep(0.22, 0.54, r)             // 中央には出さない
+                       * smoothstep(0.92, 0.60, r);            // ふちで消える
+            col += vec3(0.30, 0.55, 1.00) * w * spec * band * u_interference;
+        }
+    }
+
+    col *= u_exposure;
+    col = aces(col);
+
+    // 周辺をわずかに落として、中央へ目を集める
+    vec2 q = (v_uv - 0.5) * vec2(u_aspect, 1.0);
+    float vig = 1.0 - u_vignette * dot(q, q);
+    col *= clamp(vig, 0.0, 1.0);
+
+    col = pow(col, vec3(1.0 / 2.2));     // ガンマ
+
+    // premultipliedAlpha で出すので、アルファ 0 ならブラウザ側は
+    //   結果 = この色 + 背景   という純粋な加算合成になる。
+    // 背景の星空を隠さずに、花火の光だけが足される。
+    o_color = vec4(col, u_outAlpha);
+}
+`,
+};
+
+/* ============================================================================
+   GLStage — 既存の2D粒子を WebGL2 の HDR で描く描画モジュール
+   ----------------------------------------------------------------------------
+   ・粒子の物理計算は一切引き受けない。CPU 側の ParticleSystem が今までどおり
+     動かした結果を、毎フレーム読んで描くだけ。だから既存の花・雨・千輪・
+     母音花火・冠菊の挙動は何ひとつ変わらない。
+   ・尾は「速度を逆向きにたどった位置」として GPU で作る。CPU は尾の配列を
+     持たなくてよくなるので、そのぶん粒子を増やせる。
+   ・RGBA16F に貯めて、明部抽出 → 5段縮小 → 拡大加算 → ACES で仕上げる。
+   ・背景の星空の上に加算で重ねる（premultipliedAlpha + 出力アルファ 0）。
+   ・使えない端末では init() が false を返す。呼び出し側は 2D 描画へ落ちる。
+   ========================================================================== */
+class GLStage {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.log = [];
+        this.ok = false;
+        this.scale = 1;
+        // 既存の尾の長さは 4〜14 フレーム。16 点 × 1 フレームでちょうど覆える
+        this.trailSteps = 16;      // 尾を何点で描くか（品質で下げられる）
+        this.trailStep = 1.0;      // 1点が何フレームぶんか
+        this.capacity = 0;
+        this.drawn = 0;
+        this.maxMips = 5;          // 品質を下げるとブルームの段数を減らす
+        this.params = { size: 1, bloom: 0.85, expo: 1.05, fade: 0.74, intf: 0, vig: 0.5 };
+        this.intfQ = 1;        // 画質の段によるかかり具合
+        this.intfUser = 0;     // 利用者の設定（0 = 出さない。これが既定）
+    }
+
+    note(msg, cls) { this.log.push(cls ? `<span class="${cls}">${msg}</span>` : msg); }
+
+    /* ---------------- 起動 ---------------- */
+    init(src) {
+        let gl = null;
+        try {
+            gl = this.canvas.getContext('webgl2', {
+                alpha: true, antialias: false, depth: false, stencil: false,
+                premultipliedAlpha: true, preserveDrawingBuffer: false,
+                powerPreference: 'high-performance'
+            });
+        } catch (e) { gl = null; }
+        if (!gl) { this.note('WebGL2 が使えません → 2D描画で動かします', 'wn'); return false; }
+        this.gl = gl;
+        this.src = src;
+
+        this.note('WebGL2 … 利用可能', 'ok');
+        this.note('GPU … ' + this.gpuName(gl));
+
+        this.floatColor = !!gl.getExtension('EXT_color_buffer_float');
+        gl.getExtension('OES_texture_float_linear');
+        gl.getExtension('EXT_float_blend');
+        this.note('HDRバッファ … ' + (this.floatColor ? 'RGBA16F' : '不可。8bitで代替'),
+                  this.floatColor ? 'ok' : 'wn');
+
+        const mp = gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE);
+        this.maxPoint = Math.max(8, Math.min(256, (mp && mp[1]) || 64));
+        this.note('点の最大径 … ' + ((mp && mp[1]) || '?') + 'px');
+
+        try {
+            this.pProg = this.program(src.particleVert, src.particleFrag);
+            this.flatProg = this.program(src.quad, src.flat);
+            this.brightProg = this.program(src.quad, src.bright);
+            this.downProg = this.program(src.quad, src.down);
+            this.upProg = this.program(src.quad, src.up);
+            this.compProg = this.program(src.quad, src.comp);
+        } catch (e) {
+            this.note('シェーダの組み立てに失敗 → 2D描画で動かします', 'ng');
+            this.note(String(e.message).split('\n')[0]);
+            return false;
+        }
+        this.note('シェーダ 6本 … コンパイル・リンク成功', 'ok');
+
+        this.emptyVao = gl.createVertexArray();
+        this.allocate(24000);
+        this.spectrumTex = this.makeSpectrum(128);
+        this.resize();
+
+        if (!this.scene || !this.scene.okFB) {
+            this.note('描画先を作れませんでした → 2D描画で動かします', 'ng');
+            return false;
+        }
+        this.ok = true;
+        return true;
+    }
+
+    gpuName(gl) {
+        try {
+            const d = gl.getExtension('WEBGL_debug_renderer_info');
+            return (d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)) || '不明';
+        } catch (e) { return '不明'; }
+    }
+
+    shader(type, srcText) {
+        const gl = this.gl, s = gl.createShader(type);
+        gl.shaderSource(s, srcText);
+        gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+            throw new Error(gl.getShaderInfoLog(s) || 'compile failed');
+        }
+        return s;
+    }
+
+    program(vs, fs) {
+        const gl = this.gl, p = gl.createProgram();
+        gl.attachShader(p, this.shader(gl.VERTEX_SHADER, vs));
+        gl.attachShader(p, this.shader(gl.FRAGMENT_SHADER, fs));
+        gl.linkProgram(p);
+        if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+            throw new Error(gl.getProgramInfoLog(p) || 'link failed');
+        }
+        p.u = {};
+        const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+        for (let i = 0; i < n; i++) {
+            const info = gl.getActiveUniform(p, i);
+            if (info) p.u[info.name.replace('[0]', '')] = gl.getUniformLocation(p, info.name);
+        }
+        return p;
+    }
+
+    /* ---------------- 粒子バッファ ---------------- */
+    allocate(cap) {
+        const gl = this.gl;
+        this.capacity = cap;
+        this.data = new Float32Array(cap * 12);       // 12 float = 48 byte / 粒子
+        if (this.vbo) gl.deleteBuffer(this.vbo);
+        if (this.vao) gl.deleteVertexArray(this.vao);
+        this.vbo = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+        gl.bufferData(gl.ARRAY_BUFFER, this.data.byteLength, gl.DYNAMIC_DRAW);
+
+        this.vao = gl.createVertexArray();
+        gl.bindVertexArray(this.vao);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+        [['a_pos', 0], ['a_col', 16], ['a_misc', 32]].forEach(([nm, off]) => {
+            const loc = gl.getAttribLocation(this.pProg, nm);
+            if (loc < 0) return;
+            gl.enableVertexAttribArray(loc);
+            gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, 48, off);
+            gl.vertexAttribDivisor(loc, 1);           // 1粒子 = 1インスタンス
+        });
+        gl.bindVertexArray(null);
+    }
+
+    makeSpectrum(n) {
+        const gl = this.gl, t = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, t);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, n, 1, 0, gl.RED, gl.UNSIGNED_BYTE, new Uint8Array(n));
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        this.specN = n;
+        this.specBuf = new Uint8Array(n);
+        return t;
+    }
+
+    setSpectrum(arr) {
+        if (!this.ok || !arr || !arr.length) return;
+        const gl = this.gl, n = this.specN, b = this.specBuf, L = arr.length;
+        for (let i = 0; i < n; i++) {
+            const v = arr[(i * L / n) | 0] * 255;
+            b[i] = v < 0 ? 0 : v > 255 ? 255 : v;
+        }
+        gl.bindTexture(gl.TEXTURE_2D, this.spectrumTex);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, n, 1, gl.RED, gl.UNSIGNED_BYTE, b);
+    }
+
+    /* ---------------- 画面サイズ ---------------- */
+    resize(scale) {
+        const gl = this.gl;
+        if (scale) this.scale = scale;
+        this.cssW = Math.max(1, window.innerWidth);
+        this.cssH = Math.max(1, window.innerHeight);
+        this.dpr = Math.min(window.devicePixelRatio || 1, 2) * this.scale;
+        const w = Math.max(2, Math.floor(this.cssW * this.dpr));
+        const h = Math.max(2, Math.floor(this.cssH * this.dpr));
+        if (w === this.w && h === this.h) return;
+        this.w = w; this.h = h;
+        this.canvas.width = w; this.canvas.height = h;
+
+        const ifmt = this.floatColor ? gl.RGBA16F : gl.RGBA8;
+        const type = this.floatColor ? gl.HALF_FLOAT : gl.UNSIGNED_BYTE;
+        const mk = (tw, th) => {
+            const tex = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+            gl.texImage2D(gl.TEXTURE_2D, 0, ifmt, tw, th, 0, gl.RGBA, type, null);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            const fb = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+            const st = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            return { tex, fb, w: tw, h: th, okFB: st === gl.FRAMEBUFFER_COMPLETE };
+        };
+        if (this.scene) { gl.deleteTexture(this.scene.tex); gl.deleteFramebuffer(this.scene.fb); }
+        if (this.mips) this.mips.forEach(m => { gl.deleteTexture(m.tex); gl.deleteFramebuffer(m.fb); });
+
+        this.scene = mk(w, h);
+        this.mips = [];
+        let mw = w, mh = h;
+        for (let i = 0; i < 5; i++) {
+            mw = Math.max(2, mw >> 1); mh = Math.max(2, mh >> 1);
+            const t = mk(mw, mh);
+            if (!t.okFB) break;
+            this.mips.push(t);
+            if (mw <= 8 || mh <= 8) break;
+        }
+        this.cleared = false;
+    }
+
+    quad() {
+        const gl = this.gl;
+        gl.bindVertexArray(this.emptyVao);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.bindVertexArray(null);
+    }
+
+    /* ---------------- 1フレーム描く ----------------
+       ps     : 既存の ParticleSystem（pool を読むだけ。変更しない）
+       dt     : 前フレームからのミリ秒
+       skip   : この種類は描かない（'glyph' は 2D 側で文字として描くため）     */
+    frame(ps, dt, skip) {
+        if (!this.ok) return;
+        const gl = this.gl, P = this.params;
+
+        // 前フレームで束縛したテクスチャを外す（描画先を読む形になるのを防ぐ）
+        for (let u = 0; u < 3; u++) { gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, null); }
+        gl.activeTexture(gl.TEXTURE0);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.scene.fb);
+        gl.viewport(0, 0, this.w, this.h);
+
+        if (!this.cleared) { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); this.cleared = true; }
+
+        // --- 残光：貯めてある絵を一律に暗くする ---
+        const f = Math.pow(P.fade, Math.max(dt, 1) / 16.666);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.ZERO, gl.CONSTANT_COLOR);
+        gl.blendColor(f, f, f, f);
+        gl.useProgram(this.flatProg);
+        this.quad();
+
+        // --- 粒子を加算で描く ---
+        const n = this.fill(ps, skip);
+        this.drawn = n;
+        if (n > 0) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+            gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.data, 0, n * 12);
+            const p = this.pProg;
+            gl.useProgram(p);
+            gl.uniform2f(p.u.u_res, this.cssW, this.cssH);
+            gl.uniform1f(p.u.u_sizeK, P.size * this.dpr);
+            gl.uniform1f(p.u.u_trailStep, this.trailStep);
+            gl.uniform1f(p.u.u_maxPoint, this.maxPoint);
+            gl.blendFunc(gl.ONE, gl.ONE);
+            gl.bindVertexArray(this.vao);
+            gl.drawArraysInstanced(gl.POINTS, 0, this.trailSteps, n);
+            gl.bindVertexArray(null);
+        }
+        gl.disable(gl.BLEND);
+
+        this.post();
+    }
+
+    /* 既存の粒子を、GPU が読む並びに詰め替える */
+    fill(ps, skip) {
+        const pool = ps.pool, d = this.data, cap = this.capacity;
+        let n = 0;
+        for (let i = 0; i < pool.length && n < cap; i++) {
+            const p = pool[i];
+            if (!p.active || p.type === skip) continue;
+            const a = p.alpha;
+            if (a <= 0.004) continue;
+            const o = n * 12;
+            d[o] = p.x; d[o + 1] = p.y; d[o + 2] = p.vx; d[o + 3] = p.vy;
+            d[o + 4] = p.hue; d[o + 5] = p.sat * 0.01; d[o + 6] = p.lit * 0.01; d[o + 7] = a;
+            const soft = p.soft ? 1 : 0;
+            let tl = 1, ta = 0;
+            if (!soft && p.type !== 'shell' && p.type !== 'bloom') {
+                tl = p.trailLen || 1;
+                ta = (p.type === 'willow') ? 0.85 : 0.62;
+            }
+            d[o + 8] = p.size; d[o + 9] = tl; d[o + 10] = soft; d[o + 11] = ta;
+            n++;
+        }
+        return n;
+    }
+
+    /* 明部抽出 → 縮小 → 拡大加算 → ACES で画面へ */
+    post() {
+        const gl = this.gl, P = this.params;
+        const m = this.mips.slice(0, Math.max(1, Math.min(this.maxMips, this.mips.length)));
+        if (!m.length) return;
+
+        gl.useProgram(this.brightProg);
+        gl.uniform1f(this.brightProg.u.u_threshold, 0.72);
+        gl.uniform1f(this.brightProg.u.u_knee, 0.5);
+        gl.uniform1i(this.brightProg.u.u_src, 0);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, m[0].fb);
+        gl.viewport(0, 0, m[0].w, m[0].h);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.scene.tex);
+        this.quad();
+
+        gl.useProgram(this.downProg);
+        gl.uniform1i(this.downProg.u.u_src, 0);
+        for (let i = 1; i < m.length; i++) {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, m[i].fb);
+            gl.viewport(0, 0, m[i].w, m[i].h);
+            gl.bindTexture(gl.TEXTURE_2D, m[i - 1].tex);
+            gl.uniform2f(this.downProg.u.u_texel, 1 / m[i - 1].w, 1 / m[i - 1].h);
+            this.quad();
+        }
+
+        gl.useProgram(this.upProg);
+        gl.uniform1i(this.upProg.u.u_src, 0);
+        gl.uniform1f(this.upProg.u.u_radius, 1.0);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.ONE, gl.ONE);
+        for (let i = m.length - 1; i > 0; i--) {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, m[i - 1].fb);
+            gl.viewport(0, 0, m[i - 1].w, m[i - 1].h);
+            gl.bindTexture(gl.TEXTURE_2D, m[i].tex);
+            gl.uniform2f(this.upProg.u.u_texel, 1 / m[i].w, 1 / m[i].h);
+            this.quad();
+        }
+        gl.disable(gl.BLEND);
+
+        for (let u = 0; u < 3; u++) { gl.activeTexture(gl.TEXTURE0 + u); gl.bindTexture(gl.TEXTURE_2D, null); }
+
+        const c = this.compProg;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, this.w, this.h);
+        gl.useProgram(c);
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.scene.tex);
+        gl.uniform1i(c.u.u_scene, 0);
+        gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, m[0].tex);
+        gl.uniform1i(c.u.u_bloom, 1);
+        gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, this.spectrumTex);
+        gl.uniform1i(c.u.u_spectrum, 2);
+        gl.uniform1f(c.u.u_bloomK, P.bloom);
+        gl.uniform1f(c.u.u_exposure, P.expo);
+        gl.uniform1f(c.u.u_interference, P.intf);
+        gl.uniform1f(c.u.u_time, (performance.now() || 0) * 0.001);
+        gl.uniform1f(c.u.u_aspect, this.w / this.h);
+        gl.uniform1f(c.u.u_vignette, P.vig);
+        gl.uniform1f(c.u.u_outAlpha, 0.0);      // 0 = 星空の上に加算で重ねる
+        this.quad();
+        gl.activeTexture(gl.TEXTURE0);
+    }
+}
+
+
+/* ============================================================================
+   品質の段 — 重いときは上から順に落とす。
+   実機で測った1フレームの時間にもとづいて、ひとりでに上下する。
+   ========================================================================== */
+const QUALITY = [
+    { name: '最軽量', scale: 0.55, trail: 6,  cap: 0.22, mips: 3, intf: 0,    dens: 0.55 },
+    { name: '軽量',   scale: 0.70, trail: 9,  cap: 0.40, mips: 4, intf: 0.5,  dens: 0.72 },
+    { name: 'ふつう', scale: 0.85, trail: 12, cap: 0.65, mips: 5, intf: 0.85, dens: 0.88 },
+    { name: '高画質', scale: 1.00, trail: 16, cap: 1.00, mips: 5, intf: 1,    dens: 1.00 },
+];
+
+/* ============================================================================
+   デモ — だれもいないときに流れる台本
+   ----------------------------------------------------------------------------
+   マイクを真似るのではなく、特徴量を直接わたして発火させる。
+   そうすることで「マイクが壊れていてもデモは必ず動く」。
+   一拍ごとに声の性格を変えてあるので、対応表そのものの実演にもなっている。
+   ========================================================================== */
+const DEMO_SCRIPT = [
+    // t 秒 / k 種類（v=声, w=ことば, m=文字）
+    { t: 0.4,  k: 'v', f: { rms: 46, pitched: true, f0: 190, attack: .35, clarity: .9,
+                            centroidN: .42, low: .55, high: .35, crest: 3.1 } },
+    { t: 1.9,  k: 'v', f: { rms: 52, pitched: true, f0: 340, attack: .75, clarity: .88,
+                            centroidN: .68, low: .30, high: .70, crest: 3.0 } },
+    { t: 3.0,  k: 'v', f: { rms: 62, pitched: false, f0: 0, attack: .96, clarity: .12,
+                            centroidN: .62, low: .75, high: .72, crest: 12.0 }, combo: 1 },
+    { t: 3.35, k: 'v', f: { rms: 64, pitched: false, f0: 0, attack: .96, clarity: .12,
+                            centroidN: .62, low: .75, high: .72, crest: 12.0 }, combo: 2 },
+    { t: 3.7,  k: 'v', f: { rms: 66, pitched: false, f0: 0, attack: .96, clarity: .12,
+                            centroidN: .62, low: .75, high: .72, crest: 12.0 }, combo: 3 },
+    { t: 5.0,  k: 'v', f: { rms: 72, pitched: true, f0: 115, attack: .18, clarity: .93,
+                            centroidN: .22, low: .92, high: .18, crest: 3.0 } },
+    { t: 6.6,  k: 'm', msg: 'こえの たかさで いろが かわる' },
+    { t: 7.0,  k: 'w', w: 'ありがとう' },
+    { t: 11.2, k: 'w', w: 'ごめんね' },
+    { t: 16.0, k: 'm', msg: 'ありがとう と いって みて' },
+    { t: 16.6, k: 'v', f: { rms: 50, pitched: true, f0: 430, attack: .80, clarity: .86,
+                            centroidN: .78, low: .22, high: .80, crest: 3.0 } },
+    { t: 17.8, k: 'w', w: 'ありがとう' },
+    { t: 21.6, k: 'v', f: { rms: 58, pitched: true, f0: 150, attack: .25, clarity: .9,
+                            centroidN: .30, low: .80, high: .25, crest: 3.0 } },
+    { t: 23.0, k: 'k' },                                   // 冠菊
+    { t: 27.0, k: 'm', msg: 'こえを だして みて' },
+    { t: 29.0, k: 'end' },
+];
+
+/* =========================================================
+   Background Star System
+   ========================================================= */
+class Background {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d', { alpha: false });
+        this.stars = [];
+        this.summerLevel = 0;
+        this.resize();
+        this.initStars();
+    }
+    resize() {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+    }
+    initStars() {
+        this.stars = [];
+        const starCount = (this.width * this.height) / 4000;
+        for (let i = 0; i < starCount; i++) {
+            this.stars.push({
+                x: random(0, this.width), y: random(0, this.height),
+                size: random(0.5, 1.2), baseAlpha: random(0.1, 0.4),
+                phase: random(0, PI2), speed: random(0.005, 0.02)
+            });
+        }
+        // 瞬くのは一部だけにして、残りは一枚の絵に焼いておく。
+        // 毎フレーム数百個の円を描かずに済み、見た目はほとんど変わらない
+        this.twinkle = this.stars.filter(() => Math.random() < 0.09);
+        const fixed = new Set(this.twinkle);
+        this.layer = document.createElement('canvas');
+        this.layer.width = Math.max(1, this.width);
+        this.layer.height = Math.max(1, this.height);
+        const g = this.layer.getContext('2d');
+        g.fillStyle = '#ffffff';
+        for (const s of this.stars) {
+            if (fixed.has(s)) continue;
+            g.globalAlpha = clamp(s.baseAlpha, 0, 1);
+            g.beginPath(); g.arc(s.x, s.y, s.size, 0, PI2); g.fill();
+        }
+        g.globalAlpha = 1;
+    }
+    draw(time) {
+        // 夏が満ちるほど、空の底がわずかに青く明るむ
+        const r = Math.floor(3 + 17 * this.summerLevel);
+        const g = Math.floor(5 + 20 * this.summerLevel);
+        const b = Math.floor(8 + 47 * this.summerLevel);
+        this.ctx.fillStyle = `rgb(${r},${g},${b})`;
+        this.ctx.fillRect(0, 0, this.width, this.height);
+
+        if (this.layer) this.ctx.drawImage(this.layer, 0, 0);
+        this.ctx.fillStyle = '#ffffff';
+        const tw = this.twinkle;
+        for (let i = 0; i < tw.length; i++) {
+            const star = tw[i];
+            star.phase += star.speed;
+            this.ctx.globalAlpha = clamp(star.baseAlpha + Math.sin(star.phase) * 0.2, 0, 1);
+            this.ctx.beginPath();
+            this.ctx.arc(star.x, star.y, star.size, 0, PI2);
+            this.ctx.fill();
+        }
+        this.ctx.globalAlpha = 1.0;
+    }
+}
+
+/* =========================================================
+   Audio Engine (Mic Analysis)
+   ========================================================= */
+class AudioEngine {
+    constructor() {
+        this.ctx = null; this.sfx = null; this.analyser = null;
+        this.microphone = null; this.dataArray = null;
+
+        this.rms = 0; this.pitch = 0;
+        this.energy = { low: 0, mid: 0, high: 0, total: 0 };
+        // 音量以外の特徴量
+        this.f0 = 0;          // 基本周波数（自己相関。声のときだけ有効）
+        this.pitched = false; // 周期的な声かどうか
+        this.clarity = 0;     // 澄んでいるか 0〜1
+        this.centroid = 0;    // スペクトル重心（音の明るさ）Hz
+        this.centroidN = 0;   // 同上を 0〜1 に正規化
+        this.flux = 0;        // スペクトルの変化量（子音や打撃で大きい）
+        this.attack = 0;      // 立ち上がりの鋭さ 0〜1
+        this.crest = 0;       // 尖頭値÷実効値（打撃音で大きい）
+        this.peakHold = 0;    // マイク確認用の尖頭保持
+        this.riseMs = 0;      // 立ち上がりにかかった時間
+        this.bandFloor = [-60, -60, -60];
+        this.deviceId = null; this.recovering = false; this.onRecover = null;
+
+        // 時間波形の実効値から出す 0〜130 の目盛り。部屋の騒音に自動で追従する
+        this.rms = 0;
+        this.noise = 6;          // 静かなときの水準
+        this.voicedTime = 0;
+        this.hi = 24; this.lo = 15;
+        this.sensIdx = 0;
+        try {
+            const i = SENS_STEPS.findIndex(x => x.key === localStorage.getItem(SENS_KEY));
+            if (i >= 0) this.sensIdx = i;
+        } catch (e) {}
+        this.sustainedTime = 0;
+        this.lastOnset = 0;
+        this.combo = 0;
+
+        this.wasLoud = false;
+        this.pending = false;
+        this.peakRms = 0;
+
+        this.onEvent = null;
+        this.onKamuro = null;
+        this.isActive = false;
+        this.pitchEngine = null;
+        this.tone = 0.5;          // 音の高さ 0〜1（色と粒の性質を決める）
+    }
+
+    async init() {
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioContext();
+        if (this.ctx.state === 'suspended') await this.ctx.resume();
+        this.sfx = new SoundFX(this.ctx);
+
+        try {
+            // 端末の自動ゲイン調整を切る。これを切らないと声の大小が均されてしまう
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+                video: false
+            });
+            this.microphone = this.ctx.createMediaStreamSource(stream);
+            this.analyser = this.ctx.createAnalyser();
+            this.analyser.fftSize = 2048;
+            this.analyser.smoothingTimeConstant = 0.7;
+            this.microphone.connect(this.analyser);
+            this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+            this.timeData = new Float32Array(this.analyser.fftSize);
+            this.freqF = new Float32Array(this.analyser.frequencyBinCount);
+            this.prevMag = new Float32Array(this.analyser.frequencyBinCount);
+            // 音の高さ用は別の解析器。変化に追いつくよう平滑化を弱くする
+            this.pitchEngine = new PitchEngine(this.ctx, this.microphone);
+            this.stream = stream;
+            this.watchTrack();
+            this.isActive = true;
+            return true;
+        } catch (e) {
+            // なぜ使えないのかを残しておく（画面に出して伝える）
+            if (!window.isSecureContext) this.failReason = 'secure';
+            else if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) this.failReason = 'denied';
+            else if (!navigator.mediaDevices) this.failReason = 'secure';
+            else this.failReason = 'other';
+            return false;
+        }
+    }
+
+    /* 波紋に渡すスペクトル。60Hz〜6kHz を対数で 64 本にまとめる。
+       getByteFrequencyData（dB を 0〜255 に写したもの）をそのまま使うと、
+       静かな部屋でも高い値が出て振り切れてしまう。音量のときと同じく、
+       帯域ごとに暗騒音を測り、そこからどれだけ上がったかで見る。 */
+    specBands(out) {
+        if (!this.isActive || !this.freqF) { out.fill(0); return out; }
+        const F = this.freqF, nb = F.length, n = out.length;
+        const binHz = this.ctx.sampleRate / this.analyser.fftSize;
+        if (!this.specFloor) { this.specFloor = new Float32Array(n); this.specFloor.fill(-999); this.specWarm = 0; }
+        const fl = this.specFloor;
+        const warm = this.specWarm++ < 70;      // 最初の約1秒で部屋の静けさをおぼえる
+        for (let i = 0; i < n; i++) {
+            const a = Math.max(1, Math.round(60 * Math.pow(100, i / n) / binHz));
+            const b = Math.min(nb, Math.max(a + 1, Math.round(60 * Math.pow(100, (i + 1) / n) / binHz)));
+            let s = 0;
+            for (let k = a; k < b; k++) s += (F[k] > -140 ? F[k] : -140);
+            const db = s / (b - a);
+            // 下がるのは速く、上がるのはごく遅く（声で基準が持ち上がらないように）
+            if (warm) fl[i] = (fl[i] < -900) ? db : fl[i] + (db - fl[i]) * 0.3;
+            else if (db < fl[i]) fl[i] += (db - fl[i]) * 0.10;
+            else fl[i] += (db - fl[i]) * 0.0015;
+            // 2dB ぶんの遊びを置く。わずかな揺れでは輪が出ない
+            out[i] = clamp((db - fl[i] - 2) / 22, 0, 1);
+        }
+        return out;
+    }
+
+    /* 使える入力機器の一覧（外部オーディオインターフェースを選ぶため） */
+    async listInputs() {
+        try {
+            const ds = await navigator.mediaDevices.enumerateDevices();
+            return ds.filter(d => d.kind === 'audioinput');
+        } catch (e) { return []; }
+    }
+
+    /* 入力機器を切り替える。解析の配線はそのまま引き継ぐ */
+    async useDevice(deviceId) {
+        if (!this.ctx || !this.analyser) return false;
+        try {
+            const a = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+            if (deviceId) a.deviceId = { exact: deviceId };
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: a, video: false });
+            if (this.stream) { try { this.stream.getTracks().forEach(t => t.stop()); } catch (e) {} }
+            if (this.microphone) { try { this.microphone.disconnect(); } catch (e) {} }
+            this.stream = stream;
+            this.microphone = this.ctx.createMediaStreamSource(stream);
+            this.microphone.connect(this.analyser);
+            if (this.pitchEngine) this.microphone.connect(this.pitchEngine.an);
+            this.deviceId = deviceId || null;
+            this.watchTrack();
+            return true;
+        } catch (e) { return false; }
+    }
+
+    /* 機器が抜けたことを検知する */
+    watchTrack() {
+        const t = this.stream && this.stream.getAudioTracks && this.stream.getAudioTracks()[0];
+        if (t && t.addEventListener) t.addEventListener('ended', () => this.recover());
+    }
+
+    /* 抜けた機器を、つながるまで取り直し続ける（会場での事故に備える） */
+    recover() {
+        if (this.recovering || !this.isActive) return;
+        this.recovering = true;
+        if (this.onRecover) this.onRecover('lost');
+        let n = 0;
+        const again = () => setTimeout(async () => {
+            let ok = await this.useDevice(this.deviceId);
+            if (!ok) ok = await this.useDevice(null);       // 既定の機器に落とす
+            if (ok) { this.recovering = false; if (this.onRecover) this.onRecover('ok'); }
+            else if (++n < 30) again();
+            else { this.recovering = false; if (this.onRecover) this.onRecover('fail'); }
+        }, 1500);
+        again();
+    }
+
+    update(dt) {
+        if (!this.isActive) return;
+
+        this.analyser.getByteFrequencyData(this.dataArray);
+        this.analyser.getFloatTimeDomainData(this.timeData);
+        this.analyser.getFloatFrequencyData(this.freqF);
+
+        // 音量は波形そのものから。周波数の 0〜255 は暗騒音でも大きな値になるため使わない
+        let sq = 0, peakAmp = 0;
+        const T = this.timeData, N = T.length;
+        for (let i = 0; i < N; i++) {
+            const v = T[i]; sq += v * v;
+            const av = v < 0 ? -v : v; if (av > peakAmp) peakAmp = av;
+        }
+        const raw = Math.sqrt(sq / N);                          // 0〜1
+        this.crest = raw > 1e-6 ? peakAmp / raw : 0;            // 打撃音ほど大きい
+
+        // --- スペクトルを一度だけ走査して、重心・変化量・帯域を同時に出す ---
+        const F = this.freqF, nb = F.length;
+        const binHz = this.ctx.sampleRate / this.analyser.fftSize;
+        const i80 = Math.max(1, Math.round(80 / binHz));
+        const i8k = Math.min(nb, Math.round(8000 / binHz));
+        const LN10_20 = 0.11512925;
+        let magSum = 0, wSum = 0, flux = 0, bLow = 0, bMid = 0, bHigh = 0;
+        for (let i = i80; i < i8k; i++) {
+            const db = F[i] > -140 ? F[i] : -140;
+            const m = Math.exp(db * LN10_20);                   // dB → 線形振幅
+            magSum += m; wSum += m * i * binHz;
+            const d = m - this.prevMag[i]; if (d > 0) flux += d;
+            this.prevMag[i] = m;
+            const hz = i * binHz;
+            if (hz < 400) bLow += m; else if (hz < 2000) bMid += m; else bHigh += m;
+        }
+        this.centroid = magSum > 1e-9 ? wSum / magSum : 0;      // 音の明るさ
+        this.centroidN = clamp((Math.log2(clamp(this.centroid, 100, 8000)) - Math.log2(100)) /
+                               (Math.log2(8000) - Math.log2(100)), 0, 1);
+        this.flux = magSum > 1e-9 ? clamp(flux / magSum, 0, 1) : 0;
+
+        // 帯域は、帯域ごとの暗騒音を引いてから 0〜1 にする
+        const bRaw = [bLow, bMid, bHigh];
+        for (let b = 0; b < 3; b++) {
+            const db = 20 * Math.log10(bRaw[b] + 1e-9);
+            if (db < this.bandFloor[b]) this.bandFloor[b] += (db - this.bandFloor[b]) * 0.08;
+            else if (this.rms < this.lo) this.bandFloor[b] += (db - this.bandFloor[b]) * 0.004;
+            bRaw[b] = clamp((db - this.bandFloor[b]) / 28, 0, 1);
+        }
+        this.energy.low = bRaw[0]; this.energy.mid = bRaw[1]; this.energy.high = bRaw[2];
+        this.energy.total = (bRaw[0] + bRaw[1] + bRaw[2]) / 3;
+        const level = clamp(Math.sqrt(raw / 0.6) * 100, 0, 130); // 聞こえ方に近い目盛り
+        this.rms = this.rms * 0.30 + level * 0.70;
+
+        // 部屋の騒音の水準を測る。
+        // 下がるのは速く、上がるのは「声が出ていないとき」だけ。
+        // そうしないと、しゃべり続けるうちに基準が声につられて上がってしまう
+        this.voicedTime = (this.rms > this.lo) ? this.voicedTime + dt : 0;
+        if (this.rms < this.noise) {
+            this.noise += (this.rms - this.noise) * 0.08;
+        } else if (this.rms < this.lo || this.voicedTime > 8000) {
+            // 8秒以上鳴りっぱなしなら、それは声ではなく部屋の音とみなす
+            this.noise += (this.rms - this.noise) * 0.004;
+        }
+        this.noise = clamp(this.noise, 0, 45);
+        const S = SENS_STEPS[this.sensIdx];
+        this.hi = this.noise + S.hi;      // ここを超えたら「音が鳴った」
+        this.lo = this.noise + S.lo;      // ここを下回ったら「鳴り終わった」
+
+        // マイク確認用の尖頭保持（3秒かけてゆっくり下がる）
+        this.peakHold = Math.max(this.rms, this.peakHold - dt * 0.035);
+
+        if (this.pitchEngine) {
+            this.pitchEngine.gate = this.lo;
+            this.pitchEngine.update(this.rms);
+            // 音の高さは自己相関で求めた基本周波数を使う。
+            // 周期性が弱い音（「バン！」や拍手）には音程がないので、明るさ（重心）で代用する
+            const pe = this.pitchEngine;
+            this.clarity = pe.clarity;
+            this.pitched = pe.clarity > 0.45 && pe.f0 > 55 && pe.f0 < 1500 && this.rms > this.lo;
+            this.f0 = this.pitched ? pe.f0 : 0;
+            this.pitch = this.pitched ? pe.f0 : this.centroid;
+            this.tone = toneOf(this);
+        }
+        this.detectEvents(dt);
+        this.updateUI();
+    }
+
+    detectEvents(dt) {
+        const now = performance.now();
+        // 上のしきい値で「鳴った」、下のしきい値で「止んだ」と判断する（ヒステリシス）
+        const loud = this.wasLoud ? (this.rms > this.lo) : (this.rms > this.hi);
+
+        // 立ち上がりの鋭さ：静かな水準から発火線まで駆け上がるのに要した時間で測る。
+        // 拍手は一瞬、ため息はゆっくり。音量の大小とは独立になる
+        const gateLo = this.noise + (this.lo - this.noise) * 0.3;
+        if (!this.wasLoud) this.riseMs = (this.rms > gateLo) ? this.riseMs + dt : 0;
+
+        // 持続（冠菊用）。発射条件とは切り離して判定する
+        if (this.rms > this.lo) {
+            this.sustainedTime += dt;
+        } else {
+            if (this.sustainedTime > 1200) { if (this.onKamuro) this.onKamuro(); this.combo = 0; }
+            this.sustainedTime = 0;
+        }
+
+        // 立ち上がりを捕まえ、120ms ピークを見てから撃つ
+        if (loud && !this.wasLoud && now - this.lastOnset > 260) {
+            this.combo = (now - this.lastOnset < 800) ? this.combo + 1 : 1;
+            this.lastOnset = now;
+            this.peakRms = this.rms;
+            this.attack = clamp(1 - this.riseMs / 220, 0, 1);
+            this.pending = true;
+        }
+        if (this.pending) {
+            this.peakRms = Math.max(this.peakRms, this.rms);
+            if (now - this.lastOnset > 120) {
+                this.pending = false;
+                if (this.onEvent) this.onEvent({
+                    rms: this.peakRms, pitch: this.pitch, combo: this.combo, vowel: this.vowel,
+                    f0: this.f0, pitched: this.pitched, clarity: this.clarity, tone: this.tone,
+                    centroid: this.centroid, centroidN: this.centroidN,
+                    attack: this.attack, crest: this.crest, flux: this.flux,
+                    low: this.energy.low, mid: this.energy.mid, high: this.energy.high
+                });
+            }
+        }
+        this.wasLoud = loud;
+        if (now - this.lastOnset > 1200) this.combo = 0;
+    }
+
+    updateUI() {
+        document.getElementById('hud-mic').classList.toggle('active', this.rms > this.hi);
+        document.getElementById('hud-lvl').style.width = `${clamp((this.rms / 110) * 100, 0, 100)}%`;
+        const mk = document.getElementById('hud-mark');
+        if (mk) mk.style.left = `${clamp((this.hi / 110) * 100, 0, 100)}%`;   // 発火する高さの目印
+        const pk = document.getElementById('hud-peak');
+        if (pk) pk.style.width = `${clamp((this.peakHold / 110) * 100, 0, 100)}%`;
+        document.getElementById('hud-frq').style.width = `${clamp((this.pitch / 2000) * 100, 0, 100)}%`;
+        document.getElementById('hud-eng').style.width = `${clamp((this.energy.total / 128) * 100, 0, 100)}%`;
+        document.getElementById('hud-cmb').innerText = this.combo > 1 ? `x${this.combo}` : '0';
+    }
+}
+
+/* マイクの感度。部屋の騒音の上にどれだけ余裕を置くか */
+const SENS_STEPS = [
+    { key: 'mid',  label: 'ふつう', hi: 18, lo: 11 },
+    { key: 'low',  label: 'ひくい', hi: 32, lo: 21 },
+    { key: 'high', label: 'たかい', hi: 11, lo: 7 }
+];
+const SENS_KEY = 'koe_mic_sens_v1';
+
+/* =========================================================
+   Speech Engine — ことばを聞き取る
+   音の層とは別。聞き取りには時間がかかるので、
+   その遅れを「文字が空に浮かぶ時間」として使う
+   ========================================================= */
+class SpeechEngine {
+    constructor() {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        this.supported = !!SR;
+        this.SR = SR;
+        this.rec = null;
+        this.want = false;
+        this.listening = false;
+        this.onWord = null;
+        this.onInterim = null;
+        this.lastFired = 0;
+    }
+
+    start() {
+        if (!this.supported || this.rec) return false;
+        try {
+            const rec = new this.SR();
+            rec.lang = 'ja-JP';
+            rec.continuous = true;
+            rec.interimResults = true;
+            rec.maxAlternatives = 1;
+
+            rec.onstart = () => { this.listening = true; this.paint(); };
+            rec.onend = () => {
+                this.listening = false; this.paint();
+                // 無音が続くと勝手に止まるので、自分で立て直す
+                if (this.want) setTimeout(() => { try { rec.start(); } catch (e) {} }, 350);
+            };
+            rec.onerror = (e) => {
+                if (e.error === 'not-allowed' || e.error === 'service-not-allowed') this.want = false;
+            };
+            rec.onresult = (ev) => {
+                let interim = '', final = '';
+                for (let i = ev.resultIndex; i < ev.results.length; i++) {
+                    const r = ev.results[i];
+                    if (r.isFinal) final += r[0].transcript;
+                    else interim += r[0].transcript;
+                }
+                if (interim && this.onInterim) this.onInterim(interim);
+                if (final.trim()) {
+                    const now = performance.now();
+                    if (now - this.lastFired > 700) {   // 同じ一言で二重に出さない
+                        this.lastFired = now;
+                        if (this.onWord) this.onWord(final.trim());
+                    }
+                }
+            };
+
+            this.rec = rec;
+            this.want = true;
+            rec.start();
+            return true;
+        } catch (e) {
+            this.rec = null;
+            return false;
+        }
+    }
+
+    paint() {
+        const led = document.getElementById('hud-word');
+        if (led) led.classList.toggle('active', this.listening);
+    }
+}
+
+/* =========================================================
+   Particle System
+   ========================================================= */
+class Particle {
+    constructor() {
+        this.active = false; this.trail = [];
+        this.ch = ''; this.ph = 0; this.ref = null; this.spark = false;
+        this.soft = false; this.aMul = 1;
+        this.pa = 0; this.pr = 0; this.ox = 0; this.oy = 0; this.bd = 0;
+    }
+
+    init(x, y, vx, vy, life, size, hue, type = 'normal', trailLen) {
+        this.x = x; this.y = y; this.vx = vx; this.vy = vy;
+        this.life = life; this.maxLife = life;
+        this.size = (type === 'glyph') ? size : size * FINE;
+        this.hue = hue;
+        this.sat = type === 'willow' ? random(40, 70) : random(70, 100);
+        this.lit = type === 'willow' ? random(50, 70) : random(50, 80);
+        this.alpha = 1;
+        this.type = type;
+        this.tag = null;
+        this.noPull = false;
+        this.spark = false;
+        this.soft = false;
+        this.aMul = 1;
+
+        if (type === 'glyph') {
+            this.gravity = 0; this.friction = 1; this.trailLen = 2; this.noPull = true;
+        } else if (type === 'bloom') {
+            this.gravity = 0; this.friction = 0.8; this.trailLen = 3; this.noPull = true;
+        } else if (type === 'willow') {
+            this.gravity = random(0.04, 0.06);
+            this.friction = random(0.96, 0.98);
+            this.trailLen = randomInt(6, 14);
+        } else {
+            this.gravity = type === 'shell' ? 0.05 : 0.02;
+            this.friction = type === 'shell' ? 0.99 : random(0.92, 0.98);
+            this.trailLen = randomInt(4, 12);
+        }
+        if (trailLen) this.trailLen = trailLen;   // 花火ごとに尾の長さを変える
+
+        this.active = true;
+        // 軌跡の入れ物は使い回す（毎回作り直すと冠菊でGCが走る）。
+        // GPU描画のときは尾を速度から作るので、ここは丸ごと省ける
+        if (KEEP_TRAIL) {
+            while (this.trail.length < this.trailLen) this.trail.push({ x: 0, y: 0 });
+            this.trail.length = this.trailLen;
+            for (let i = 0; i < this.trailLen; i++) { this.trail[i].x = x; this.trail[i].y = y; }
+        }
+        return this;
+    }
+
+    update(dt, interactForce) {
+        if (!this.active) return;
+
+        const ts = dt / 16.66;          // 120Hz 端末でも同じ動きになるよう時間で正規化
+
+        if (KEEP_TRAIL) {
+            const t0 = this.trail.shift();
+            t0.x = this.x; t0.y = this.y;
+            this.trail.push(t0);
+        }
+
+        // --- ことばの雨の文字 ---
+        if (this.type === 'glyph') {
+            this.x += Math.sin(this.life * 0.035 + this.ph) * 0.5 * ts;   // ゆれながら降る
+            this.y += this.vy * ts;
+            this.life -= ts;
+            const t = this.life / this.maxLife;
+            this.alpha = Math.min(1, (1 - t) * 9) * Math.min(1, t * 4.5);
+            if (this.life <= 0) this.active = false;
+            return;
+        }
+
+        // --- 花びらとして開いていく粒子 ---
+        if (this.type === 'bloom') {
+            const ref = this.ref;
+            if (!ref) { this.active = false; return; }
+            if (ref.rel) {                                  // 解き放たれて散る
+                this.vy += 0.012 * ts;
+                this.vx *= Math.pow(0.993, ts); this.vy *= Math.pow(0.993, ts);
+                this.x += this.vx * ts; this.y += this.vy * ts;
+                this.life -= ts;
+            } else {
+                const pr = clamp((ref.t - this.bd) / 1.55, 0, 1);
+                const e = pr * pr * (3 - 2 * pr);           // はじめ遅く、途中で開き、終わりで止まる
+                const ang = this.pa + ref.t * 0.055;        // 花全体がゆっくり回る
+                const tx = this.ox + Math.cos(ang) * this.pr * e;
+                const ty = this.oy + Math.sin(ang) * this.pr * e;
+                this.vx += (tx - this.x) * 0.075 * ts;
+                this.vy += (ty - this.y) * 0.075 * ts;
+                this.vx *= Math.pow(0.78, ts); this.vy *= Math.pow(0.78, ts);
+                this.x += this.vx * ts; this.y += this.vy * ts;
+                this.life -= ts * 0.12;
+            }
+            // 加算合成で白く潰れないよう、1粒はごく薄く置く
+            const t2 = this.life / this.maxLife;
+            this.alpha = Math.max(0, Math.min(1, t2 * 3.2)) * this.aMul;
+            if (this.life <= 0) this.active = false;
+            return;
+        }
+
+        if (interactForce && interactForce.charging && !this.noPull) {
+            const dx = interactForce.x - this.x;
+            const dy = interactForce.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            if (dist < 300) {
+                const force = (300 - dist) / 300;
+                const pull = Math.min((performance.now() - interactForce.startTime) / 1000, 1);
+                this.vx += (dx / dist) * force * pull * 0.4 * ts;
+                this.vy += (dy / dist) * force * pull * 0.4 * ts;
+            }
+        }
+
+        this.vx *= Math.pow(this.friction, ts);
+        this.vy *= Math.pow(this.friction, ts);
+        this.vy += this.gravity * ts;
+
+        this.x += this.vx * ts;
+        this.y += this.vy * ts;
+
+        this.life -= (this.type === 'willow') ? ts * 0.6 : ts;
+        this.alpha = Math.max(0, this.life / this.maxLife);
+        if (this.life <= 0 || this.alpha <= 0.01) this.active = false;
+    }
+
+    draw(ctx) {
+        if (!this.active) return;
+
+        if (this.soft) {
+            const r = this.size;
+            ctx.globalAlpha = this.alpha;
+            ctx.drawImage(SOFT.get(this.hue), this.x - r, this.y - r, r * 2, r * 2);
+            ctx.globalAlpha = 1;
+            return;
+        }
+
+        if (this.type === 'glyph') {
+            ctx.globalAlpha = this.alpha * (0.62 + 0.38 * Math.sin(this.life * 0.22 + this.ph));
+            ctx.font = `${this.size.toFixed(1)}px "Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif`;
+            ctx.fillStyle = hsla(this.hue, this.sat, this.lit, 1);
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(this.ch, this.x, this.y);
+            ctx.globalAlpha = 1;
+            return;
+        }
+
+        if (this.trail.length > 0 && this.type !== 'shell' && this.type !== 'bloom') {
+            ctx.beginPath();
+            ctx.moveTo(this.trail[0].x, this.trail[0].y);
+            for (let i = 1; i < this.trail.length; i++) ctx.lineTo(this.trail[i].x, this.trail[i].y);
+            const trailAlpha = this.type === 'willow' ? this.alpha * 0.85 : this.alpha * 0.62;
+            ctx.strokeStyle = hsla(this.hue, this.sat, this.lit, trailAlpha);
+            ctx.lineWidth = this.size * 0.8;
+            ctx.stroke();
+        }
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, PI2);
+        ctx.fillStyle = hsla(this.hue, this.sat, this.lit, this.alpha);
+        ctx.fill();
+    }
+}
+
+class ParticleSystem {
+    constructor(maxParticles) {
+        this.pool = Array.from({ length: maxParticles }, () => new Particle());
+        this.cursor = 0;                 // 毎回 find() で全走査すると冠菊で固まるため
+        this.live = 0;                   // 生きている粒子の数（毎フレーム数え直す）
+        this.softCap = maxParticles;     // 品質を下げたとき、ここまでしか使わない
+    }
+    emit(x, y, vx, vy, life, size, hue, type, trailLen) {
+        // 品質を下げたときの上限。ここで止めないと、budget() を通らない
+        // パターン（菊・リング・冠菊）が上限を無視してしまう
+        if (this.live >= this.softCap) return null;
+        const n = this.pool.length;
+        for (let i = 0; i < n; i++) {
+            const p = this.pool[this.cursor];
+            this.cursor = (this.cursor + 1) % n;
+            if (!p.active) {
+                this.live++;
+                const q = p.init(x, y, vx, vy, life, size, hue, type, trailLen);
+                if (VOICE.on && q) {
+                    // 息の成分が多い声ほど、粒の飛ぶ向きがばらける
+                    if (VOICE.scatter > 0.001) {
+                        const a = gauss() * VOICE.scatter, c = Math.cos(a), s = Math.sin(a);
+                        const nx = q.vx * c - q.vy * s;
+                        q.vy = q.vx * s + q.vy * c; q.vx = nx;
+                    }
+                    q.vx *= VOICE.spd; q.vy *= VOICE.spd;
+                    q.life = q.maxLife = q.life * VOICE.life;
+                    q.size *= VOICE.size;
+                    q.sat = clamp(q.sat * VOICE.sat, 0, 100);
+                    q.gravity *= VOICE.grav;
+                }
+                return q;
+            }
+        }
+        return null;
+    }
+    update(dt, interactForce) {
+        // 生きている数をここで数えておく。budget() が毎回プールを
+        // 走査しなくて済むようになる（花ひとつで数十万回の走査が消える）
+        const pool = this.pool;
+        let n = 0;
+        for (let i = 0; i < pool.length; i++) {
+            const p = pool[i];
+            if (!p.active) continue;
+            p.update(dt, interactForce);
+            if (p.active) n++;
+        }
+        this.live = n;
+    }
+    draw(ctx) {
+        ctx.globalCompositeOperation = 'lighter';
+        const pool = this.pool;
+        for (let i = 0; i < pool.length; i++) if (pool[i].active) pool[i].draw(ctx);
+    }
+    forEachTagged(tag, fn) {
+        const pool = this.pool;
+        for (let i = 0; i < pool.length; i++) {
+            const p = pool[i];
+            if (p.active && p.tag === tag) fn(p);
+        }
+    }
+    clear() { const pool = this.pool; for (let i = 0; i < pool.length; i++) pool[i].active = false; this.live = 0; }
+}
+
+/* =========================================================
+   Patterns — 声から生まれる基本の花火
+   ========================================================= */
+const Patterns = {
+    Classic: (ps, x, y, hue, scale) => {
+        const count = Math.floor(100 * scale * DENS);
+        for (let i = 0; i < count; i++) {
+            const a = random(0, PI2), s = random(1, 8 * scale);
+            ps.emit(x, y, Math.cos(a) * s, Math.sin(a) * s, random(40, 80), random(1, 3), hue, 'normal');
+        }
+    },
+    Ring: (ps, x, y, hue, scale) => {
+        const count = Math.floor(120 * scale * DENS);
+        for (let i = 0; i < count; i++) {
+            const a = (i / count) * PI2, s = 7 * scale + random(-0.5, 0.5);
+            ps.emit(x, y, Math.cos(a) * s, Math.sin(a) * s, random(50, 70), 2, hue, 'normal');
+        }
+    },
+    Kamuro: (ps, x, y, scale) => {
+        // プールを食い尽くさないよう上限を置く（端末が小さいほど少なく）
+        const cap = ps.softCap || ps.pool.length;
+        const count = Math.min(Math.floor(800 * scale * DENS), Math.floor(cap * 0.55));
+        for (let i = 0; i < count; i++) {
+            const a = random(0, PI2), r = Math.random();
+            const s = (r < 0.2 ? random(12, 22) : random(2, 12)) * scale;
+            ps.emit(x, y, Math.cos(a) * s, Math.sin(a) * s,
+                    random(100, 250), random(1.5, 3.5), random(30, 50), 'willow');
+        }
+    }
+};
+
+/* =========================================================
+   WordPatterns — ことばから生まれる花火
+   ことばごとに、形も色も時間の流れ方も変える
+   ========================================================= */
+let TAG_SEQ = 0;
+const WordPatterns = {
+
+    /* ありがとう — 冠菊。急がず、長く、金色に降りそそぐ */
+    kamuro(ve, x, y, hue) {
+        const ps = ve.ps, count = ve.budget(900);
+        for (let i = 0; i < count; i++) {
+            const a = random(0, PI2), r = Math.random();
+            const s = (r < 0.22 ? random(13, 23) : random(2, 12)) * 1.5;
+            ps.emit(x, y, Math.cos(a) * s, Math.sin(a) * s,
+                    random(130, 280), random(1.5, 3.5), random(32, 50), 'willow');
+        }
+        ve.flashSoft(0.5);
+    },
+
+    /* ごめんね — うつむいて落ちる青。最後に、ひと粒だけまっすぐ昇る */
+    sorry(ve, x, y, hue) {
+        const ps = ve.ps, count = ve.budget(380);
+        for (let i = 0; i < count; i++) {
+            const a = random(0, PI2), s = random(1, 6);
+            // 横に広く、下へ強く。うつむいて崩れ落ちる形
+            const p = ps.emit(x, y, Math.cos(a) * s * 1.3, Math.sin(a) * s * 0.45 + random(0.8, 2.2),
+                              random(95, 195), random(1.2, 2.8), hue + random(-12, 12), 'normal');
+            if (p) { p.gravity = random(0.06, 0.11); p.friction = random(0.955, 0.98); p.sat = random(35, 65); p.lit = random(60, 85); }
+        }
+        // 言えたことの合図。遅れて、ひと粒だけ上へ
+        setTimeout(() => {
+            const p = ps.emit(x, y + 40, random(-0.3, 0.3), -2.6, 170, 2.2, 190, 'normal');
+            if (p) { p.gravity = 0.004; p.friction = 0.995; p.sat = 25; p.lit = 92; }
+            if (ve.sfx) ve.sfx.playChime(1320, 1.6, 0.06);
+        }, 1700);
+    },
+
+    /* だいすき／愛してる — 花が咲く。外側の層から順に開き、やがてほどける */
+    flower(ve, x, y, hue) {
+        ve.flowers.push(new Flower(ve, ve.width * 0.5, ve.height * 0.44, hue));
+        ve.flashSoft(0.3);
+    },
+
+    /* （旧）ハート。いまは使っていないが、戻せるように残してある */
+    heart(ve, x, y, hue) {
+        const ps = ve.ps, count = ve.budget(420);
+        const tag = 'h' + (TAG_SEQ++);
+        for (let i = 0; i < count; i++) {
+            const t = random(0, PI2);
+            const hx = 16 * Math.pow(Math.sin(t), 3);
+            const hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+            const fill = 0.5 + 0.5 * Math.sqrt(Math.random());
+            const sp = 0.42 * fill;
+            const p = ps.emit(x, y, hx * sp, hy * sp, random(95, 150), random(1.2, 2.8),
+                              hue + random(-10, 16), 'normal');
+            if (p) { p.tag = tag; p.gravity = 0.012; p.friction = random(0.955, 0.975); p.sat = random(78, 100); p.lit = random(58, 82); }
+        }
+        // 鼓動：二度だけ、外へ押し出す
+        const beat = (power) => ps.forEachTagged(tag, p => {
+            const dx = p.x - x, dy = p.y - y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+            p.vx += (dx / d) * power; p.vy += (dy / d) * power;
+            p.life = Math.min(p.maxLife, p.life + 14);
+        });
+        setTimeout(() => beat(1.5), 620);
+        setTimeout(() => beat(1.1), 1240);
+        ve.flashSoft(0.35);
+    },
+
+    /* おめでとう — 千輪。開いたあと、あちこちでもう一度開く */
+    senrin(ve, x, y) {
+        const ps = ve.ps, count = ve.budget(260);
+        const seeds = [], seedTag = 's' + (TAG_SEQ++);
+        for (let i = 0; i < count; i++) {
+            const a = random(0, PI2), s = random(3, 11);
+            const p = ps.emit(x, y, Math.cos(a) * s, Math.sin(a) * s,
+                              random(60, 95), random(1.4, 2.8), random(0, 360), 'normal');
+            if (p && seeds.length < 14 && Math.random() < 0.2) { p.tag = seedTag; seeds.push(p); }
+        }
+        setTimeout(() => {
+            for (const sp of seeds) {
+                if (!sp.active || sp.tag !== seedTag) continue;
+                const hue = random(0, 360);
+                for (let i = 0; i < 22; i++) {
+                    const a = random(0, PI2), s = random(0.6, 3.2);
+                    ps.emit(sp.x, sp.y, Math.cos(a) * s, Math.sin(a) * s,
+                            random(40, 70), random(1, 2.2), hue + random(-18, 18), 'normal');
+                }
+            }
+        }, 680);
+        ve.flashSoft(0.7);
+    },
+
+    /* がんばれ — 下から、だんだん高く、五連 */
+    rocketchain(ve, x, y, hue) {
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                const tx = x + random(-ve.width * 0.16, ve.width * 0.16);
+                const ty = y - i * (ve.height * 0.055) + random(-20, 20);
+                ve.launchShell(ve.width * 0.5 + random(-60, 60), tx, clamp(ty, 50, ve.height * 0.7), {
+                    hue: hue + i * 6, scale: 1.0 + i * 0.22,
+                    burst: (bx, by) => {
+                        const ps = ve.ps, count = ve.budget(120);
+                        for (let k = 0; k < count; k++) {
+                            const a = random(0, PI2), s = random(2, 10 + i * 1.6);
+                            const p = ps.emit(bx, by, Math.cos(a) * s, Math.sin(a) * s,
+                                              random(35, 60), random(1, 2.4), hue + random(-14, 14), 'normal');
+                            if (p) { p.sat = random(20, 60); p.lit = random(70, 95); p.friction = random(0.90, 0.95); }
+                        }
+                        if (ve.sfx) ve.sfx.playBurst(1.0 + i * 0.3, false);
+                    }
+                });
+            }, i * 260);
+        }
+    },
+
+    /* おかえり — 左右から昇ってきた二つの光が、まんなかで ひとつになる */
+    twin(ve, x, y, hue) {
+        let arrived = 0;
+        const fire = (bx, by) => {
+            arrived++;
+            if (arrived < 2) return;                  // 二つ揃って、はじめて開く
+            const ps = ve.ps, count = ve.budget(420);
+            for (let i = 0; i < count; i++) {
+                const a = random(0, PI2), s = random(1.5, 9);
+                const p = ps.emit(x, y, Math.cos(a) * s, Math.sin(a) * s,
+                                  random(80, 140), random(1.4, 3), hue + random(-18, 24), 'normal');
+                if (p) { p.gravity = 0.018; p.sat = random(60, 92); p.lit = random(62, 86); }
+            }
+            if (ve.sfx) ve.sfx.playBurst(2.0, false);
+            ve.flashSoft(0.45);
+        };
+        ve.launchShell(ve.width * 0.16, x, y, { hue: hue, scale: 1, burst: fire, time: 1.25 });
+        ve.launchShell(ve.width * 0.84, x, y, { hue: hue + 14, scale: 1, burst: fire, time: 1.25 });
+        setTimeout(() => { if (arrived === 1) { arrived = 1; fire(x, y); } }, 4000);
+    },
+
+    /* おやすみ — 細かい粒が雲のようにゆっくり広がって、ゆっくり消える */
+    nebula(ve, x, y, hue) {
+        const ps = ve.ps, count = ve.budget(520);
+        for (let i = 0; i < count; i++) {
+            const a = random(0, PI2), r = Math.pow(Math.random(), 1.5), s = r * 4.6;
+            const p = ps.emit(x + random(-34, 34), y + random(-24, 24),
+                              Math.cos(a) * s, Math.sin(a) * s,
+                              random(220, 460), random(0.8, 2.2), hue + random(-26, 26), 'normal');
+            if (p) { p.gravity = 0.002; p.friction = random(0.985, 0.996); p.sat = random(40, 75); p.lit = random(62, 86); }
+        }
+    },
+
+    /* さみしい — 細く長い残光。消えたあと、ひと粒が残り、そこへ光が寄ってくる */
+    lonely(ve, x, y, hue) {
+        const ps = ve.ps, count = ve.budget(340);
+        for (let i = 0; i < count; i++) {
+            const a = random(0, PI2), s = random(0.8, 4.0);
+            // 遅く、細く、長く。消えそうで消えない光
+            const p = ps.emit(x, y, Math.cos(a) * s, Math.sin(a) * s,
+                              random(170, 270), random(1.2, 2.4), hue + random(-10, 10), 'normal');
+            if (p) { p.gravity = 0.010; p.friction = random(0.985, 0.995); p.sat = random(25, 50); p.lit = random(70, 90); }
+        }
+        // 残るひと粒
+        setTimeout(() => {
+            const core = ps.emit(x, y + 30, 0, -0.08, 420, 2.4, 200, 'normal');
+            if (core) { core.gravity = 0; core.friction = 1; core.sat = 20; core.lit = 95; }
+            // ひとりにしない。あとから光が寄ってくる
+            setTimeout(() => {
+                for (let i = 0; i < 26; i++) {
+                    const a = random(0, PI2), d = random(160, 340);
+                    const px = x + Math.cos(a) * d, py = y + 30 + Math.sin(a) * d;
+                    const p = ps.emit(px, py, -Math.cos(a) * d * 0.016, -Math.sin(a) * d * 0.016,
+                                      200, random(1, 2), random(180, 215), 'normal');
+                    if (p) { p.gravity = 0; p.friction = 0.995; p.sat = 40; p.lit = 88; }
+                }
+                if (ve.sfx) ve.sfx.playChime(990, 2.2, 0.05);
+            }, 1500);
+        }, 1800);
+    },
+
+    /* だいじょうぶ — やわらかい輪が、静かに三重に広がる */
+    ring(ve, x, y, hue) {
+        for (let r = 0; r < 3; r++) {
+            setTimeout(() => {
+                const ps = ve.ps, count = ve.budget(140);
+                for (let i = 0; i < count; i++) {
+                    const a = (i / count) * PI2;
+                    const s = (3.4 + r * 1.9) + random(-0.2, 0.2);
+                    const p = ps.emit(x, y, Math.cos(a) * s, Math.sin(a) * s,
+                                      random(110, 170), 1.8, hue + random(-8, 8), 'normal');
+                    if (p) { p.gravity = 0.003; p.friction = random(0.986, 0.992); p.sat = random(25, 55); p.lit = random(72, 92); }
+                }
+            }, r * 520);
+        }
+    },
+
+    /* うれしい — 虹色の小玉が、あちこちで同時にはじける */
+    pop(ve, x, y) {
+        for (let k = 0; k < 10; k++) {
+            setTimeout(() => {
+                const ps = ve.ps;
+                const px = x + random(-ve.width * 0.22, ve.width * 0.22);
+                const py = y + random(-ve.height * 0.14, ve.height * 0.14);
+                const hue = random(0, 360);
+                const count = ve.budget(60);
+                for (let i = 0; i < count; i++) {
+                    const a = random(0, PI2), s = random(1, 5.5);
+                    const p = ps.emit(px, py, Math.cos(a) * s, Math.sin(a) * s,
+                                      random(30, 55), random(1, 2.4), hue + random(-24, 24), 'normal');
+                    if (p) { p.friction = random(0.90, 0.95); p.lit = random(65, 90); }
+                }
+            }, k * 95);
+        }
+        ve.flashSoft(0.4);
+    },
+
+    /* 嫌い — 不発。開かずに、ほどけて落ちる。
+       叱るのではなく、ただ「光にならなかった」だけにしてある。
+       文字の雨も降らない。 */
+    dud(ve, x, y, hue) {
+        const ps = ve.ps;
+
+        // ① 開きかけの、ほんの短い光
+        const n1 = ve.budget(80);
+        for (let i = 0; i < n1; i++) {
+            const a = random(0, PI2), s = random(0.6, 3.4);
+            const p = ps.emit(x, y, Math.cos(a) * s, Math.sin(a) * s,
+                              random(12, 28), random(0.8, 1.8), 220 + random(-16, 16), 'normal');
+            if (p) { p.gravity = 0.12; p.friction = 0.90; p.sat = random(5, 22); p.lit = random(42, 64); }
+        }
+
+        // ② すぐに力を失って、まっすぐ落ちていく
+        setTimeout(() => {
+            const n2 = ve.budget(140);
+            for (let i = 0; i < n2; i++) {
+                const p = ps.emit(x + gauss() * 18, y + gauss() * 10,
+                                  gauss() * 0.5, random(0.5, 2.4),
+                                  random(60, 140), random(0.7, 1.7), 216 + random(-10, 10), 'normal');
+                if (p) { p.gravity = random(0.10, 0.18); p.friction = 0.986;
+                         p.sat = random(3, 15); p.lit = random(24, 46); }
+            }
+        }, 160);
+
+        // ③ 細い煙だけが、ゆっくり昇って消える
+        setTimeout(() => {
+            const n3 = ve.budget(46);
+            for (let i = 0; i < n3; i++) {
+                const p = ps.emit(x + gauss() * 12, y, gauss() * 0.35, -random(0.15, 0.6),
+                                  random(150, 280), random(1.2, 2.6), 214, 'normal');
+                if (p) { p.gravity = -0.003; p.friction = 0.996; p.sat = 4; p.lit = random(12, 24);
+                         p.soft = true; p.size *= 3.4; }
+            }
+        }, 330);
+    },
+
+    /* 辞書にないことば — その文字の形のまま、光になって散る */
+    plain(ve, x, y, hue) {
+        const ps = ve.ps, count = ve.budget(280);
+        for (let i = 0; i < count; i++) {
+            const a = random(0, PI2), s = random(1, 7.5);
+            const p = ps.emit(x, y, Math.cos(a) * s, Math.sin(a) * s,
+                              random(60, 110), random(1, 2.6), hue + random(-20, 20), 'normal');
+            if (p) { p.gravity = 0.015; }
+        }
+    }
+};
+
+/* =========================================================
+   ことばの雨 — VOICE BLOOM の「きれいな雨」をこの作品に移したもの
+   言ったことばの文字そのものが、光りながら、ゆれながら降る
+   ========================================================= */
+let RAIN_SEQ = 0;
+const RAIN_STYLE = {
+    bright: { glyphEvery: 0.10, dropsPerFrame: 1.5, gsize: [15, 31], gspd: [1.8, 3.2], sat: [45, 78], lit: [80, 95] },
+    gentle: { glyphEvery: 0.17, dropsPerFrame: 0.8, gsize: [13, 24], gspd: [1.3, 2.3], sat: [16, 42], lit: [78, 92] }
+};
+const GENTLE_KINDS = { sorry: 1 };
+
+class WordRain {
+    constructor(ve, text, hue, kind) {
+        this.ve = ve;
+        this.chars = Array.from(text).filter(c => c.trim());
+        if (!this.chars.length) this.chars = ['・'];
+        this.hue = hue;
+        this.st = RAIN_STYLE[GENTLE_KINDS[kind] ? 'gentle' : 'bright'];
+        this.t = 0; this.acc = 0; this.dacc = 0; this.ci = 0;
+        this.tag = 'r' + (RAIN_SEQ++);
+        this.glyphs = [];
+    }
+
+    spawnGlyph() {
+        const ve = this.ve, st = this.st;
+        // 文字が画面に溜まりすぎないようにする（花火の邪魔をさせない）
+        let n = 0;
+        const pool = ve.ps.pool;
+        for (let i = 0; i < pool.length; i++) if (pool[i].active && pool[i].type === 'glyph') n++;
+        if (n > 44) return;
+        const vy = random(st.gspd[0], st.gspd[1]);
+        const p = ve.ps.emit(random(ve.width * 0.04, ve.width * 0.96), -34, 0, vy,
+                             (ve.height + 80) / vy, random(st.gsize[0], st.gsize[1]),
+                             this.hue + random(-14, 14), 'glyph');
+        if (!p) return;
+        p.ch = this.chars[this.ci % this.chars.length];
+        this.ci++;
+        p.ph = random(0, PI2);
+        p.sat = random(st.sat[0], st.sat[1]);
+        p.lit = random(st.lit[0], st.lit[1]);
+        p.tag = this.tag;
+        this.glyphs.push(p);
+    }
+
+    spawnDrop() {
+        const ve = this.ve;
+        const vy = random(4.5, 9.0);
+        const p = ve.ps.emit(random(0, ve.width), -20, random(-0.08, 0.08), vy,
+                             (ve.height + 60) / vy, random(0.7, 1.6),
+                             this.hue + random(-20, 20), 'normal', 5);
+        if (p) { p.gravity = 0; p.friction = 1; p.sat = random(10, 45); p.lit = random(76, 94); p.noPull = true; }
+    }
+
+    update(dt) {
+        const d = dt / 1000;
+        this.t += d;
+        if (this.t < 3.0) {
+            this.acc += d;
+            while (this.acc > this.st.glyphEvery) { this.acc -= this.st.glyphEvery; this.spawnGlyph(); }
+            this.dacc += this.st.dropsPerFrame * (dt / 16.66);
+            while (this.dacc >= 1) { this.dacc -= 1; this.spawnDrop(); }
+        }
+        // 地面に届いた文字がキラッと弾ける
+        for (let i = 0; i < this.glyphs.length; i++) {
+            const g = this.glyphs[i];
+            if (!g.active || g.tag !== this.tag) { this.glyphs.splice(i--, 1); continue; }
+            if (!g.spark && g.life < 14) {
+                g.spark = true;
+                for (let k = 0; k < 5; k++) {
+                    const a = random(0, PI2), sp = random(0.5, 2.4);
+                    const q = this.ve.ps.emit(g.x, g.y, Math.cos(a) * sp, Math.sin(a) * sp - 0.6,
+                                              random(16, 34), random(0.8, 1.6), this.hue + random(-16, 16), 'normal', 5);
+                    if (q) { q.gravity = 0.018; q.sat = random(20, 60); q.lit = random(84, 98); }
+                }
+            }
+        }
+        return this.t < 4.6;
+    }
+}
+
+/* =========================================================
+   花 — MUSIC DNA FLOWER の層構造を、この作品の粒子で咲かせる
+   外側の層から順に開き、しばらく咲いて、ほどけて散る
+   ========================================================= */
+let BLOOM_SEQ = 0;
+class Flower {
+    constructor(ve, x, y, hue) {
+        this.ve = ve; this.x = x; this.y = y; this.hue = hue;
+        this.ref = { t: 0, rel: false };
+        this.tag = 'f' + (BLOOM_SEQ++);
+        this.t = 0; this.done = false; this.chimed = false;
+
+        const R = Math.min(ve.width, ve.height) * 0.30;
+        const fine = ve.isMobile ? 0.6 : 1;
+        // 外側から順に開く3層。花びらは少なく大きくして、1枚ずつ見えるようにする
+        const layers = [
+            { n: 9, rad: R * 1.00, delay: 0.10, dh: 12, sat: [70, 90],  lit: [52, 68] },
+            { n: 7, rad: R * 0.66, delay: 0.95, dh:  4, sat: [80, 96],  lit: [62, 80] },
+            { n: 5, rad: R * 0.40, delay: 1.75, dh: -8, sat: [88, 100], lit: [74, 92] }
+        ];
+        for (let li = 0; li < layers.length; li++) {
+            const L = layers[li];
+            const half = 0.46 * (PI2 / L.n);          // 隣とのあいだに細い隙間を残す
+            const inner = L.rad * 0.18;
+            const off = li * 0.42;
+
+            for (let i = 0; i < L.n; i++) {
+                const base = (i / L.n) * PI2 + off;
+
+                // --- 花びらの体：背骨に沿って光を連ね、1枚の面にする ---
+                const NU = 9;
+                for (let iu = 0; iu < NU; iu++) {
+                    const u = (iu + 0.5) / NU;                                // 根元→先
+                    const rr = inner + (L.rad - inner) * u;
+                    // 幅は画素で決める。根元と先で細り、中ほどがいちばん広い弁の形
+                    const wpx = L.rad * 0.175 * Math.sin(Math.PI * Math.pow(u, 0.80));
+                    const halfA = wpx / Math.max(1, rr);
+                    const nv = Math.max(1, Math.min(4, Math.round(wpx / (L.rad * 0.045))));
+                    for (let iv = 0; iv < nv; iv++) {
+                        const v = nv === 1 ? 0 : (((iv + 0.5) / nv) * 2 - 1) * 0.86 + random(-0.1, 0.1);
+                        const p = ve.ps.emit(x + random(-4, 4), y + random(-4, 4), 0, 0,
+                                             900, 2, hue + L.dh + random(-7, 7), 'bloom');
+                        if (!p) continue;
+                        p.ref = this.ref; p.tag = this.tag;
+                        p.ox = x; p.oy = y; p.pa = base + v * halfA; p.pr = rr; p.bd = L.delay;
+                        p.sat = random(L.sat[0], L.sat[1]);
+                        p.lit = random(L.lit[0], L.lit[1]) + (1 - u) * 16;
+                        p.soft = true;
+                        p.size = Math.max(L.rad * 0.042, wpx / 1.55);
+                        p.aMul = 0.030;
+                    }
+                }
+
+                // --- その上に載る細かい粒 ---
+                const m = Math.max(8, Math.floor(26 * fine));
+                for (let k = 0; k < m; k++) {
+                    const phi = (Math.random() * 2 - 1) * half;
+                    const edge = Math.cos(Math.PI * phi / (2 * half));
+                    const outer = inner + (L.rad - inner) * Math.pow(Math.max(0, edge), 0.5);
+                    const rad = inner + (outer - inner) * Math.sqrt(random(0.02, 1));
+                    const u = rad / L.rad;
+                    const p = ve.ps.emit(x + random(-4, 4), y + random(-4, 4), 0, 0,
+                                         900, random(1.4, 2.8), hue + L.dh + random(-9, 9), 'bloom');
+                    if (!p) continue;
+                    p.ref = this.ref; p.tag = this.tag;
+                    p.ox = x; p.oy = y; p.pa = base + phi; p.pr = rad; p.bd = L.delay;
+                    p.sat = random(L.sat[0], L.sat[1]);
+                    p.lit = random(L.lit[0], L.lit[1]) + (1 - u) * 16;
+                    p.aMul = 0.32;
+                }
+            }
+        }
+        // しべ
+        for (let i = 0; i < Math.floor(150 * fine); i++) {
+            const a = random(0, PI2), r = Math.pow(Math.random(), 0.6) * R * 0.20;
+            const p = ve.ps.emit(x, y, 0, 0, 900, random(1.2, 2.6), 44 + random(-10, 12), 'bloom');
+            if (!p) continue;
+            p.ref = this.ref; p.tag = this.tag;
+            p.ox = x; p.oy = y; p.pa = a; p.pr = r; p.bd = 2.25;
+            p.sat = random(55, 90); p.lit = random(84, 98); p.aMul = 0.22;
+            if (i < 10) { p.soft = true; p.size = R * random(0.07, 0.14); p.aMul = 0.05; }
+        }
+        if (ve.sfx) { ve.sfx.playSoft(120, 2.8, 0.95); ve.sfx.playChime(660, 2.4, 0.08); }
+    }
+
+    update(dt) {
+        const d = dt / 1000;
+        this.t += d;
+        if (!this.ref.rel) this.ref.t += d;
+
+        if (!this.chimed && this.t > 3.5) {            // 開ききった合図
+            this.chimed = true;
+            if (this.ve.sfx) { this.ve.sfx.playChime(990, 2.6, 0.09); this.ve.sfx.playCrackle(this.ve.sfx.ctx.currentTime, 1.4, 18); }
+            this.ve.flashSoft(0.5);
+        }
+        if (!this.ref.rel && this.t > 5.2) {           // ほどけて散る
+            this.ref.rel = true;
+            const cx = this.x, cy = this.y;
+            this.ve.ps.forEachTagged(this.tag, p => {
+                const dx = p.x - cx, dy = p.y - cy, dd = Math.hypot(dx, dy) || 1;
+                p.vx += (dx / dd) * random(0.3, 1.5) + random(-0.3, 0.3);
+                p.vy += (dy / dd) * random(0.3, 1.5) - random(0.1, 0.7);
+                p.life = Math.min(p.life, random(70, 165));
+                p.maxLife = p.life;
+            });
+            if (this.ve.sfx) this.ve.sfx.playSoft(90, 3.2, 0.6);
+        }
+        if (this.t > 8.2) this.done = true;
+        return !this.done;
+    }
+}
+
+/* =========================================================
+   Visual Engine
+   ========================================================= */
+class VisualEngine {
+    constructor(audioEngine, bg) {
+        this.audioEngine = audioEngine;
+        this.bg = bg;
+        this.canvas = document.getElementById('main-canvas');
+        this.ctx = this.canvas.getContext('2d', { alpha: true });
+        this.glow = document.getElementById('glow-canvas');
+        this.gctx = this.glow.getContext('2d');
+        this.isMobile = window.innerWidth < 768;
+
+        // GPU描画を試す。使えなければ今までどおりの 2D 描画で動く
+        this.gl = new GLStage(document.getElementById('gl-canvas'));
+        this.useGL = this.gl.init(GLSRC);
+        if (this.useGL) {
+            KEEP_TRAIL = false;
+            DENS = this.isMobile ? 2.0 : 2.6;     // 描画が軽くなったぶん粒を増やす
+            document.body.classList.add('gfx-gl');
+        }
+        const cap = this.useGL ? (this.isMobile ? 9000 : 26000)
+                               : (this.isMobile ? 3400 : 8000);
+        this.ps = new ParticleSystem(cap);
+        if (this.useGL) this.gl.allocate(cap);
+        this.shells = [];
+        this.rains = [];
+        this.flowers = [];
+        this.interactForce = null;
+
+        this.summerLevel = 0;
+        this.resettingSummer = false;
+        this.burstGlow = 0;
+        this.stream = null;
+        this.lastStreamPos = null;
+        this.resize();
+    }
+
+    get sfx() { return this.audioEngine.sfx; }
+
+    resize() {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+        // 発光レイヤーは低解像度でよい（縮小転写してぼかし、screen で重ねるだけ）
+        this.glow.width = Math.max(2, Math.floor(this.width * 0.26));
+        this.glow.height = Math.max(2, Math.floor(this.height * 0.26));
+        this.gctx.imageSmoothingEnabled = true;
+        if (this.useGL) this.gl.resize();
+    }
+
+    /* 空いている粒子の数を見て、出す数を決める */
+    budget(want) {
+        want = Math.floor(want * DENS * (this.densK || 1));
+        const free = Math.max(0, (this.ps.softCap || this.ps.pool.length) - this.ps.live);
+        return Math.max(24, Math.min(want, Math.floor(free * 0.75)));
+    }
+
+    flashSoft(v) {
+        const el = document.getElementById('flash');
+        el.style.transition = 'none';
+        el.style.opacity = String(clamp(v * 0.28, 0, 0.3));
+        requestAnimationFrame(() => {
+            el.style.transition = 'opacity 1.4s ease-out';
+            el.style.opacity = '0';
+        });
+    }
+
+    /* 打ち上げ玉。到達したら burst を呼ぶ */
+    launchShell(sx, tx, ty, opt) {
+        const sy = this.height;
+        const g = 0.05;
+        const vy = -Math.sqrt(2 * g * Math.max(40, sy - ty));
+        const frames = (-vy / g);
+        const vx = (tx - sx) / frames;
+        if (this.sfx) this.sfx.playLaunch(opt.time || (frames / 60));
+        this.shells.push({
+            x: sx, y: sy, vx, vy, hue: opt.hue, scale: opt.scale || 1,
+            pattern: opt.pattern || null, burst: opt.burst || null,
+            voice: opt.voice || null,          // 開く瞬間に粒子へかける声の性格
+            glow: opt.glow || 0,               // 開く瞬間の発光の強さ
+            active: true, trail: []
+        });
+    }
+
+    /* 声から：一発の花火 */
+    /* 音の特徴量 → 映像パラメータ（対応表の実装）
+       ------------------------------------------------------------------
+         大きさ     ← 音量（発火線からの差）
+         高さ       ← 音量
+         初速       ← 立ち上がりの鋭さ
+         寿命       ← 明るさ（暗い声ほど長く残る）
+         粒の大きさ ← 音の高さ（低い声ほど大きい粒）
+         彩度       ← 周期性（澄んだ声ほど鮮やか）
+         重力       ← 低域（低音が強いほど重く垂れる）
+         散らばり   ← 高域（息の成分）
+         色相       ← 音の高さ（連続）／母音があればその色を軸に前後
+         発光量     ← 尖頭比（打撃音ほど一瞬強く光る）
+       ------------------------------------------------------------------ */
+    triggerEvent(features) {
+        const f = features;
+        const { rms, combo } = f;
+        if (!this.resettingSummer) this.summerLevel = clamp(this.summerLevel + 0.08, 0, 1);
+
+        // 特徴量。古い呼び出し（タッチなど）でも壊れないよう既定値を置く
+        const tone    = toneOf(f);
+        const attack  = f.attack   === undefined ? 0.5 : f.attack;
+        const clarity = f.clarity  === undefined ? 0.6 : f.clarity;
+        const cen     = f.centroidN === undefined ? 0.5 : f.centroidN;
+        const low     = f.low      === undefined ? 0.4 : f.low;
+        const high    = f.high     === undefined ? 0.3 : f.high;
+        const crest   = f.crest    === undefined ? 3.0 : f.crest;
+
+        // 大きさは音量で決める。発火線からどれだけ上かで測るので、
+        // 感度の設定を変えても同じ感覚で使える
+        const line = (this.audioEngine && this.audioEngine.hi) || 26;
+        const over = Math.max(0, rms - line);
+        let scale = clamp(0.5 + over / 26, 0.5, 2.8);
+        if (combo > 1) scale *= (1 + combo * 0.1);
+
+        // --- 色相：音の高さから連続的に決まる ---
+        const hue = pitchHue(tone) + random(-8, 8);
+
+        // --- 開く高さ：大きい声ほど高く上がる ---
+        //     以前は音の高さを主にしていたが、実際には「バン！」が多く
+        //     音程が取れないため、音量だけで決める形にした
+        const minH = 0.13, maxH = 0.74;
+        const up = clamp((scale - 0.5) / 2.3, 0, 1);
+        const targetRatio = maxH - up * (maxH - minH);
+
+        const sx = random(this.width * 0.2, this.width * 0.8);
+        const tx = sx + random(-30, 30);
+        let ty = this.height * random(targetRatio - 0.05, targetRatio + 0.05);
+        ty = clamp(ty, 50, this.height - 50);
+
+        // --- 声の性格。開く瞬間に粒子へかける ---
+        const voice = {
+            spd:     0.78 + attack * 0.55,
+            life:    1.40 - cen * 0.62,
+            size:    1.28 - tone * 0.52,
+            sat:     0.74 + clarity * 0.42,
+            grav:    0.72 + low * 0.95,
+            scatter: high * 0.38
+        };
+
+        // --- 打撃音（尖頭比が大きい音）ほど一瞬強く光る。
+        //     音が鳴った瞬間ではなく、玉が開く瞬間に光らせる ---
+        const glow = clamp((crest - 3) / 9, 0, 1);
+
+        // 低く大きい声は、衝撃波のようなリングで開く
+        const pattern = (combo > 2 || (tone < 0.3 && scale > 1.9)) ? 'Ring' : 'Classic';
+
+        this.launchShell(sx, tx, ty, { hue, scale, pattern, voice, glow });
+    }
+
+    /* 声を伸ばしているあいだ、光の帯が昇る。母音を変えると帯も変わる */
+    updateStream(audio, dt) {
+        const on = audio.isActive && audio.sustainedTime > 200;
+        if (on) {
+            if (!this.stream) {
+                this.stream = { x: this.width * 0.5 + random(-this.width * 0.12, this.width * 0.12),
+                                y: this.height * 0.88, vy: -0.5 };
+            }
+            const ts = dt / 16.66, st = this.stream;
+            st.vy = Math.max(-2.6, st.vy - 0.006 * ts);
+            st.y = Math.max(this.height * 0.22, st.y + st.vy * ts);
+            emitStream(this, st.x, st.y, audio.tone === undefined ? 0.5 : audio.tone, audio.rms);
+            this.lastStreamPos = { x: st.x, y: st.y };
+        } else if (this.stream) {
+            this.stream = null;
+        }
+    }
+
+    /* ことばから：すぐに花火が開き、そのことばの文字が雨になって降る */
+    triggerWord(text, entry) {
+        if (!entry) return;                  // 決めた3つのことば以外は、何も起こさない
+        const now = performance.now();
+        if (now - (this.wordAt || 0) < 520) return;      // 連打で散らからないように
+        this.wordAt = now;
+        if (!this.resettingSummer) this.summerLevel = clamp(this.summerLevel + 0.14, 0, 1);
+
+        const kind = entry ? entry.kind : 'plain';
+        const hue = (entry && entry.hue >= 0) ? entry.hue : random(0, 360);
+        const x = this.width * random(0.3, 0.7);
+        const y = this.height * random(0.28, 0.42);
+
+        (WordPatterns[kind] || WordPatterns.plain)(this, x, y, hue);
+        if (this.sfx) this.sfx.playWordBurst(kind, 2.2);
+
+        if (kind === 'dud') return;          // 不発のときは文字の雨も降らない
+        const show = Array.from(text).length > 8 ? entry.label : text;
+        if (this.rains.length >= 3) this.rains.shift();    // 古い雨は降り終わらせる
+        this.rains.push(new WordRain(this, show, hue, kind));
+    }
+
+    triggerSummerCatharsis(x, y) {
+        const flash = document.getElementById('flash');
+        flash.style.transition = 'none';
+        flash.style.opacity = '1';
+        setTimeout(() => { flash.style.transition = 'opacity 3s ease-out'; flash.style.opacity = '0'; }, 100);
+
+        this.ps.clear();
+        this.summerLevel = 1.0;
+        if (this.sfx) this.sfx.playBurst(3.5, true);
+
+        setTimeout(() => {
+            Patterns.Kamuro(this.ps, x, y, 3.5);
+            this.resettingSummer = true;
+        }, 200);
+    }
+
+    update(dt) {
+        if (this.resettingSummer) {
+            this.summerLevel -= (dt / 1000) * 0.15;
+            if (this.summerLevel <= 0) { this.summerLevel = 0; this.resettingSummer = false; }
+        } else if (this.summerLevel > 0) {
+            this.summerLevel = Math.max(0, this.summerLevel - (dt / 1000) * 0.02);
+        }
+        this.bg.summerLevel = this.summerLevel;
+        document.getElementById('hud-acc').style.width = `${this.summerLevel * 100}%`;
+
+        // 打撃音の一瞬の発光は、0.4 秒ほどで引く
+        this.burstGlow = (this.burstGlow || 0) * Math.pow(0.012, dt / 1000);
+        if (this.useGL && this.gl.ok) {
+            const en = this.audioEngine.isActive ? clamp(this.audioEngine.energy.total, 0, 1) : 0;
+            this.gl.params.bloom = 0.82 + this.burstGlow * 0.85;   // 大声ほど強く光る
+            // 下駄を置かない。音が鳴っていないときは完全に 0 になる
+            this.gl.params.intf = en * 0.55 * this.gl.intfUser * this.gl.intfQ;
+        }
+
+        const ts = dt / 16.66;
+        for (let shell of this.shells) {
+            if (!shell.active) continue;
+            shell.trail.push({ x: shell.x, y: shell.y });
+            if (shell.trail.length > 5) shell.trail.shift();
+
+            shell.vy += 0.05 * ts;
+            shell.x += shell.vx * ts;
+            shell.y += shell.vy * ts;
+
+            if (Math.random() < 0.4) {
+                this.ps.emit(shell.x, shell.y, random(-0.5, 0.5), random(-0.5, 0.5), 15, 1, shell.hue, 'spark');
+            }
+
+            // 頂点、または画面の端に達したら開く
+            if (shell.vy >= -1 || shell.y < 40 || shell.x < 20 || shell.x > this.width - 20) {
+                shell.active = false;
+                // 打ち上げてから開くまでに時間が空くので、
+                // そのときの声の性格を玉に持たせておき、開く瞬間に適用する
+                if (shell.voice) { Object.assign(VOICE, shell.voice); VOICE.on = true; }
+                if (shell.glow) this.burstGlow = Math.max(this.burstGlow || 0, shell.glow);
+                try {
+                    if (shell.burst) {
+                        shell.burst(shell.x, shell.y);
+                    } else {
+                        Patterns[shell.pattern](this.ps, shell.x, shell.y, shell.hue, shell.scale);
+                        if (this.sfx) this.sfx.playBurst(shell.scale, false);
+                    }
+                } finally { voiceReset(); }
+            }
+        }
+        this.shells = this.shells.filter(s => s.active);
+        for (let i = this.rains.length - 1; i >= 0; i--) if (!this.rains[i].update(dt)) this.rains.splice(i, 1);
+        for (let i = this.flowers.length - 1; i >= 0; i--) if (!this.flowers[i].update(dt)) this.flowers.splice(i, 1);
+        // 雨が降っているあいだは、空がほんのり明るくなる
+        if (this.rains.length && !this.resettingSummer) {
+            this.summerLevel = clamp(this.summerLevel + (dt / 1000) * 0.06, 0, 1);
+        }
+        this.ps.update(dt, this.interactForce);
+    }
+
+    /* 描画先を選ぶ。GPU が使えないときは今までどおりの 2D 描画 */
+    draw(dt) {
+        if (this.useGL && this.gl.ok) { this.drawGL(dt); return; }
+        this.draw2D();
+    }
+
+    /* GPU描画：粒子は GL、文字と打ち上げ玉と溜めの輪だけ 2D で上に重ねる */
+    drawGL(dt) {
+        this.gl.params.fade = 0.74;
+        this.gl.frame(this.ps, dt || 16.7, 'glyph');
+
+        const g = this.ctx;
+        g.setTransform(1, 0, 0, 1, 0, 0);
+        g.clearRect(0, 0, this.width, this.height);
+        g.globalCompositeOperation = 'lighter';
+        this.drawShells(g);
+        const pool = this.ps.pool;
+        for (let i = 0; i < pool.length; i++) {
+            const p = pool[i];
+            if (p.active && p.type === 'glyph') p.draw(g);
+        }
+        this.drawCharge(g);
+        g.globalCompositeOperation = 'source-over';
+    }
+
+    drawShells(g) {
+        for (let shell of this.shells) {
+            g.beginPath();
+            g.arc(shell.x, shell.y, 2, 0, PI2);
+            g.fillStyle = '#fff';
+            g.fill();
+            if (shell.trail.length > 0) {
+                g.beginPath();
+                g.moveTo(shell.trail[0].x, shell.trail[0].y);
+                for (let i = 1; i < shell.trail.length; i++) g.lineTo(shell.trail[i].x, shell.trail[i].y);
+                g.strokeStyle = hsla(shell.hue, 100, 70, 0.6);
+                g.lineWidth = 2;
+                g.stroke();
+            }
+        }
+    }
+
+    drawCharge(g) {
+        if (!this.interactForce || !this.interactForce.charging) return;
+        const dur = performance.now() - this.interactForce.startTime;
+        const ratio = Math.min(dur / 1000, 1);
+        const radius = 10 + ratio * 40;
+        g.beginPath();
+        g.arc(this.interactForce.x, this.interactForce.y, radius, 0, PI2);
+        g.fillStyle = hsla(35, 80, 60, 0.05 + ratio * 0.1);
+        g.fill();
+        g.beginPath();
+        g.arc(this.interactForce.x, this.interactForce.y, radius, 0, PI2);
+        g.strokeStyle = hsla(35, 100, 80, 0.2 + ratio * 0.4);
+        g.lineWidth = 1 + ratio * 2;
+        g.stroke();
+        if (ratio >= 1) {
+            g.beginPath();
+            g.arc(this.interactForce.x, this.interactForce.y,
+                  radius + 10 + Math.sin(performance.now() * 0.02) * 5, 0, PI2);
+            g.strokeStyle = 'rgba(255,230,150,0.8)';
+            g.lineWidth = 1.5;
+            g.stroke();
+        }
+    }
+
+    draw2D() {
+        // 残光：暗い色を重ねるのではなく、アルファを削る（下の星空を隠さないため）
+        this.ctx.globalCompositeOperation = 'destination-out';
+        this.ctx.fillStyle = 'rgba(0,0,0,0.26)';
+        this.ctx.fillRect(0, 0, this.width, this.height);
+
+        this.ctx.globalCompositeOperation = 'lighter';
+
+        for (let shell of this.shells) {
+            this.ctx.beginPath();
+            this.ctx.arc(shell.x, shell.y, 2, 0, PI2);
+            this.ctx.fillStyle = '#fff';
+            this.ctx.fill();
+            if (shell.trail.length > 0) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(shell.trail[0].x, shell.trail[0].y);
+                for (let i = 1; i < shell.trail.length; i++) this.ctx.lineTo(shell.trail[i].x, shell.trail[i].y);
+                this.ctx.strokeStyle = hsla(shell.hue, 100, 70, 0.6);
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+            }
+        }
+
+        this.ps.draw(this.ctx);
+
+        if (this.interactForce && this.interactForce.charging) {
+            const dur = performance.now() - this.interactForce.startTime;
+            const ratio = Math.min(dur / 1000, 1);
+            const radius = 10 + ratio * 40;
+            this.ctx.beginPath();
+            this.ctx.arc(this.interactForce.x, this.interactForce.y, radius, 0, PI2);
+            this.ctx.fillStyle = hsla(35, 80, 60, 0.05 + ratio * 0.1);
+            this.ctx.fill();
+            this.ctx.beginPath();
+            this.ctx.arc(this.interactForce.x, this.interactForce.y, radius, 0, PI2);
+            this.ctx.strokeStyle = hsla(35, 100, 80, 0.2 + ratio * 0.4);
+            this.ctx.lineWidth = 1 + ratio * 2;
+            this.ctx.stroke();
+            if (ratio >= 1) {
+                this.ctx.beginPath();
+                this.ctx.arc(this.interactForce.x, this.interactForce.y,
+                             radius + 10 + Math.sin(performance.now() * 0.02) * 5, 0, PI2);
+                this.ctx.strokeStyle = 'rgba(255,230,150,0.8)';
+                this.ctx.lineWidth = 1.5;
+                this.ctx.stroke();
+            }
+        }
+        this.ctx.globalCompositeOperation = 'source-over';
+
+        // 擬似Bloom：本画面を縮小転写し、明るいところを飽和させてから CSS 側でぼかす
+        const g = this.gctx, gw = this.glow.width, gh = this.glow.height;
+        g.globalCompositeOperation = 'source-over';
+        g.clearRect(0, 0, gw, gh);
+        g.drawImage(this.canvas, 0, 0, gw, gh);
+        g.globalCompositeOperation = 'lighter';
+        g.globalAlpha = 0.8;
+        g.drawImage(this.canvas, 0, 0, gw, gh);
+        g.globalAlpha = 1;
+        g.globalCompositeOperation = 'source-over';
+    }
+}
+
+/* =========================================================
+   App Controller
+   ========================================================= */
+class App {
+    constructor() {
+        this.audio = new AudioEngine();
+        this.bg = new Background(document.getElementById('bg-canvas'));
+        this.visual = new VisualEngine(this.audio, this.bg);
+        this.speech = new SpeechEngine();
+        this.specOut = new Float32Array(64);
+        // --- 会場で使うための状態 ---
+        this.venue = false;        // 会場モード
+        this.demo = null;          // デモ再生中の状態
+        this.idleMs = 0;           // 声がない時間
+        this.idleLimit = 45000;    // この時間をこえたらデモ（0 = 自動デモなし）
+        this.soundOn = true;
+        this.started = false;
+        // --- 性能の自動調整 ---
+        this.qi = 3;               // いまの品質の段
+        this.qAuto = true;
+        this.frameMs = 16.7;       // なめらかにした1フレームの時間
+        this.slowMs = 0;           // 重い状態がつづいた時間
+        this.fastMs = 0;           // 軽い状態がつづいた時間
+        this.fps = 60;
+        this.worstMs = 0;
+        this.frames = 0;
+        this.startedAt = Date.now();
+        this.lastTime = performance.now();
+        this.initEvents();
+        this.loop = this.loop.bind(this);
+        requestAnimationFrame(this.loop);
+    }
+
+    /* ---------------- 品質の段を当てはめる ---------------- */
+    applyQuality(i, why) {
+        const q = QUALITY[clamp(i, 0, QUALITY.length - 1)];
+        this.qi = clamp(i, 0, QUALITY.length - 1);
+        const V = this.visual;
+        V.densK = q.dens;
+        V.ps.softCap = Math.max(900, Math.floor(V.ps.pool.length * q.cap));
+        if (V.useGL && V.gl.ok) {
+            V.gl.trailSteps = q.trail;
+            V.gl.maxMips = q.mips;
+            V.gl.intfQ = q.intf;
+            V.gl.resize(q.scale);
+        }
+        const b = document.getElementById('ad-qual');
+        if (b) b.textContent = '画質：' + q.name + (this.qAuto ? '（自動）' : '（固定）');
+        if (why) this.hint('画質を' + q.name + 'にしました', 1800);
+    }
+
+    /* 1フレームの時間を見て、重ければ落とし、軽ければ戻す */
+    autoQuality(ms) {
+        this.frames++;
+        this.frameMs = this.frameMs * 0.92 + ms * 0.08;
+        if (this.frames > 120 && ms > this.worstMs) this.worstMs = ms;
+        this.fps = this.fps * 0.92 + (1000 / Math.max(ms, 1)) * 0.08;
+        if (!this.qAuto || !this.started) return;
+
+        if (this.frameMs > 24) { this.slowMs += ms; this.fastMs = 0; }
+        else if (this.frameMs < 13.5) { this.fastMs += ms; this.slowMs = 0; }
+        else { this.slowMs = 0; this.fastMs = 0; }
+
+        if (this.slowMs > 1500 && this.qi > 0) {
+            this.slowMs = 0; this.applyQuality(this.qi - 1, true);
+        } else if (this.fastMs > 6000 && this.qi < QUALITY.length - 1) {
+            this.fastMs = 0; this.applyQuality(this.qi + 1, false);
+        }
+    }
+
+    /* ---------------- 自己診断（そのまま貼り出せる） ---------------- */
+    diagnose() {
+        const V = this.visual, a = this.audio, g = V.gl;
+        const mins = ((Date.now() - this.startedAt) / 60000).toFixed(1);
+        const L = [];
+        L.push('── 声を、光に。 自己診断 ──');
+        L.push('画面      ' + innerWidth + 'x' + innerHeight + ' / 画素比 ' +
+               (window.devicePixelRatio || 1).toFixed(2));
+        L.push('描画      ' + (V.useGL && g.ok ? 'GPU' : '2D') +
+               ' / 画質 ' + QUALITY[this.qi].name + (this.qAuto ? '（自動）' : '（固定）'));
+        if (g.ok) {
+            L.push('GPU       ' + g.gpuName(g.gl));
+            L.push('HDR       ' + (g.floatColor ? 'RGBA16F' : '8bitで代替') +
+                   ' / 点の最大径 ' + g.maxPoint + 'px');
+            L.push('描画先    ' + g.w + 'x' + g.h + '（' + Math.round(g.scale * 100) + '%）' +
+                   ' / ブルーム ' + Math.min(g.maxMips, g.mips.length) + '段');
+            L.push('尾        ' + g.trailSteps + '点 / 1フレームの粒 ' +
+                   (g.drawn * g.trailSteps).toLocaleString());
+        } else {
+            L.push('GPU       使えていない（' + (g.log[0] || '理由なし').replace(/<[^>]+>/g, '') + '）');
+        }
+        L.push('なめらかさ ' + this.fps.toFixed(0) + ' fps / 1フレーム ' +
+               this.frameMs.toFixed(1) + 'ms / 最悪 ' + this.worstMs.toFixed(0) + 'ms');
+        L.push('粒子      ' + V.ps.live.toLocaleString() + ' / 上限 ' +
+               V.ps.softCap.toLocaleString() + '（プール ' + V.ps.pool.length.toLocaleString() + '）');
+        L.push('マイク    ' + (a.isActive ? '使えている' : '使えていない（' + (a.failReason || '理由不明') + '）') +
+               ' / 感度 ' + SENS_STEPS[a.sensIdx].label +
+               ' / 騒音 ' + a.noise.toFixed(0) + ' / 発火線 ' + a.hi.toFixed(0));
+        L.push('ことば    ' + (this.speech.supported ? '聞き取れる' : 'この端末では不可'));
+        L.push('稼働      ' + mins + '分 / 描いたフレーム ' + this.frames.toLocaleString());
+        return L.join('\n');
+    }
+
+    toggleFull() {
+        try {
+            if (document.fullscreenElement) document.exitFullscreen();
+            else document.documentElement.requestFullscreen();
+        } catch (e) { this.hint('この環境では全画面にできません', 2200); }
+    }
+
+    /* ---------------- 会場モード ---------------- */
+    setVenue(on) {
+        this.venue = on;
+        document.body.classList.toggle('venue', on);
+        const b = document.getElementById('ad-venue');
+        if (b) b.textContent = on ? '会場モード 終了' : '会場モード 開始';
+        this.stageMsg(on ? 'こえを だして みて' : '');
+    }
+
+    stageMsg(text) {
+        const el = document.getElementById('stage-msg');
+        if (!el) return;
+        if (text) { el.textContent = text; el.classList.add('on'); }
+        else el.classList.remove('on');
+    }
+
+    /* ---------------- 緊急リセット ---------------- */
+    resetAll() {
+        const V = this.visual;
+        V.ps.pool.forEach(p => { p.active = false; });
+        V.shells.length = 0;
+        V.rains.length = 0;
+        V.flowers.length = 0;
+        V.stream = null;
+        V.summerLevel = 0;
+        V.resettingSummer = false;
+        V.burstGlow = 0;
+        V.interactForce = null;
+        this.stopDemo();
+        this.audio.combo = 0;
+        this.audio.sustainedTime = 0;
+        V.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        V.ctx.clearRect(0, 0, V.width, V.height);
+        V.gctx.clearRect(0, 0, V.glow.width, V.glow.height);
+        if (V.useGL && V.gl.ok) V.gl.cleared = false;
+        this.idleMs = 0;
+        this.hint('ぜんぶ消しました', 1600);
+    }
+
+    /* ---------------- デモ ---------------- */
+    startDemo() {
+        if (this.demo) return;
+        this.demo = { t: 0, i: 0, base: -1, overMs: 0 };
+        this.stageMsg('');
+    }
+
+    stopDemo(byUser) {
+        if (!this.demo) return;
+        this.demo = null;
+        this.idleMs = 0;
+        if (this.venue) this.stageMsg('こえを だして みて');
+        if (byUser) this.hint('', 1);
+    }
+
+    stepDemo(dt) {
+        const d = this.demo;
+        if (!d) return;
+        d.t += dt / 1000;
+
+        // だれかが声を出したら、すぐにデモをやめて本人の声にゆずる。
+        // デモ自身が鳴らす音をひろって止まらないよう、少し高い線で判断する
+        if (this.audio.isActive) {
+            if (d.base < 0 && d.t > 1.2) d.base = this.audio.rms;
+            const line = Math.max(this.audio.hi, (d.base < 0 ? 0 : d.base) + 18);
+            d.overMs = this.audio.rms > line ? d.overMs + dt : 0;
+            if (d.overMs > 200) { this.stopDemo(true); return; }
+        }
+
+        while (d.i < DEMO_SCRIPT.length && DEMO_SCRIPT[d.i].t <= d.t) {
+            const s = DEMO_SCRIPT[d.i++];
+            if (s.k === 'end') { this.demo = { t: 0, i: 0, base: d.base, overMs: 0 }; return; }
+            if (s.k === 'v') this.visual.triggerEvent(Object.assign({ combo: s.combo || 1, vowel: null }, s.f));
+            else if (s.k === 'w') this.sayWord(s.w);
+            else if (s.k === 'k') this.visual.triggerSummerCatharsis(this.visual.width / 2, this.visual.height * 0.34);
+            else if (s.k === 'm' && this.venue) { this.stageMsg(s.msg); setTimeout(() => {
+                if (this.demo && this.venue) this.stageMsg(''); }, 3200); }
+        }
+    }
+
+    /* ---------------- マイクの確認 ---------------- */
+    paintMicTest() {
+        const a = this.audio;
+        const el = id => document.getElementById(id);
+        if (!el('mic-now')) return;
+        const pct = v => clamp((v / 110) * 100, 0, 100).toFixed(1) + '%';
+        el('mic-now').style.width = pct(a.rms);
+        el('mic-peak').style.left = pct(a.peakHold);
+        el('mic-line').style.left = pct(a.hi);
+        el('mic-v').textContent = a.rms.toFixed(0);
+        el('mic-h').textContent = a.hi.toFixed(0);
+        let v;
+        if (!a.isActive) v = 'マイクが使えていません。下のことばボタンで遊べます';
+        else if (a.peakHold < a.hi * 0.6) v = 'まだ小さいようです。もう少し大きな声か、感度を「たかい」に';
+        else if (a.peakHold < a.hi) v = 'あと少し。感度を「たかい」にすると届きます';
+        else if (a.noise > a.hi * 0.8) v = 'まわりが少しうるさいようです。感度を「ひくい」に';
+        else v = 'ちょうどよく届いています';
+        el('mic-verdict').textContent = v;
+    }
+
+    hint(text, ms = 2600) {
+        const el = document.getElementById('hint');
+        el.classList.toggle('long', Array.from(text).length > 14);
+        el.textContent = text;
+        el.style.transition = 'opacity 1.2s ease';
+        el.style.opacity = '1';
+        setTimeout(() => { el.style.opacity = '0'; }, ms);
+    }
+
+    sayWord(text) {
+        this.visual.triggerWord(text, matchWord(text));
+    }
+
+    /* 使える入力機器を一覧に出す。2つ以上あるときだけ見せる */
+    async refreshDevices() {
+        const sel = document.getElementById('dev-sel');
+        if (!sel) return;
+        const list = await this.audio.listInputs();
+        sel.innerHTML = '';
+        list.forEach((d, i) => {
+            const o = document.createElement('option');
+            o.value = d.deviceId;
+            o.textContent = d.label || ('マイク ' + (i + 1));
+            sel.appendChild(o);
+        });
+        if (this.audio.deviceId) sel.value = this.audio.deviceId;
+        sel.classList.toggle('on', list.length > 1);
+    }
+
+    initEvents() {
+        window.addEventListener('resize', () => {
+            this.bg.resize(); this.visual.resize(); this.bg.initStars();
+        });
+
+        document.getElementById('start-btn').addEventListener('click', async () => {
+            // Safari は操作直後でないと聞き取りを始められないので、await より前に呼ぶ
+            this.speech.onWord = (t) => this.sayWord(t);
+            const speechOk = this.speech.start();
+
+            const success = await this.audio.init();
+
+            const intro = document.getElementById('intro');
+            intro.style.opacity = '0';
+            setTimeout(() => {
+                intro.style.display = 'none';
+                document.getElementById('hud').style.opacity = '1';
+                document.getElementById('credit').style.opacity = '1';
+                document.getElementById('word-bar').classList.add('on');
+                this.started = true;
+                this.startedAt = Date.now();
+                this.applyQuality(this.qi, false);
+                if (this.audio.isActive) {
+                    document.getElementById('sens-btn').classList.add('on');
+                    this.refreshDevices();
+                }
+                setTimeout(() => this.hint('Esc で運営パネル', 2600), 7000);
+            }, 1500);
+
+            if (success) {
+                this.audio.onEvent = (f) => this.visual.triggerEvent(f);
+                this.audio.onKamuro = () => {
+                    // 昇っていた光の帯の先で冠菊が開く
+                    const p = this.visual.lastStreamPos || { x: this.visual.width / 2, y: this.visual.height / 3 };
+                    this.visual.triggerSummerCatharsis(p.x, p.y);
+                };
+            } else {
+                const led = document.getElementById('hud-mic');
+                led.style.background = '#444'; led.style.boxShadow = 'none';
+                led.parentElement.style.opacity = '0.3';
+                const why = {
+                    secure: 'マイクは https のページでしか使えません',
+                    denied: 'マイクの使用が許可されませんでした',
+                    other:  'このブラウザではマイクが使えません'
+                }[this.audio.failReason] || 'マイクが使えません';
+                setTimeout(() => this.hint(why + '　／　画面の下のことばで遊べます', 6000), 1800);
+            }
+
+            // 聞き取りに対応していない端末では、下のことばを押して出してもらう
+            if (!speechOk) {
+                const led = document.getElementById('hud-word');
+                led.style.background = '#444'; led.parentElement.style.opacity = '0.3';
+            }
+
+            setTimeout(() => this.hint('ことばを、言ってみて。'), 2600);
+        });
+
+        // 入力機器の切り替えと、抜けたときの復旧
+        const sel = document.getElementById('dev-sel');
+        sel.addEventListener('change', async (e) => {
+            e.stopPropagation();
+            const ok = await this.audio.useDevice(sel.value);
+            this.hint(ok ? '入力を切り替えました' : 'その機器は使えませんでした', 2000);
+        });
+        this.audio.onRecover = (state) => {
+            if (state === 'lost') this.hint('マイクが外れました。つなぎ直しています', 5000);
+            else if (state === 'ok') { this.hint('マイクに再接続しました', 2200); this.refreshDevices(); }
+            else this.hint('マイクに再接続できません。ページを開き直してください', 8000);
+        };
+        try {
+            navigator.mediaDevices.addEventListener('devicechange', () => this.refreshDevices());
+        } catch (err) {}
+
+        // ---------------- 運営パネル ----------------
+        const ad = document.getElementById('admin');
+        const openAdmin = on => {
+            ad.classList.toggle('on', on);
+            if (on) this.paintMicTest();
+        };
+        document.getElementById('ad-close').addEventListener('click', e => { e.stopPropagation(); openAdmin(false); });
+        ad.addEventListener('pointerdown', e => e.stopPropagation());
+        window.addEventListener('keydown', e => {
+            const typing = document.activeElement === document.getElementById('word-input');
+            if (e.key === 'Escape') { e.preventDefault(); openAdmin(!ad.classList.contains('on')); }
+            if (typing) return;
+            if (e.key === 'r' || e.key === 'R') this.resetAll();
+            if (e.key === 'f' || e.key === 'F') this.toggleFull();
+        });
+
+        document.getElementById('ad-full').addEventListener('click', e => { e.stopPropagation(); this.toggleFull(); });
+        document.getElementById('ad-venue').addEventListener('click', e => {
+            e.stopPropagation(); this.setVenue(!this.venue); openAdmin(false);
+        });
+        const bigBtn = document.getElementById('ad-big');
+        bigBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            const on = document.body.classList.toggle('ui-big');
+            bigBtn.textContent = on ? '表示をふつうに' : '表示を大きく';
+        });
+        const sndBtn = document.getElementById('ad-sound');
+        sndBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            this.soundOn = !this.soundOn;
+            sndBtn.textContent = '音を鳴らす：' + (this.soundOn ? 'ON' : 'OFF');
+            if (this.audio.sfx) this.audio.sfx.masterGain.gain.value = this.soundOn ? 0.5 : 0;
+        });
+        const qualBtn = document.getElementById('ad-qual');
+        qualBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            if (this.qAuto) { this.hint('先に「画質を固定する」を押してください', 2400); return; }
+            this.applyQuality((this.qi + 1) % QUALITY.length, true);
+        });
+        const waveBtn = document.getElementById('ad-wave');
+        const WAVES = [[0, 'なし'], [0.45, 'よわく'], [1.0, 'つよく']];
+        const WAVE_KEY = 'koe_wave_v1';
+        let wi = 0;
+        try { const k = +localStorage.getItem(WAVE_KEY); if (k >= 0 && k < WAVES.length) wi = k; } catch (e) {}
+        const paintWave = () => {
+            waveBtn.textContent = '音の波紋：' + WAVES[wi][1];
+            if (this.visual.gl) this.visual.gl.intfUser = WAVES[wi][0];
+        };
+        paintWave();
+        waveBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            wi = (wi + 1) % WAVES.length;
+            try { localStorage.setItem(WAVE_KEY, String(wi)); } catch (err) {}
+            paintWave();
+            this.hint('音の波紋：' + WAVES[wi][1], 1600);
+        });
+
+        const qaBtn = document.getElementById('ad-qauto');
+        qaBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            this.qAuto = !this.qAuto;
+            qaBtn.textContent = this.qAuto ? '画質を固定する' : '画質を自動にもどす';
+            this.applyQuality(this.qi, false);
+        });
+        document.getElementById('ad-copy').addEventListener('click', async e => {
+            e.stopPropagation();
+            const t = this.diagnose();
+            try { await navigator.clipboard.writeText(t); this.hint('コピーしました', 1600); }
+            catch (err) {
+                const ta = document.getElementById('ad-diag');
+                const r = document.createRange(); r.selectNodeContents(ta);
+                const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+                this.hint('選択しました。Ctrl+C でコピーしてください', 2800);
+            }
+        });
+        document.getElementById('ad-demo').addEventListener('click', e => {
+            e.stopPropagation(); openAdmin(false);
+            if (this.demo) this.stopDemo(true); else this.startDemo();
+        });
+        const idleBtn = document.getElementById('ad-idle');
+        const IDLES = [45000, 90000, 180000, 0];
+        idleBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            const i = (IDLES.indexOf(this.idleLimit) + 1) % IDLES.length;
+            this.idleLimit = IDLES[i];
+            idleBtn.textContent = '自動デモ：' + (this.idleLimit ? (this.idleLimit / 1000) + '秒' : 'しない');
+        });
+        document.getElementById('ad-reset').addEventListener('click', e => {
+            e.stopPropagation(); this.resetAll(); openAdmin(false);
+        });
+        document.getElementById('ad-reload').addEventListener('click', e => {
+            e.stopPropagation(); location.reload();
+        });
+
+        // 描画方式の切り替え（GPU ⇄ 2D）
+        const gfxBtn = document.getElementById('gfx-btn');
+        const paintGfx = () => {
+            gfxBtn.textContent = this.visual.useGL ? '描画 GPU' : '描画 2D';
+        };
+        if (this.visual.gl.ok) gfxBtn.classList.add('on');
+        paintGfx();
+        gfxBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!this.visual.gl.ok) { this.hint('この端末では GPU 描画が使えません', 2600); return; }
+            this.visual.useGL = !this.visual.useGL;
+            KEEP_TRAIL = !this.visual.useGL;
+            if (KEEP_TRAIL) {
+                // GPU から 2D へ戻すときは、尾の入れ物を作り直す
+                const pool = this.visual.ps.pool;
+                for (let i = 0; i < pool.length; i++) {
+                    const p = pool[i];
+                    if (!p.active) continue;
+                    while (p.trail.length < p.trailLen) p.trail.push({ x: 0, y: 0 });
+                    p.trail.length = p.trailLen;
+                    for (let k = 0; k < p.trailLen; k++) { p.trail[k].x = p.x; p.trail[k].y = p.y; }
+                }
+            }
+            document.body.classList.toggle('gfx-gl', this.visual.useGL);
+            // 切り替えた瞬間に前の絵が残らないよう、両方を消す
+            this.visual.ctx.setTransform(1, 0, 0, 1, 0, 0);
+            this.visual.ctx.clearRect(0, 0, this.visual.width, this.visual.height);
+            this.visual.gctx.clearRect(0, 0, this.visual.glow.width, this.visual.glow.height);
+            if (this.visual.useGL) this.visual.gl.cleared = false;
+            paintGfx();
+            this.hint(this.visual.useGL ? 'GPU描画' : '2D描画', 1500);
+        });
+
+        // マイクの感度。小さな音を拾いすぎるときは「ひくい」にする
+        const sensBtn = document.getElementById('sens-btn');
+        const paintSens = () => {
+            const t = '感度 ' + SENS_STEPS[this.audio.sensIdx].label;
+            sensBtn.textContent = t;
+            const a2 = document.getElementById('ad-sens');
+            if (a2) a2.textContent = t;
+        };
+        paintSens();
+        const bumpSens = (e) => {
+            e.stopPropagation();
+            this.audio.sensIdx = (this.audio.sensIdx + 1) % SENS_STEPS.length;
+            try { localStorage.setItem(SENS_KEY, SENS_STEPS[this.audio.sensIdx].key); } catch (err) {}
+            paintSens();
+            this.hint('感度 ' + SENS_STEPS[this.audio.sensIdx].label, 1600);
+        };
+        sensBtn.addEventListener('click', bumpSens);
+        document.getElementById('ad-sens').addEventListener('click', bumpSens);
+
+        // 表示を消す／出す（作品だけを見たいとき）
+        const toggleUI = () => {
+            const off = document.body.classList.toggle('ui-off');
+            document.getElementById('ui-toggle').textContent = off ? '表示を出す' : '表示を消す';
+        };
+        document.getElementById('ui-toggle').addEventListener('click', (e) => { e.stopPropagation(); toggleUI(); });
+        window.addEventListener('keydown', (e) => {
+            if ((e.key === 'h' || e.key === 'H') && document.activeElement !== document.getElementById('word-input')) toggleUI();
+        });
+
+        // こえをおぼえる（やらなくても遊べる）
+
+        // ことばのボタン
+        document.querySelectorAll('.chip').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.sayWord(btn.dataset.w);
+            });
+        });
+
+        // 自分で書く
+        const input = document.getElementById('word-input');
+        input.addEventListener('keydown', (e) => {
+            e.stopPropagation();
+            if (e.key === 'Enter' && input.value.trim()) {
+                const t = input.value.trim();
+                if (!matchWord(t)) this.hint('いまは ありがとう・ごめんね・嫌い の3つです', 2800);
+                this.sayWord(t);
+                input.value = '';
+                input.blur();
+            }
+        });
+        input.addEventListener('pointerdown', e => e.stopPropagation());
+
+        // ことばの帯は触れているあいだだけはっきり見せる
+        const bar = document.getElementById('word-bar');
+        const touchOn = () => { bar.classList.add('touched'); clearTimeout(this._barT);
+                                this._barT = setTimeout(() => bar.classList.remove('touched'), 4000); };
+        bar.addEventListener('pointerdown', touchOn);
+        bar.addEventListener('pointermove', touchOn);
+
+        const layer = document.getElementById('interaction-layer');
+        let isDown = false;
+
+        const handleStart = (e) => {
+            e.preventDefault();
+            if (this.demo) this.stopDemo(true);
+            this.idleMs = 0;
+            isDown = true;
+            const pt = e.touches ? e.touches[0] : e;
+            this.visual.interactForce = { x: pt.clientX, y: pt.clientY, startTime: performance.now(), charging: true };
+        };
+        const handleMove = (e) => {
+            e.preventDefault();
+            if (!isDown || !this.visual.interactForce) return;
+            const pt = e.touches ? e.touches[0] : e;
+            this.visual.interactForce.x = pt.clientX;
+            this.visual.interactForce.y = pt.clientY;
+        };
+        const handleEnd = (e) => {
+            if (e.preventDefault) e.preventDefault();
+            isDown = false;
+            if (this.visual.interactForce) {
+                let px, py;
+                if (e.changedTouches && e.changedTouches[0]) {
+                    px = e.changedTouches[0].clientX; py = e.changedTouches[0].clientY;
+                } else if (typeof e.clientX === 'number') {
+                    px = e.clientX; py = e.clientY;
+                } else {
+                    px = this.visual.interactForce.x; py = this.visual.interactForce.y;
+                }
+                const dur = performance.now() - this.visual.interactForce.startTime;
+                if (dur >= 1000) {
+                    this.visual.triggerSummerCatharsis(px, py);
+                } else {
+                    this.visual.triggerEvent({ rms: 60, pitch: random(100, 1000), combo: 1 });
+                }
+            }
+            this.visual.interactForce = null;
+        };
+
+        layer.addEventListener('mousedown', handleStart);
+        layer.addEventListener('mousemove', handleMove);
+        layer.addEventListener('mouseup', handleEnd);
+        layer.addEventListener('mouseleave', () => { if (isDown) handleEnd({ preventDefault: () => {} }); });
+        layer.addEventListener('touchstart', handleStart, { passive: false });
+        layer.addEventListener('touchmove', handleMove, { passive: false });
+        layer.addEventListener('touchend', handleEnd, { passive: false });
+        layer.addEventListener('touchcancel', handleEnd, { passive: false });
+    }
+
+    loop(time) {
+        const dt = Math.min(time - this.lastTime, 50);
+        this.lastTime = time;
+        this.autoQuality(dt);
+
+        this.audio.update(dt);
+        this.visual.updateStream(this.audio, dt);
+
+        // --- 無音のつづいた時間をはかり、こえていればデモを流す ---
+        if (this.started) {
+            if (this.demo) {
+                this.stepDemo(dt);
+            } else {
+                const quiet = !this.audio.isActive || this.audio.rms < this.audio.lo;
+                this.idleMs = quiet ? this.idleMs + dt : 0;
+                if (this.idleLimit && this.idleMs > this.idleLimit) this.startDemo();
+            }
+        }
+        if (document.getElementById('admin').classList.contains('on')) {
+            this.paintMicTest();
+            if ((this.frames & 15) === 0) document.getElementById('ad-diag').textContent = this.diagnose();
+        }
+        this.bg.draw(time);
+        this.visual.update(dt);
+        if (this.visual.useGL) this.visual.gl.setSpectrum(this.audio.specBands(this.specOut));
+        this.visual.draw(dt);
+
+        requestAnimationFrame(this.loop);
+    }
+}
+
+window.onload = () => { new App(); };
+</script>
+
+<!-- ============================================================================
+     実装されている反応
+     ----------------------------------------------------------------------------
+     【声の層】すぐ出る（遅れ 平均137ms）
+       音を出すと花火が一発上がる。1.2秒以上のばすと冠菊。連打でコンボ。
+       ※ 母音（あいうえお）の判定は外した。実際に遊んでもらうと、ほとんどの人は
+          花火に向かって「バン！」としか言わず、母音がほぼ出なかったため。
+          音の高さ（基本周波数）は色のために残してある。
+
+     【音の特徴量 → 映像】音量だけで全部が決まる状態にはしない
+       大きさ     ← 音量（発火線からどれだけ上か。感度を変えても感覚が変わらない）
+       高さ       ← 音量          実測 音量30で画面の67%／音量100で20%
+       粒の数     ← 音量          実測 音量30で183粒／音量100で728粒
+       初速       ← 立ち上がりの鋭さ            実測 2.15 → 3.15
+       寿命       ← 明るさ（暗い声ほど長い）    実測 75 → 57
+       粒の大きさ ← 音の高さ（低い声ほど太い）  実測 1.48 → 1.05
+       彩度       ← 周期性（澄んだ声ほど鮮やか）実測 94 → 70
+       重力       ← 低域（低音ほど重く垂れる）  実測 0.031 → 0.020
+       散らばり   ← 高域（息の成分が多いほどばらける）
+       色相       ← 音の高さ（7点の連続補間）   実測 335度 → 203度
+                    音程の取れない音（バン！・拍手）は明るさで代用する
+       発光量     ← 尖頭比（打撃音は開く瞬間に強く光る）実測 0.87 / 声 0.00
+       音の波紋   ← スペクトル（既定では出さない。運営パネルで なし/よわく/つよく）
+
+     【ことばの層】3つだけ。これ以外のことばでは何も起こらない
+       ありがとう  冠菊。急がず長く、金色に降る。文字の雨つき
+       ごめんね    うつむいて崩れ落ちる青。やさしい雨。1.7秒後ひと粒だけ昇る
+       嫌い        不発。開かずにほどけて落ちる。文字の雨も降らない。鈍い音だけ
+                   （叱るのではなく、ただ光にならなかった、という形にしてある）
+       ※ 花・千輪・三重の輪などのつくりはコードに残してある。
+          WORD_TABLE に1行足せば、いつでも戻せる。
+
+     【声が出せないとき】画面の下の3つのボタン／自分で書いて Enter
+
+     【測定している音の特徴量】すべて端末内。声はどこにも送られない
+       音量 RMS ........ 時間波形の実効値。暗騒音に自動追従する 0〜130 の目盛り
+       尖頭比 crest .... 尖頭値÷実効値。声 2〜4 / 打撃音 10〜15。打撃と声を分ける
+       基本周波数 f0 ... NSDF自己相関。合成音で 115Hz→114Hz、215Hz→214Hz を確認
+       周期性 clarity .. NSDFの最大値。澄んだ声ほど高い。音程の信頼度に使う
+       重心 centroid ... 線形振幅で重み付けした真のスペクトル重心（音の明るさ）
+       立上り attack ... 静寂から発火線まで駆け上がった時間。瞬時0.92／450ms0.12
+       帯域 low/mid/high  60-400 / 400-2000 / 2000-8000Hz。帯域ごとに暗騒音を引く
+       発話開始・終了 ... 二つのしきい値（ヒステリシス）＋不応期260ms
+       スペクトル ...... 60Hz〜6kHz を対数で64本。帯域ごとに暗騒音を引くので、
+                         静かな部屋では64本すべてが 0.000 になる
+
+     【入力機器】
+       複数のマイクがあるときは右上で切り替えられる（外部オーディオIF対応）
+       機器が抜けたら自動で取り直す。戻らなければ既定の機器に落とす
+       HUD の PEAK は3秒の尖頭保持。マイクが生きているかの確認に使う
+
+     【描画】WebGL2 / HDR / 本物のブルーム
+       粒子の物理計算は CPU、GPU は「描く」だけ。だから花火の挙動は変わらない。
+       尾は速度を逆向きにたどって GPU 側で作る（CPU は位置を覚えなくてよい）。
+       RGBA16F に貯める → 明部抽出 → 5段縮小 → 拡大加算 → ACES → ガンマ。
+       背景の星空の上に加算で重ねる（premultipliedAlpha + 出力アルファ 0）。
+       1フレームの描画命令は 12 回（粒子 1 + 後処理 11）。
+       粒子プールは 26,000（スマホ 9,000）。2D のときは 8,000（3,400）。
+       WebGL2 が無い・シェーダが通らない・描画先が作れない場合は自動で 2D へ。
+       右上のボタンで手動でも切り替えられる。
+
+     【性能】実機で自分を測って適応する
+       品質の段 ... 最軽量／軽量／ふつう／高画質。1フレームの時間を見て上下する。
+                    24ms を 1.5 秒こえると下げ、13.5ms を 6 秒下回ると戻す。
+                    運営パネルで固定もできる（低性能PC向けの軽量モード）。
+       星空 ....... 動かない星は一枚の絵に焼く。1フレームの円 519回 → 51回。
+       長時間稼働 . 60秒間休みなく発火させて JSメモリ +1MB（たまり続けない）
+       外部参照 ... 0 件。回線なしで動く
+
+     【会場で使う】
+       Esc .......... 運営パネル（全画面／会場モード／表示サイズ／音／波紋／
+                      マイクの確認／感度／画質／デモ／自己診断／緊急リセット）
+       F ............ 全画面      R ... ぜんぶ消す      H ... 表示を消す／出す
+       会場モード ... HUDもボタンも消え、中央に「こえを だして みて」だけ出る
+       自動デモ ..... 誰も声を出さない時間がつづくと流れる（45/90/180秒/しない）
+                      声を出すか画面にさわると即座に止まる
+       マイクの確認 . 届いている／小さい／うるさい を日本語で判定する
+       自己診断 ..... GPU・画質・FPS・粒子数・マイクの状態をそのまま貼り出せる
+
+     【操作】タップ=打ち上げ ドラッグ=引き寄せ 長押し1秒=冠菊
+     ========================================================================== -->
+</body>
+</html>
